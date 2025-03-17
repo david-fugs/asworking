@@ -1,189 +1,245 @@
 <?php
-    session_start();
-    
-    if(!isset($_SESSION['id'])){
-        header("Location: ../../index.php");
+session_start();
+include("../../conexion.php");
+if (!isset($_SESSION['id'])) {
+    header("Location: ../../index.php");
+}
+$nombre = $_SESSION['nombre'];
+$tipo_usu = $_SESSION['tipo_usuario'];
+
+if (isset($_GET['delete'])) {
+    $num_doc_cta = $_GET['delete'];
+    deleteMember($num_doc_cta);
+}
+function deleteMember($num_ofe_cta)
+{
+    global $mysqli; // Asegurar acceso a la conexión global
+
+    $query = "DELETE FROM cuenta WHERE num_ofe_cta = ?";
+    $stmt = $mysqli->prepare($query);
+    $stmt->bind_param("s", $num_ofe_cta);
+
+    if ($stmt->execute()) {
+        echo "<script>alert('Cuenta eliminada correctamente');
+        window.location = 'showClients.php';</script>";
+    } else {
+        echo "<script>alert('Error al eliminar el Cuenta');
+        window.location = 'showClients.php';</script>";
     }
-    
-    $usuario      = $_SESSION['usuario'];
-    $nombre       = $_SESSION['nombre'];
-    $tipo_usuario = $_SESSION['tipo_usuario'];
-   
+
+    $stmt->close();
+}
+function getStatus($estado)
+{
+    if ($estado == 1) {
+        return "<span class='badge bg-success'>ACTIVO</span>";
+    } else {
+        return "<span class='badge bg-danger'>INACTIVO</span>";
+    }
+}
+
+// Obtener los filtros desde el formulario
+$upc_sku= isset($_GET['upc_sku']) ? trim($_GET['upc_sku']) : '';
+$cc = isset($_GET['num_doc_cta']) ? trim($_GET['num_doc_cta']) : '';
+$nombre = isset($_GET['nom_cta']) ? trim($_GET['nom_cta']) : '';
+$plan = isset($_GET['plan_cta']) ? trim($_GET['plan_cta']) : '';
+$estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-    	<meta charset="utf-8">
-    	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>ASWWORKING</title>
-        <link rel="stylesheet" href="css/styles.css">
-        <link rel="stylesheet" href="../../css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm">
 
-		<style>
-        	.responsive {
-           		max-width: 100%;
-            	height: auto;
-        	}
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ASWWORKING | SOFT</title>
+    <script src="js/64d58efce2.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link rel="stylesheet" type="text/css" href="css/estilos2024.css">
+    <link href="../../../fontawesome/css/all.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/fed2435e21.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-        	.selector-for-some-widget {
-  				box-sizing: content-box;
-			}
+    <style>
+        th {
+            font-size: 15px;
+        }
 
-			.principal {
-                padding: 20px; /* Añadido para mejorar el espaciado */
-            }
+        td {
+            font-size: 15px;
+        }
 
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 20px;
-            }
+        .responsive {
+            max-width: 100%;
+            height: auto;
+        }
 
-            th, td {
-                padding: 15px;
-                text-align: left;
-                border-bottom: 1px solid #ddd;
-            }
+        .selector-for-some-widget {
+            box-sizing: content-box;
+        }
 
-            @media screen and (max-width: 600px) {
-                th, td {
-                    padding: 8px;
-                }
-            }
-    	</style>
-    </head>
-    <body>
+        .pending {
+            background-color: orange;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
 
-    	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"></script>
-		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"></script>
+        .ok {
+            background-color: lightblue;
+            color: black;
+            font-weight: bold;
+            text-align: center;
+        }
 
-		<center>
-	    	<img src='../../img/logo.png' width=300 height=174 class="responsive">
-		</center>
+        .disabled-link {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"></script>
+    <center style="margin-top: 20px;">
+        <img src='../../img/logo.png' width="300" height="212" class="responsive">
+    </center>
+    <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i class="fa-solid fa-file-signature"></i> ITEMS</b></h1>
+    <div class="flex">
+        <div class="box">
+            <form action="showitems.php" method="get" class="form">
+                <input name="upc_sku" type="text" placeholder="Upc sku" value="<?= htmlspecialchars($upc_sku) ?>">
+                <input name="item" type="text" placeholder="Item" value="<?= htmlspecialchars($item) ?>">
+                <input name="nom_cta" type="text" placeholder="Nombre Cliente" value="<?= htmlspecialchars($nombre) ?>">
+                <input name="plan_cta" type="text" placeholder="Plan Cliente" value="<?= htmlspecialchars($plan) ?>">
+                <input value="Search" type="submit">
+            </form>
+        </div>
+    </div>
+    <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
+    <?php
+    date_default_timezone_set("America/Bogota");
+    include("../../conexion.php");
+    require_once("../../zebra.php");
 
-		<section class="principal">
+    // Inicializa la consulta base
+    $queryBase = "SELECT * FROM items WHERE 1=1";
+    // Agrega filtros si existen
+    if (!empty($_GET['upc_sku'])) {
+        $upc_sku = $mysqli->real_escape_string($_GET['upc_sku']);
+        $queryBase .= " AND upc_sku_item LIKE '%$upc_sku%'";
+    }
+    if (!empty($_GET['num_ofe_cta'])) {
+        $num_ofe_cta = $mysqli->real_escape_string($_GET['num_ofe_cta']);
+        $queryBase .= " AND num_ofe_cta = '$num_ofe_cta'";
+    }
+    if (!empty($_GET['num_doc_cta'])) {
+        $num_doc_cta = $mysqli->real_escape_string($_GET['num_doc_cta']);
+        $queryBase .= " AND num_doc_cta = '$num_doc_cta'";
+    }
 
-			<div style="border-radius: 9px 9px 9px 9px; -moz-border-radius: 9px 9px 9px 9px; -webkit-border-radius: 9px 9px 9px 9px; border: 4px solid #FFFFFF;" align="center">
+    if (!empty($_GET['nom_cta'])) {
+        $nom_cta = $mysqli->real_escape_string($_GET['nom_cta']);
+        $queryBase .= " AND nom_cta LIKE '%$nom_cta%'";
+    }
 
-				<div align="center">
-					<h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em"><b><i class="fa-solid fa-shop"></i> ITEMS</b></h1>
-				</div>
+    // Contar total de registros antes de aplicar el LIMIT
+    $res = $mysqli->query($queryBase);
+    if (!$res) {
+        die("Error en la consulta: " . $mysqli->error);
+    }
+    $num_registros = mysqli_num_rows($res);
+    $resul_x_pagina = 100;
+    // Configuración de Zebra_Pagination
+    $paginacion = new Zebra_Pagination();
+    $paginacion->records($num_registros);
+    $paginacion->records_per_page($resul_x_pagina);
 
-    			<div style="border-radius: 9px 9px 9px 9px; -moz-border-radius: 9px 9px 9px 9px; -webkit-border-radius: 9px 9px 9px 9px; border: 1px solid #efd47d; width: 500px; height: 30px; background:#FAFAFA; display:table-cell; vertical-align:middle;">
 
-					<label for="buscar">Search</label>
+    $page = $paginacion->get_page(); // Obtiene la página actual
+    $offset = ($page - 1) * $resul_x_pagina; // Calcula el desplazamiento
+    $queryFinal = $queryBase . "  LIMIT $offset, $resul_x_pagina";
+    // Ejecutar consulta con paginación
+    $result = $mysqli->query($queryFinal);
+    if (!$result) {
+        die("Error en la consulta: " . $mysqli->error);
+    }
+    // Inicia la tabla
+    echo "<section class='content'>
+    <div class='card-body'>
+        <div class='table-responsive'>
+            <table style='width:1300px;'>
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>UPC | SKU</th>
+                        <th>DATE</th>
+                        <th>BRAND</th>
+                        <th>ITEM</th>
+                        <th>REF</th>
+                        <th>COLOR</th>
+                        <th>SIZE</th>
+                        <th>CATEGORY</th>
+                        <th>COST</th>
+                        <th>WEIGHT</th>
+						<th>STOCK</th>
+						<th>BATCH</th>
+                        <th>EDIT</th>
+                        <th>DELETE</th>
+                    </tr>
+                </thead>
+                <tbody>";
+    $i = 1;
+    while ($row = mysqli_fetch_array($result)) {
+            echo '<tr>
+			<td data-label="NO.">' . $i . '</td>
+            <td data-label="CUENTA">' . $row['upc_sku_item'] . '</td>
+            <td data-label="CEDULA">' . $row['date_item'] . '</td>
+            <td style="text-transform:uppercase;" data-label="NOMBRE">' . $row['brand_item'] . '</td>
+            <td data-label="ESTRATO">' . $row['item_item'] . '</td>
+            <td data-label="TELEFONO">' . $row['ref_item'] . '</td>
+            <td data-label="CUOTA">' . $row['color_item'] . '</td>
+            <td data-label="BENEFICIARIOS">' . $row['size_item'] . '</td>
+            <td data-label="OBSERVACIONES">' . $row['category_item'] . '</td>
+            <td data-label="ESTADO">' . $row['cost_item'] . '</td>
+			<td data-label="ESTADO">' . $row['weight_item'] . '</td>
+			<td data-label="ESTADO">'  . '</td>
+            <td data-label="ESTADO">'  . '</td>
+            <td data-label="EDITAR">
+                <a href="editClient.php?upc_sku_item=' . $row['upc_sku_item'] . '">
+                    <img src="../../img/editar.png" width=28 height=28>
+                </a>
+            </td>
+            <td data-label="ELIMINAR">
+                <a href="?delete=' . $row['upc_sku_item'] . '" onclick="return confirm(\'¿Estás seguro de que deseas eliminar esta cuenta?\');">
+                    <i class="fa-sharp-duotone fa-solid fa-trash" style="color:red; height:20px;"></i>
+                </a>
+            </td>   
+        </tr>';
+            $i++;
+    }
 
-	    			<form action="showitems.php" method="get">
-	    				<input name="upc_sku_item" type="text"  placeholder="UPC/SKU" size=30>
-	    				<input name="item_item" type="text"  placeholder="ITEM" size=20>
-	    				<input name="brand_item" type="text"  placeholder="BRAND" size=20>
-	    				<input name="ref_item" type="text"  placeholder="REF" size=20>
-	    				<input name="color_item" type="text"  placeholder="COLOR" size=20>
-	    				<input name="size_item" type="text"  placeholder="SIZE" size=20>
-						<input value="Search Item" type="submit">
-					</form>
-					
-	    		</div>
+    // Cierra la tabla y muestra la paginación
+    echo '</tbody></table></div>';
 
-<?php
+    // Mostrar la paginación después de la tabla
+    $paginacion->render();
+    echo '</section>';
 
-	date_default_timezone_set("America/Bogota");
-	include("../../conexion.php");
-	require_once("../../zebra.php");
+    ?>
 
-	@$upc_sku_item 	= ($_GET['upc_sku_item']);
-	@$item_item 	= ($_GET['item_item']);
-	@$brand_item 	= ($_GET['brand_item']);
-	@$ref_item 		= ($_GET['ref_item']);
-	@$color_item 	= ($_GET['color_item']);
-	@$size_item 	= ($_GET['size_item']);
+    <center>
+        <br /><a href="../access.php"><img src='img/atras.png' width="72" height="72" title="Regresar" /></a>
+    </center>
 
-	$query = "SELECT * FROM `items` WHERE (upc_sku_item LIKE '%".$upc_sku_item."%') AND (item_item LIKE '%".$item_item."%') AND (brand_item LIKE '%".$brand_item."%') AND (ref_item LIKE '%".$ref_item."%') AND (color_item LIKE '%".$color_item."%') AND (size_item LIKE '%".$size_item."%') ORDER BY date_item ASC";
-	$res = $mysqli->query($query);
-	$num_registros = mysqli_num_rows($res);
-	$resul_x_pagina = 1000;
+    <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
 
-	echo "<section class='content'>
-			<div class='card-body'>
-        		<div class='table-responsive'>
-		        	<table>
-		            	<thead>
-		                	<tr>
-								<th>No.</th>
-								<th>UPC|SKU</th>
-								<th>DATE</th>
-								<th>BRAND</th>
-								<th>ITEM</th>
-								<th>REF</th>
-								<th>COLOR</th>
-								<th>SIZE</th>
-				        		<th>CATEGORY</th>
-				        		<th>COST</th>
-				        		<th>WEIGHT</th>
-				        		<th>INVENTORY</th>
-				        		<th>EDIT</th>
-				    		</tr>
-				  		</thead>
-            			<tbody>";
+</body>
 
-	$paginacion = new Zebra_Pagination();
-	$paginacion->records($num_registros);
-	$paginacion->records_per_page($resul_x_pagina);
-
-	$consulta = "SELECT * FROM `items` WHERE (upc_sku_item LIKE '%".$upc_sku_item."%') AND (item_item LIKE '%".$item_item."%') AND (brand_item LIKE '%".$brand_item."%') AND (ref_item LIKE '%".$ref_item."%') AND (color_item LIKE '%".$color_item."%') AND (size_item LIKE '%".$size_item."%') ORDER BY date_item ASC LIMIT " .(($paginacion->get_page() - 1) * $resul_x_pagina). "," .$resul_x_pagina;
-	$result = $mysqli->query($consulta);
-
-	$i = 1;
-	while($row = mysqli_fetch_array($result))
-	{
-
-		echo '
-				<tr>
-					<td data-label="No." style="' . $color . '">'.($i + (($paginacion->get_page() - 1) * $resul_x_pagina)).'</td>
-					<td data-label="UPC|SKU">'.$row['upc_sku_item'].'</td>
-					<td data-label="DATE">'.$row['date_item'].'</td>
-					<td data-label="BRAND">'.$row['brand_item'].'</td>
-					<td data-label="ITEM">'.$row['item_item'].'</td>
-					<td data-label="REF">'.$row['ref_item'].'</td>
-					<td data-label="COLOR">'.$row['color_item'].'</td>
-					<td data-label="SIZE">'.$row['size_item'].'</td>
-					<td data-label="CATEGORY">'.$row['category_item'].'</td>
-					<td data-label="COST">'.$row['cost_item'].'</td>
-					<td data-label="WEIGHT">'.$row['weight_item'].'</td>
-					<td data-label="INVENTORY">'.$row['inventory_item'].'</td>
-					<td data-label="EDITAR"><a href="edititems.php?upc_sku_item='.$row['upc_sku_item'].'"><img src="../../img/editar.png" width=28 height=28></a></td>
-
-				</tr>';
-		$i++;
-	}
- 
-	echo '</table>
-		</div>
-
-		';
-
-	$paginacion->render();
-
-?>
-			<div class="share-container">
-	            <!-- Go to www.addthis.com/dashboard to customize your tools -->
-	            <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4ecc1a47193e29e4" async="async"></script>
-	            <!-- Go to www.addthis.com/dashboard to customize your tools -->
-	            <div class="addthis_sharing_toolbox"></div>
-	        </div>
-			<center>
-			<br/><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="Regresar" /></a>
-			</center>
-
-			</div>
-		</div>
-		</section>
-		<script src="js/app.js"></script>
-		<script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
-
-	</body>
 </html>
