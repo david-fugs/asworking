@@ -11,20 +11,20 @@ if (isset($_GET['delete'])) {
     $num_doc_cta = $_GET['delete'];
     deleteMember($num_doc_cta);
 }
-function deleteMember($num_ofe_cta)
+function deleteMember($upsi_item)
 {
     global $mysqli; // Asegurar acceso a la conexión global
 
-    $query = "DELETE FROM cuenta WHERE num_ofe_cta = ?";
+    $query = "DELETE FROM items WHERE upsi_item  = ?";
     $stmt = $mysqli->prepare($query);
-    $stmt->bind_param("s", $num_ofe_cta);
+    $stmt->bind_param("s", $upsi_item);
 
     if ($stmt->execute()) {
-        echo "<script>alert('Cuenta eliminada correctamente');
-        window.location = 'showClients.php';</script>";
+        echo "<script>alert('Item deleted correctly');
+        window.location = 'showitems.php';</script>";
     } else {
-        echo "<script>alert('Error al eliminar el Cuenta');
-        window.location = 'showClients.php';</script>";
+        echo "<script>alert('Error deleting the item');
+        window.location = 'showitems.php';</script>";
     }
 
     $stmt->close();
@@ -39,9 +39,9 @@ function getStatus($estado)
 }
 
 // Obtener los filtros desde el formulario
-$upc_sku= isset($_GET['upc_sku']) ? trim($_GET['upc_sku']) : '';
-$cc = isset($_GET['num_doc_cta']) ? trim($_GET['num_doc_cta']) : '';
-$nombre = isset($_GET['nom_cta']) ? trim($_GET['nom_cta']) : '';
+$upc_sku = isset($_GET['upc_sku']) ? trim($_GET['upc_sku']) : '';
+$item = isset($_GET['item']) ? trim($_GET['item']) : '';
+$reference = isset($_GET['ref']) ? trim($_GET['ref']) : '';
 $plan = isset($_GET['plan_cta']) ? trim($_GET['plan_cta']) : '';
 $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
 ?>
@@ -103,6 +103,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         }
     </style>
 </head>
+
 <body>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"></script>
@@ -116,7 +117,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             <form action="showitems.php" method="get" class="form">
                 <input name="upc_sku" type="text" placeholder="Upc sku" value="<?= htmlspecialchars($upc_sku) ?>">
                 <input name="item" type="text" placeholder="Item" value="<?= htmlspecialchars($item) ?>">
-                <input name="nom_cta" type="text" placeholder="Nombre Cliente" value="<?= htmlspecialchars($nombre) ?>">
+                <input name="ref" type="text" placeholder="Reference" value="<?= htmlspecialchars($reference) ?>">
                 <input name="plan_cta" type="text" placeholder="Plan Cliente" value="<?= htmlspecialchars($plan) ?>">
                 <input value="Search" type="submit">
             </form>
@@ -135,13 +136,13 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         $upc_sku = $mysqli->real_escape_string($_GET['upc_sku']);
         $queryBase .= " AND upc_sku_item LIKE '%$upc_sku%'";
     }
-    if (!empty($_GET['num_ofe_cta'])) {
-        $num_ofe_cta = $mysqli->real_escape_string($_GET['num_ofe_cta']);
-        $queryBase .= " AND num_ofe_cta = '$num_ofe_cta'";
+    if (!empty($_GET['item'])) {
+        $item = $mysqli->real_escape_string($_GET['item']);
+        $queryBase .= " AND item_item  LIKE '%$item%'";
     }
-    if (!empty($_GET['num_doc_cta'])) {
-        $num_doc_cta = $mysqli->real_escape_string($_GET['num_doc_cta']);
-        $queryBase .= " AND num_doc_cta = '$num_doc_cta'";
+    if (!empty($_GET['ref'])) {
+        $reference = $mysqli->real_escape_string($_GET['ref']);
+        $queryBase .= " AND ref_item = '$reference'";
     }
 
     if (!empty($_GET['nom_cta'])) {
@@ -178,7 +179,8 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                 <thead>
                     <tr>
                         <th>No.</th>
-                        <th>UPC | SKU</th>
+                        <th>UPC </th>
+                        <th>SKU</th>
                         <th>DATE</th>
                         <th>BRAND</th>
                         <th>ITEM</th>
@@ -197,32 +199,46 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                 <tbody>";
     $i = 1;
     while ($row = mysqli_fetch_array($result)) {
-            echo '<tr>
+        echo '<tr>
 			<td data-label="NO.">' . $i . '</td>
-            <td data-label="CUENTA">' . $row['upc_sku_item'] . '</td>
-            <td data-label="CEDULA">' . $row['date_item'] . '</td>
-            <td style="text-transform:uppercase;" data-label="NOMBRE">' . $row['brand_item'] . '</td>
-            <td data-label="ESTRATO">' . $row['item_item'] . '</td>
-            <td data-label="TELEFONO">' . $row['ref_item'] . '</td>
-            <td data-label="CUOTA">' . $row['color_item'] . '</td>
-            <td data-label="BENEFICIARIOS">' . $row['size_item'] . '</td>
-            <td data-label="OBSERVACIONES">' . $row['category_item'] . '</td>
-            <td data-label="ESTADO">' . $row['cost_item'] . '</td>
-			<td data-label="ESTADO">' . $row['weight_item'] . '</td>
+            <td data-label="upsi">' . $row['upsi_item'] . '</td>
+            <td data-label="sku">' . $row['sku_item'] . '</td>
+            <td data-label="date">' . $row['date_item'] . '</td>
+            <td style="text-transform:uppercase;" data-label="brand">' . $row['brand_item'] . '</td>
+            <td data-label="item">' . $row['item_item'] . '</td>
+            <td data-label="ref">' . $row['ref_item'] . '</td>
+            <td data-label="color">' . $row['color_item'] . '</td>
+            <td data-label="size">' . $row['size_item'] . '</td>
+            <td data-label="category">' . $row['category_item'] . '</td>
+            <td data-label="cost">' . $row['cost_item'] . '</td>
+			<td data-label="weight">' . $row['weight_item'] . '</td>
 			<td data-label="ESTADO">'  . '</td>
             <td data-label="ESTADO">'  . '</td>
             <td data-label="EDITAR">
-                <a href="editClient.php?upc_sku_item=' . $row['upc_sku_item'] . '">
-                    <img src="../../img/editar.png" width=28 height=28>
-                </a>
+                <button type="button" class="btn-edit" 
+                    data-bs-toggle="modal" data-bs-target="#modalEdicion"
+                    data-upsi="' . $row['upsi_item'] . '"
+                    data-sku="' . $row['sku_item'] . '"
+                    data-date="' . $row['date_item'] . '"
+                    data-brand="' . $row['brand_item'] . '"
+                    data-item="' . $row['item_item'] . '"
+                    data-ref="' . $row['ref_item'] . '"
+                    data-color="' . $row['color_item'] . '"
+                    data-size="' . $row['size_item'] . '"
+                    data-category="' . $row['category_item'] . '"
+                    data-cost="' . $row['cost_item'] . '"
+                    data-weight="' . $row['weight_item'] . '"
+                    style="background-color:transparent; border:none;">
+                    <img src="../../img/editar.png" width="28" height="28">
+                </button>     
             </td>
             <td data-label="ELIMINAR">
-                <a href="?delete=' . $row['upc_sku_item'] . '" onclick="return confirm(\'¿Estás seguro de que deseas eliminar esta cuenta?\');">
+                <a href="?delete=' . $row['upsi_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');">
                     <i class="fa-sharp-duotone fa-solid fa-trash" style="color:red; height:20px;"></i>
                 </a>
             </td>   
         </tr>';
-            $i++;
+        $i++;
     }
 
     // Cierra la tabla y muestra la paginación
@@ -233,13 +249,112 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
     echo '</section>';
 
     ?>
-
+    <!-- Modal Edicion -->
+    <div class="modal fade" id="modalEdicion" tabindex="-1" aria-labelledby="modalEdicionLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="modalEdicionLabel">Editar Registro</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEditar">
+                        <input type="hidden" id="edit-upsi" name="upsi">
+                        <div class="mb-3">
+                            <label for="edit-sku" class="form-label">SKU</label>
+                            <input type="text" class="form-control" id="edit-sku" name="sku">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-date" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="edit-date" name="date">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-brand" class="form-label">Marca</label>
+                            <input type="text" class="form-control" id="edit-brand" name="brand">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-item" class="form-label">Item</label>
+                            <input type="text" class="form-control" id="edit-item" name="item">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-ref" class="form-label">Referencia</label>
+                            <input type="text" class="form-control" id="edit-ref" name="ref">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-color" class="form-label">Color</label>
+                            <input type="text" class="form-control" id="edit-color" name="color">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-size" class="form-label">Tamaño</label>
+                            <input type="text" class="form-control" id="edit-size" name="size">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-category" class="form-label">Categoría</label>
+                            <input type="text" class="form-control" id="edit-category" name="category">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-cost" class="form-label">Costo</label>
+                            <input type="text" class="form-control" id="edit-cost" name="cost">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-weight" class="form-label">Peso</label>
+                            <input type="text" class="form-control" id="edit-weight" name="weight">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="guardarCambios">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <center>
         <br /><a href="../access.php"><img src='img/atras.png' width="72" height="72" title="Regresar" /></a>
     </center>
 
     <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let modalEdicion = document.getElementById("modalEdicion");
 
+            modalEdicion.addEventListener("show.bs.modal", function(event) {
+                let button = event.relatedTarget; // Botón que abrió el modal
+
+                document.getElementById("edit-upsi").value = button.getAttribute("data-upsi");
+                document.getElementById("edit-sku").value = button.getAttribute("data-sku");
+                document.getElementById("edit-date").value = button.getAttribute("data-date");
+                document.getElementById("edit-brand").value = button.getAttribute("data-brand");
+                document.getElementById("edit-item").value = button.getAttribute("data-item");
+                document.getElementById("edit-ref").value = button.getAttribute("data-ref");
+                document.getElementById("edit-color").value = button.getAttribute("data-color");
+                document.getElementById("edit-size").value = button.getAttribute("data-size");
+                document.getElementById("edit-category").value = button.getAttribute("data-category");
+                document.getElementById("edit-cost").value = button.getAttribute("data-cost");
+                document.getElementById("edit-weight").value = button.getAttribute("data-weight");
+            });
+
+            // Enviar datos al servidor con AJAX al hacer clic en "Guardar cambios"
+            document.getElementById("guardarCambios").addEventListener("click", function() {
+                let formData = new FormData(document.getElementById("formEditar"));
+
+                fetch("editItems.php", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Registro actualizado correctamente");
+                            location.reload();
+                        } else {
+                            alert("Error al actualizar");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        });
+    </script>
 </body>
 
 </html>

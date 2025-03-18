@@ -29,9 +29,6 @@
         <img src="img/logo.png" alt=""></i>ASW-WORKING
       </div>
 
-      <div class="search_bar">
-        <input type="text" placeholder="Buscar..." />
-      </div>
 
       <div class="navbar_content">
         <i class="bi bi-grid"></i>
