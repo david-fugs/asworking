@@ -1,106 +1,96 @@
 <?php
 require '../../vendor/autoload.php';
-ini_set('memory_limit', '-1');
-ini_set('max_execution_time', 600); // Aumenta el tiempo de ejecución
 
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_FILES['excelFile']) || $_FILES['excelFile']['error'] !== UPLOAD_ERR_OK) {
-        die(json_encode(['error' => 'Error al subir el archivo']));
-    }
-
-    $tempFile = $_FILES['excelFile']['tmp_name'];
-    $reader = ReaderEntityFactory::createXLSXReader();
-    $reader->setShouldFormatDates(false); // Evita formateo de fechas (más rápido)
-    $reader->setShouldPreserveEmptyRows(false); // Ignora filas vacías (menos memoria usada)
-    $reader->open($tempFile);
-    
-    include("../../conexion.php");
-
-    $csvFile = str_replace("/", "\\", __DIR__ . '/temp_data.csv');
-    $fileHandle = fopen($csvFile, 'w');
-
-        if (!$fileHandle) {
-            die(json_encode(['error' => 'No se pudo crear el archivo CSV. Verifica permisos.']));
-        }
-    // Escribimos la primera línea (encabezados)
-    fputcsv($fileHandle, [
-        'upsi_item', 'date_item', 'brand_item', 'item_item', 'ref_item', 'color_item', 'size_item',
-        'category_item', 'cost_item', 'weight_item', 'inventory_item', 'id_usu'
-    ]);
-
-    $contadorRegistros = 0;
-
-    foreach ($reader->getSheetIterator() as $sheet) {
-        foreach ($sheet->getRowIterator() as $row) {
-            $data = [];
-            foreach ($row->getCells() as $cell) {
-                $data[] = $cell->getValue();
-            }
-
-            if ($contadorRegistros == 0) { // Saltar encabezados
-                $contadorRegistros++;
-                continue;
-            }
-
-            if (count($data) < 31) {
-                continue;
-            }
-
-            list(
-                $date, $month, $year, $upc_sku, $brand, $item, $reference, $color, $size, $category,
-                $weight, $quantity, $transaccion, $store, $price, $rotacion, $shipping_received, $tax,
-                $ship_amazon, $shipstation, $ship_shopify, $ship_walmart, $shopify_fee, $amazon_shipping_fee,
-                $walmart_fee, $ad, $costo, $tipo_inventario, $utilidad, $margen_costo, $margen_precio_venta
-            ) = $data;
-
-            // Validación de encabezados
-            if ($upc_sku == 'UPC/SKU' || $date == 'DATE' || $brand == 'BRAND') {
-                continue;
-            }
-
-            // Convertir fecha a formato correcto
-            if ($date instanceof DateTime) {
-                $date = $date->format('Y-m-d');
-            }
-
-            $id_usu = 1; // ID del usuario que sube los datos
-
-            // Escribimos en el archivo CSV
-            fputcsv($fileHandle, [$upc_sku, $date, $brand, $item, $reference, $color, $size, $category, $costo, $weight, $tipo_inventario, $id_usu]);
-
-            $contadorRegistros++;
-        }
-    }
-
-    $reader->close();
-    fclose($fileHandle); // Cerramos el archivo CSV
-
-    // Cargamos el CSV en MySQL con `LOAD DATA INFILE`
-    $mysqli->query("SET autocommit=0;");
-    $mysqli->query("SET UNIQUE_CHECKS=0;");
-    $mysqli->query("SET FOREIGN_KEY_CHECKS=0;");
-
-    $sql = "LOAD DATA INFILE '$csvFile'
-            INTO TABLE items
-            FIELDS TERMINATED BY ','  
-            ENCLOSED BY '\"'  
-            LINES TERMINATED BY '\n'  
-            IGNORE 1 LINES  
-            (upsi_item, date_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, id_usu)
-            SET date_item = STR_TO_DATE(date_item, '%Y-%m-%d')"; // Convertir fecha si es necesario
-
-    if (!$mysqli->query($sql)) {
-        die(json_encode(["error" => "Error al insertar datos: " . $mysqli->error]));
-    }
-
-    $mysqli->query("SET UNIQUE_CHECKS=1;");
-    $mysqli->query("SET FOREIGN_KEY_CHECKS=1;");
-    $mysqli->query("COMMIT;");
-
-    unlink($csvFile); // Eliminamos el archivo temporal
-
-    echo json_encode(["finalizado" => "Carga completada con éxito, $contadorRegistros registros insertados."]);
+// Verifica si se subió un archivo
+if (!isset($_FILES['excelFile']) || $_FILES['excelFile']['error'] !== UPLOAD_ERR_OK) {
+    die("Error al subir el archivo.");
 }
-?>
+
+// Ruta temporal del archivo subido
+$filePath = $_FILES['excelFile']['tmp_name'];
+
+// Verifica la extensión del archivo
+$fileExt = pathinfo($_FILES['excelFile']['name'], PATHINFO_EXTENSION);
+if ($fileExt === 'xlsx') {
+    $reader = ReaderEntityFactory::createXLSXReader();
+} elseif ($fileExt === 'xls') {
+    $reader = ReaderEntityFactory::createXLSReader();
+} else {
+    die("Formato de archivo no permitido. Solo .xlsx y .xls.");
+}
+
+$reader->open($filePath);
+
+echo "<pre>";
+echo "Cargando datos del archivo...\n\n";
+
+foreach ($reader->getSheetIterator() as $sheet) {
+    $firstRow = true;
+
+    foreach ($sheet->getRowIterator() as $row) {
+        if ($firstRow) {
+            $firstRow = false;
+            continue; // Saltar la fila de encabezados
+        }
+
+        $cells = $row->getCells();
+
+        // Extraer valores de cada columna
+        $data = [
+            'DATE'                   => $cells[0]->getValue(),
+            'MES'                    => $cells[1]->getValue(),
+            'AÑO'                    => $cells[2]->getValue(),
+            'REG'                    => $cells[3]->getValue(),
+            'UPC/SKU'                => $cells[4]->getValue(),
+            'BRAND'                  => $cells[5]->getValue(),
+            'ITEM'                   => $cells[6]->getValue(),
+            'REF'                    => $cells[7]->getValue(),
+            'COLOR'                  => $cells[8]->getValue(),
+            'SIZE'                   => $cells[9]->getValue(),
+            'CATEGORY'               => $cells[10]->getValue(),
+            'PESO LB/OZ'             => $cells[11]->getValue(),
+            'QTY'                    => $cells[12]->getValue(),
+            'TRANSACCIÓN'            => $cells[13]->getValue(),
+            'STORE'                  => $cells[14]->getValue(),
+            'PRICE'                  => $cells[15]->getValue(),
+            'ROTACIÓN'               => $cells[16]->getValue(),
+            'SHIPPING RECEIVED'      => $cells[17]->getValue(),
+            'TAX'                    => $cells[18]->getValue(),
+            'SHP EBAY'               => $cells[19]->getValue(),
+            'SHP AMAZON'             => $cells[20]->getValue(),
+            'SHIPSTATION'            => $cells[21]->getValue(),
+            'SHP SHOPIFY'            => $cells[22]->getValue(),
+            'SHP WALMART'            => $cells[23]->getValue(),
+            'SHOPIFY FEE'            => $cells[24]->getValue(),
+            'EBAY FEE'               => $cells[25]->getValue(),
+            'AMAZON SHIPPING FEE'    => $cells[26]->getValue(),
+            'AMAZON FEE'             => $cells[27]->getValue(),
+            'WALMART FEE'            => $cells[28]->getValue(),
+            'ADVERTISING'            => $cells[29]->getValue(),
+            'COMPRA'                 => $cells[30]->getValue(),
+            'COSTO'                  => $cells[31]->getValue(),
+            'TIPO DE INVENTARIO'     => $cells[32]->getValue(),
+            'UTILIDAD'               => $cells[33]->getValue(),
+            'MARGEN/COSTO'           => $cells[34]->getValue(),
+            'MARGEN/PRECIO DE VENTA' => $cells[35]->getValue(),
+            'CUSTOMER REFUND'        => $cells[36]->getValue(),
+            'SHIPPING REFUND'        => $cells[37]->getValue(),
+            'SHIPP PAYED REFUND'     => $cells[38]->getValue(),
+            'EBAY REFUND'            => $cells[39]->getValue(),
+            'AMAZON REFUND'          => $cells[40]->getValue(),
+            'AMAZON REFUND FEE'      => $cells[41]->getValue(),
+            'WALMART REFUND'         => $cells[42]->getValue(),
+            'UTILIDAD A DEVOLVER'    => $cells[43]->getValue(),
+            'COSTO DEVOLUCION'       => $cells[44]->getValue(),
+            'BUYER COMENTS'          => $cells[45]->getValue(),
+        ];
+
+        // Mostrar los valores obtenidos
+        echo implode(" | ", $data) . "\n";
+    }
+}
+
+$reader->close();
+echo "Carga completa.\n";
