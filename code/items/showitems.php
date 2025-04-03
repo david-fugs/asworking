@@ -121,57 +121,73 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         </div>
     </div>
     <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
-    <?php
-    date_default_timezone_set("America/Bogota");
-    include("../../conexion.php");
-    require_once("../../zebra.php");
+    <?php 
+date_default_timezone_set("America/Bogota");
+include("../../conexion.php");
+require_once("../../zebra.php");
 
-    // Inicializa la consulta base
-    $queryBase = "SELECT items.*, inventory.quantity_inventory 
-    FROM items 
-    LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
-    WHERE 1=1";
+// Inicializa la consulta base
+$queryBase = "SELECT items.*, inventory.quantity_inventory 
+FROM items 
+LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
+WHERE 1=1";
 
-    // Agrega filtros si existen
-    if (!empty($_GET['upc_item'])) {
-        $upc_item = $mysqli->real_escape_string($_GET['upc_item']);
-        $queryBase .= " AND upc_item LIKE '%$upc_item%'";
-    }
-    if (!empty($_GET['item'])) {
-        $item = $mysqli->real_escape_string($_GET['item']);
-        $queryBase .= " AND item_item LIKE '%$item%'";
-    }
-    if (!empty($_GET['ref'])) {
-        $reference = $mysqli->real_escape_string($_GET['ref']);
-        $queryBase .= " AND ref_item = '$reference'";
-    }
+// Agrega filtros si existen
+if (!empty($_GET['upc_item'])) {
+    $upc_item = $mysqli->real_escape_string($_GET['upc_item']);
+    $queryBase .= " AND upc_item LIKE '%$upc_item%'";
+}
+if (!empty($_GET['item'])) {
+    $item = $mysqli->real_escape_string($_GET['item']);
+    $queryBase .= " AND item_item LIKE '%$item%'";
+}
+if (!empty($_GET['ref'])) {
+    $reference = $mysqli->real_escape_string($_GET['ref']);
+    $queryBase .= " AND ref_item = '$reference'";
+}
 
+// Ordenar por cantidad en inventory
+$queryBase .= " ORDER BY inventory.quantity_inventory DESC";
 
-    // Ordenar por cantidad en inventory
-    $queryBase .= " ORDER BY inventory.quantity_inventory DESC"; // DESC para mayor a menor, ASC para menor a mayor
+// Consulta para conteo (sin duplicados)
+$countQuery = "SELECT COUNT(DISTINCT items.id_item) as total 
+               FROM items 
+               LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
+               WHERE 1=1";
 
-    // Contar total de registros antes de aplicar el LIMIT
-    $res = $mysqli->query($queryBase);
-    if (!$res) {
-        die("Error en la consulta: " . $mysqli->error);
-    }
+// Aplicar mismos filtros a countQuery
+if (!empty($_GET['upc_item'])) {
+    $countQuery .= " AND items.upc_item LIKE '%$upc_item%'";
+}
+if (!empty($_GET['item'])) {
+    $countQuery .= " AND items.item_item LIKE '%$item%'";
+}
+if (!empty($_GET['ref'])) {
+    $countQuery .= " AND items.ref_item = '$reference'";
+}
 
-    $num_registros = mysqli_num_rows($res);
-    $resul_x_pagina = 50;
+$countResult = $mysqli->query($countQuery);
+if (!$countResult) die("Error en conteo: " . $mysqli->error);
+$countRow = $countResult->fetch_assoc();
+$num_registros = $countRow['total'];
+
+$resul_x_pagina = 50;
+// Si no hay registros, evita errores en la paginación
+if ($num_registros > 0) {
     // Configuración de Zebra_Pagination
     $paginacion = new Zebra_Pagination();
     $paginacion->records($num_registros);
     $paginacion->records_per_page($resul_x_pagina);
 
-
     $page = $paginacion->get_page(); // Obtiene la página actual
     $offset = ($page - 1) * $resul_x_pagina; // Calcula el desplazamiento
-    $queryFinal = $queryBase . "  LIMIT $offset, $resul_x_pagina";
-    // Ejecutar consulta con paginación
+    $queryFinal = $queryBase . " LIMIT $offset, $resul_x_pagina";
     $result = $mysqli->query($queryFinal);
+
     if (!$result) {
         die("Error en la consulta: " . $mysqli->error);
     }
+
     echo "<section class='content'>
     <div class='card-body'>
         <div class='table-responsive'>
@@ -190,33 +206,32 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                         <th>CATEGORY</th>
                         <th>COST</th>
                         <th>WEIGHT</th>
-						<th>STOCK</th>
-						<th>BATCH</th>
+                        <th>STOCK</th>
+                        <th>BATCH</th>
                         <th>EDIT</th>
                         <th>DELETE</th>
                     </tr>
                 </thead>
                 <tbody>";
-                
+
     $i = 1;
     while ($row = mysqli_fetch_array($result)) {
-
         echo '<tr>
-			<td data-label="NO.">' . $i . '</td>
-            <td data-label="upsi">' . $row['upc_item'] . '</td>
-            <td  data-label="sku">' . $row['sku_item'] . '</td>
-            <td data-label="date">' . $row['date_item'] . '</td>
-            <td style="text-transform:uppercase;" data-label="brand">' . $row['brand_item'] . '</td>
-            <td style="width: 400px; !important"  data-label="item">' . $row['item_item'] . '</td>
-            <td data-label="ref">' . $row['ref_item'] . '</td>
-            <td data-label="color">' . $row['color_item'] . '</td>
-            <td data-label="size">' . $row['size_item'] . '</td>
-            <td data-label="category">' . $row['category_item'] . '</td>
-            <td data-label="cost">' . $row['cost_item'] . '</td>
-			<td data-label="weight">' . $row['weight_item'] . '</td>
-			<td data-label="STOCK">' . $row['quantity_inventory'] . '</td>
-            <td data-label="ESTADO">' . $row['inventory_item'] . '</td>
-            <td data-label="EDITAR">
+            <td data-label="NO.">' . $i . '</td>
+            <td data-label="UPC">' . $row['upc_item'] . '</td>
+            <td data-label="SKU">' . $row['sku_item'] . '</td>
+            <td data-label="Date">' . $row['date_item'] . '</td>
+            <td style="text-transform:uppercase;" data-label="Brand">' . $row['brand_item'] . '</td>
+            <td style="width: 400px; !important" data-label="Item">' . $row['item_item'] . '</td>
+            <td data-label="Ref">' . $row['ref_item'] . '</td>
+            <td data-label="Color">' . $row['color_item'] . '</td>
+            <td data-label="Size">' . $row['size_item'] . '</td>
+            <td data-label="Category">' . $row['category_item'] . '</td>
+            <td data-label="Cost">' . $row['cost_item'] . '</td>
+            <td data-label="Weight">' . $row['weight_item'] . '</td>
+            <td data-label="Stock">' . $row['quantity_inventory'] . '</td>
+            <td data-label="Estado">' . $row['inventory_item'] . '</td>
+            <td data-label="Editar">
                 <button type="button" class="btn-edit" 
                     data-bs-toggle="modal" data-bs-target="#modalEdicion"
                     data-upc="' . $row['upc_item'] . '"
@@ -238,7 +253,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                     <img src="../../img/editar.png" width="28" height="28">
                 </button>     
             </td>
-            <td data-label="ELIMINAR">
+            <td data-label="Eliminar">
                 <a href="?delete=' . $row['id_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');">
                     <i class="fa-sharp-duotone fa-solid fa-trash" style="color:red; height:20px;"></i>
                 </a>
@@ -247,14 +262,18 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         $i++;
     }
 
-    // Cierra la tabla y muestra la paginación
     echo '</tbody></table></div>';
 
-    // Mostrar la paginación después de la tabla
+    // Mostrar paginación
     $paginacion->render();
     echo '</section>';
+} else {
+    echo "<p>No se encontraron resultados.</p>";
+}
 
-    ?>
+?>
+
+
     <!-- Modal Edicion -->
     <div class="modal fade" id="modalEdicion" tabindex="-1" aria-labelledby="modalEdicionLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg"> <!-- Modal más ancho -->
@@ -381,7 +400,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
     </div>
 
     <center>
-        <br /><a href="../access.php"><img src='img/atras.png' width="72" height="72" title="Regresar" /></a>
+        <br /><a href="../access.php"><img src='../../img/atras.png' width="72" height="72" title="Regresar" /></a>
     </center>
 
     <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>

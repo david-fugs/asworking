@@ -1,9 +1,8 @@
-<?php 
+<?php
 include("../../conexion.php");
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    echo "hola";
 
     // Capturar datos del formulario
     $id_item = (int) $_POST["id"];
@@ -33,6 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
+
     // Actualizar la tabla items (sin cambiar quantity_inventory)
     $sql_update_items = "UPDATE items SET 
                             upc_item = '$upc', 
@@ -57,14 +57,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         // Actualizar siempre el stock en inventory
-        $sql_update_stock = "UPDATE inventory SET quantity_inventory = $stock WHERE upc_item = '$upc'";
+        $sql_update_stock = "UPDATE inventory SET quantity_inventory = $stock WHERE upc_inventory = '$upc'";
         $mysqli->query($sql_update_stock);
-
-        echo json_encode(["success" => true]);
+        header("Location: showitems.php");
+        exit;
     } else {
         echo json_encode(["success" => false, "error" => $mysqli->error]);
     }
-
     // Cerrar conexión
     $mysqli->close();
 }
