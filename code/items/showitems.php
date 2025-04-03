@@ -11,13 +11,13 @@ if (isset($_GET['delete'])) {
     $num_doc_cta = $_GET['delete'];
     deleteMember($num_doc_cta);
 }
-function deleteMember($upsi_item)
+function deleteMember($id_item)
 {
     global $mysqli; // Asegurar acceso a la conexión global
 
-    $query = "DELETE FROM items WHERE upsi_item  = ?";
+    $query = "DELETE FROM items WHERE id_item  = ?";
     $stmt = $mysqli->prepare($query);
-    $stmt->bind_param("s", $upsi_item);
+    $stmt->bind_param("s", $id_item);
 
     if ($stmt->execute()) {
         echo "<script>alert('Item deleted correctly');
@@ -39,7 +39,7 @@ function getStatus($estado)
 }
 
 // Obtener los filtros desde el formulario
-$upc_sku = isset($_GET['upc_sku']) ? trim($_GET['upc_sku']) : '';
+$upc_item = isset($_GET['upc_item']) ? trim($_GET['upc_item']) : '';
 $item = isset($_GET['item']) ? trim($_GET['item']) : '';
 $reference = isset($_GET['ref']) ? trim($_GET['ref']) : '';
 $plan = isset($_GET['plan_cta']) ? trim($_GET['plan_cta']) : '';
@@ -89,14 +89,12 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             font-weight: bold;
             text-align: center;
         }
-
         .ok {
             background-color: lightblue;
             color: black;
             font-weight: bold;
             text-align: center;
         }
-
         .disabled-link {
             pointer-events: none;
             opacity: 0.6;
@@ -115,10 +113,9 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
     <div class="flex">
         <div class="box">
             <form action="showitems.php" method="get" class="form">
-                <input name="upc_sku" type="text" placeholder="Upc sku" value="<?= htmlspecialchars($upc_sku) ?>">
+                <input name="upc_item" type="text" placeholder="Upc " value="<?= htmlspecialchars($upc_item) ?>">
                 <input name="item" type="text" placeholder="Item" value="<?= htmlspecialchars($item) ?>">
                 <input name="ref" type="text" placeholder="Reference" value="<?= htmlspecialchars($reference) ?>">
-                <input name="plan_cta" type="text" placeholder="Plan Cliente" value="<?= htmlspecialchars($plan) ?>">
                 <input value="Search" type="submit">
             </form>
         </div>
@@ -130,33 +127,37 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
     require_once("../../zebra.php");
 
     // Inicializa la consulta base
-    $queryBase = "SELECT * FROM items WHERE 1=1";
+    $queryBase = "SELECT items.*, inventory.quantity_inventory 
+    FROM items 
+    LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
+    WHERE 1=1";
+
     // Agrega filtros si existen
-    if (!empty($_GET['upc_sku'])) {
-        $upc_sku = $mysqli->real_escape_string($_GET['upc_sku']);
-        $queryBase .= " AND upc_sku_item LIKE '%$upc_sku%'";
+    if (!empty($_GET['upc_item'])) {
+        $upc_item = $mysqli->real_escape_string($_GET['upc_item']);
+        $queryBase .= " AND upc_item LIKE '%$upc_item%'";
     }
     if (!empty($_GET['item'])) {
         $item = $mysqli->real_escape_string($_GET['item']);
-        $queryBase .= " AND item_item  LIKE '%$item%'";
+        $queryBase .= " AND item_item LIKE '%$item%'";
     }
     if (!empty($_GET['ref'])) {
         $reference = $mysqli->real_escape_string($_GET['ref']);
         $queryBase .= " AND ref_item = '$reference'";
     }
 
-    if (!empty($_GET['nom_cta'])) {
-        $nom_cta = $mysqli->real_escape_string($_GET['nom_cta']);
-        $queryBase .= " AND nom_cta LIKE '%$nom_cta%'";
-    }
+
+    // Ordenar por cantidad en inventory
+    $queryBase .= " ORDER BY inventory.quantity_inventory DESC"; // DESC para mayor a menor, ASC para menor a mayor
 
     // Contar total de registros antes de aplicar el LIMIT
     $res = $mysqli->query($queryBase);
     if (!$res) {
         die("Error en la consulta: " . $mysqli->error);
     }
+
     $num_registros = mysqli_num_rows($res);
-    $resul_x_pagina = 100;
+    $resul_x_pagina = 50;
     // Configuración de Zebra_Pagination
     $paginacion = new Zebra_Pagination();
     $paginacion->records($num_registros);
@@ -171,19 +172,18 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
     if (!$result) {
         die("Error en la consulta: " . $mysqli->error);
     }
-    // Inicia la tabla
     echo "<section class='content'>
     <div class='card-body'>
         <div class='table-responsive'>
-            <table style='width:1300px;'>
-                <thead>
+            <table class='table table-striped table-hover' style='width:1300px;'>
+                <thead class='table-dark'>
                     <tr>
                         <th>No.</th>
                         <th>UPC </th>
                         <th>SKU</th>
                         <th>DATE</th>
                         <th>BRAND</th>
-                        <th>ITEM</th>
+                        <th style='width: 400px; !important' >ITEM</th>
                         <th>REF</th>
                         <th>COLOR</th>
                         <th>SIZE</th>
@@ -197,27 +197,29 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                     </tr>
                 </thead>
                 <tbody>";
+                
     $i = 1;
     while ($row = mysqli_fetch_array($result)) {
+
         echo '<tr>
 			<td data-label="NO.">' . $i . '</td>
-            <td data-label="upsi">' . $row['upsi_item'] . '</td>
-            <td data-label="sku">' . $row['sku_item'] . '</td>
+            <td data-label="upsi">' . $row['upc_item'] . '</td>
+            <td  data-label="sku">' . $row['sku_item'] . '</td>
             <td data-label="date">' . $row['date_item'] . '</td>
             <td style="text-transform:uppercase;" data-label="brand">' . $row['brand_item'] . '</td>
-            <td data-label="item">' . $row['item_item'] . '</td>
+            <td style="width: 400px; !important"  data-label="item">' . $row['item_item'] . '</td>
             <td data-label="ref">' . $row['ref_item'] . '</td>
             <td data-label="color">' . $row['color_item'] . '</td>
             <td data-label="size">' . $row['size_item'] . '</td>
             <td data-label="category">' . $row['category_item'] . '</td>
             <td data-label="cost">' . $row['cost_item'] . '</td>
 			<td data-label="weight">' . $row['weight_item'] . '</td>
-			<td data-label="ESTADO">'  . '</td>
-            <td data-label="ESTADO">'  . '</td>
+			<td data-label="STOCK">' . $row['quantity_inventory'] . '</td>
+            <td data-label="ESTADO">' . $row['inventory_item'] . '</td>
             <td data-label="EDITAR">
                 <button type="button" class="btn-edit" 
                     data-bs-toggle="modal" data-bs-target="#modalEdicion"
-                    data-upsi="' . $row['upsi_item'] . '"
+                    data-upc="' . $row['upc_item'] . '"
                     data-sku="' . $row['sku_item'] . '"
                     data-date="' . $row['date_item'] . '"
                     data-brand="' . $row['brand_item'] . '"
@@ -228,12 +230,16 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                     data-category="' . $row['category_item'] . '"
                     data-cost="' . $row['cost_item'] . '"
                     data-weight="' . $row['weight_item'] . '"
+                    data-id="' . $row['id_item'] . '"
+                    data-estado="' . $row['estado_item'] . '"
+                    data-stock="' . $row['quantity_inventory'] . '"
+                    data-batch="' . $row['inventory_item'] . '"
                     style="background-color:transparent; border:none;">
                     <img src="../../img/editar.png" width="28" height="28">
                 </button>     
             </td>
             <td data-label="ELIMINAR">
-                <a href="?delete=' . $row['upsi_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');">
+                <a href="?delete=' . $row['id_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');">
                     <i class="fa-sharp-duotone fa-solid fa-trash" style="color:red; height:20px;"></i>
                 </a>
             </td>   
@@ -251,64 +257,129 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
     ?>
     <!-- Modal Edicion -->
     <div class="modal fade" id="modalEdicion" tabindex="-1" aria-labelledby="modalEdicionLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg"> <!-- Modal más ancho -->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalEdicionLabel">Editar Registro</h1>
+                    <h1 class="modal-title fs-5" id="modalEdicionLabel">Edit </h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="formEditar">
-                        <input type="hidden" id="edit-upsi" name="upsi">
-                        <div class="mb-3">
-                            <label for="edit-sku" class="form-label">SKU</label>
-                            <input type="text" class="form-control" id="edit-sku" name="sku">
+                    <form  action="editItems.php" method="POST" >
+                        <input type="hidden" id="edit-id" name="id">
+
+                        <!-- Primera Sección: Datos Generales -->
+                        <h5 class="mb-3"> General</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-upc" name="upc">
+                                    <label for="edit-upc">UPC</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-sku" name="sku">
+                                    <label for="edit-sku">SKU</label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="edit-date" class="form-label">Fecha</label>
+
+                        <!-- Segunda Sección: Información del Producto -->
+                        <h5 class="mb-3">Product Information</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-brand" name="brand">
+                                    <label for="edit-brand">Brand</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-item" name="item">
+                                    <label for="edit-item">Item</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-ref" name="ref">
+                                    <label for="edit-ref">Reference</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-category" name="category">
+                                    <label for="edit-category">Category</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tercera Sección: Atributos del Producto -->
+                        <h5 class="mb-3">Product Attributes</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-color" name="color">
+                                    <label for="edit-color">Color</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-size" name="size">
+                                    <label for="edit-size">Size</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cuarta Sección: Datos Financieros -->
+                        <h5 class="mb-3">Data</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-cost" name="cost">
+                                    <label for="edit-cost">Cost</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-weight" name="weight">
+                                    <label for="edit-weight">Weight</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Última Sección: Stock y Lote -->
+                        <h5 class="mb-3">Stock</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-stock" name="stock">
+                                    <label for="edit-stock">Stock</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="edit-batch" name="batch">
+                                    <label for="edit-batch">Batch</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fecha -->
+                        <div class="form-floating mb-3">
                             <input type="date" class="form-control" id="edit-date" name="date">
+                            <label for="edit-date">Date</label>
                         </div>
-                        <div class="mb-3">
-                            <label for="edit-brand" class="form-label">Marca</label>
-                            <input type="text" class="form-control" id="edit-brand" name="brand">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-item" class="form-label">Item</label>
-                            <input type="text" class="form-control" id="edit-item" name="item">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-ref" class="form-label">Referencia</label>
-                            <input type="text" class="form-control" id="edit-ref" name="ref">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-color" class="form-label">Color</label>
-                            <input type="text" class="form-control" id="edit-color" name="color">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-size" class="form-label">Tamaño</label>
-                            <input type="text" class="form-control" id="edit-size" name="size">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-category" class="form-label">Categoría</label>
-                            <input type="text" class="form-control" id="edit-category" name="category">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-cost" class="form-label">Costo</label>
-                            <input type="text" class="form-control" id="edit-cost" name="cost">
-                        </div>
-                        <div class="mb-3">
-                            <label for="edit-weight" class="form-label">Peso</label>
-                            <input type="text" class="form-control" id="edit-weight" name="weight">
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="guardarCambios">Save</button>
                         </div>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="guardarCambios">Guardar cambios</button>
                 </div>
             </div>
         </div>
     </div>
+
     <center>
         <br /><a href="../access.php"><img src='img/atras.png' width="72" height="72" title="Regresar" /></a>
     </center>
@@ -321,7 +392,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             modalEdicion.addEventListener("show.bs.modal", function(event) {
                 let button = event.relatedTarget; // Botón que abrió el modal
 
-                document.getElementById("edit-upsi").value = button.getAttribute("data-upsi");
+                document.getElementById("edit-upc").value = button.getAttribute("data-upc");
                 document.getElementById("edit-sku").value = button.getAttribute("data-sku");
                 document.getElementById("edit-date").value = button.getAttribute("data-date");
                 document.getElementById("edit-brand").value = button.getAttribute("data-brand");
@@ -332,6 +403,11 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                 document.getElementById("edit-category").value = button.getAttribute("data-category");
                 document.getElementById("edit-cost").value = button.getAttribute("data-cost");
                 document.getElementById("edit-weight").value = button.getAttribute("data-weight");
+                document.getElementById("edit-stock").value = button.getAttribute("data-stock");
+                document.getElementById("edit-batch").value = button.getAttribute("data-batch");
+                document.getElementById("edit-id").value = button.getAttribute("data-id");
+
+
             });
 
             // Enviar datos al servidor con AJAX al hacer clic en "Guardar cambios"
@@ -346,7 +422,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                     .then(data => {
                         if (data.success) {
                             alert("Registro actualizado correctamente");
-                            location.reload();
+                            window.location.reload(); // Recargar la página para ver los cambios
                         } else {
                             alert("Error al actualizar");
                         }
