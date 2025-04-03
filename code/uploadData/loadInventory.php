@@ -73,7 +73,7 @@ $tipo_usu = $_SESSION['tipo_usuario'];
 
     </center>
 
-    <h1 style="color: #000000; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i class="fa-sharp-duotone fa-solid fa-file-excel"></i> Upload Excel Items</b>
+    <h1 style="color: #000000; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i class="fa-sharp-duotone fa-solid fa-file-excel"></i> Upload Excel Inventory Items</b>
     </h1>
 
     <div class="container mt-5">
@@ -81,10 +81,10 @@ $tipo_usu = $_SESSION['tipo_usuario'];
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header bg-success text-white text-center">
-                        <h4>Upload Items Excel</h4>
+                        <h4>Upload Inventory Excel</h4>
                     </div>
                     <div class="card-body">
-                        <form  action="uploadItems.php" enctype="multipart/form-data" method="POST">
+                        <form  action="uploadInventory.php" enctype="multipart/form-data" method="POST">
                             <div class="mb-3">
                                 <label for="fileInput" class="form-label">Choose the Excel File </label>
                                 <input type="file" class="form-control" id="fileInput" name="excelFile" accept=".xlsx, .xls" required>

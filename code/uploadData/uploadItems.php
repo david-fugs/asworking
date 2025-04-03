@@ -1,18 +1,16 @@
 <?php
 require '../../vendor/autoload.php';
+include("../../conexion.php"); // Se incluye la conexión a la BD
 
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 
-// Verifica si se subió un archivo
 if (!isset($_FILES['excelFile']) || $_FILES['excelFile']['error'] !== UPLOAD_ERR_OK) {
     die("Error al subir el archivo.");
 }
 
-// Ruta temporal del archivo subido
 $filePath = $_FILES['excelFile']['tmp_name'];
-
-// Verifica la extensión del archivo
 $fileExt = pathinfo($_FILES['excelFile']['name'], PATHINFO_EXTENSION);
+
 if ($fileExt === 'xlsx') {
     $reader = ReaderEntityFactory::createXLSXReader();
 } elseif ($fileExt === 'xls') {
@@ -23,8 +21,7 @@ if ($fileExt === 'xlsx') {
 
 $reader->open($filePath);
 
-echo "<pre>";
-echo "Cargando datos del archivo...\n\n";
+$id_usu = $_SESSION['id_usu'] ?? 1;
 
 foreach ($reader->getSheetIterator() as $sheet) {
     $firstRow = true;
@@ -32,65 +29,38 @@ foreach ($reader->getSheetIterator() as $sheet) {
     foreach ($sheet->getRowIterator() as $row) {
         if ($firstRow) {
             $firstRow = false;
-            continue; // Saltar la fila de encabezados
+            continue; // Saltar encabezados
         }
 
         $cells = $row->getCells();
 
-        // Extraer valores de cada columna
-        $data = [
-            'DATE'                   => $cells[0]->getValue(),
-            'MES'                    => $cells[1]->getValue(),
-            'AÑO'                    => $cells[2]->getValue(),
-            'REG'                    => $cells[3]->getValue(),
-            'UPC/SKU'                => $cells[4]->getValue(),
-            'BRAND'                  => $cells[5]->getValue(),
-            'ITEM'                   => $cells[6]->getValue(),
-            'REF'                    => $cells[7]->getValue(),
-            'COLOR'                  => $cells[8]->getValue(),
-            'SIZE'                   => $cells[9]->getValue(),
-            'CATEGORY'               => $cells[10]->getValue(),
-            'PESO LB/OZ'             => $cells[11]->getValue(),
-            'QTY'                    => $cells[12]->getValue(),
-            'TRANSACCIÓN'            => $cells[13]->getValue(),
-            'STORE'                  => $cells[14]->getValue(),
-            'PRICE'                  => $cells[15]->getValue(),
-            'ROTACIÓN'               => $cells[16]->getValue(),
-            'SHIPPING RECEIVED'      => $cells[17]->getValue(),
-            'TAX'                    => $cells[18]->getValue(),
-            'SHP EBAY'               => $cells[19]->getValue(),
-            'SHP AMAZON'             => $cells[20]->getValue(),
-            'SHIPSTATION'            => $cells[21]->getValue(),
-            'SHP SHOPIFY'            => $cells[22]->getValue(),
-            'SHP WALMART'            => $cells[23]->getValue(),
-            'SHOPIFY FEE'            => $cells[24]->getValue(),
-            'EBAY FEE'               => $cells[25]->getValue(),
-            'AMAZON SHIPPING FEE'    => $cells[26]->getValue(),
-            'AMAZON FEE'             => $cells[27]->getValue(),
-            'WALMART FEE'            => $cells[28]->getValue(),
-            'ADVERTISING'            => $cells[29]->getValue(),
-            'COMPRA'                 => $cells[30]->getValue(),
-            'COSTO'                  => $cells[31]->getValue(),
-            'TIPO DE INVENTARIO'     => $cells[32]->getValue(),
-            'UTILIDAD'               => $cells[33]->getValue(),
-            'MARGEN/COSTO'           => $cells[34]->getValue(),
-            'MARGEN/PRECIO DE VENTA' => $cells[35]->getValue(),
-            'CUSTOMER REFUND'        => $cells[36]->getValue(),
-            'SHIPPING REFUND'        => $cells[37]->getValue(),
-            'SHIPP PAYED REFUND'     => $cells[38]->getValue(),
-            'EBAY REFUND'            => $cells[39]->getValue(),
-            'AMAZON REFUND'          => $cells[40]->getValue(),
-            'AMAZON REFUND FEE'      => $cells[41]->getValue(),
-            'WALMART REFUND'         => $cells[42]->getValue(),
-            'UTILIDAD A DEVOLVER'    => $cells[43]->getValue(),
-            'COSTO DEVOLUCION'       => $cells[44]->getValue(),
-            'BUYER COMENTS'          => $cells[45]->getValue(),
-        ];
+        // Convertir la fecha de Excel a formato Y-m-d
+        $dateExcel = $cells[0]->getValue();
+        if (is_numeric($dateExcel)) {
+            $dateFormatted = date('Y-m-d', \PhpOffice\PhpSpreadsheet\Shared\Date::excelToTimestamp($dateExcel));
+        } else {
+            // Si la fecha ya está en formato texto, intentamos formatearla correctamente
+            $dateFormatted = date('Y-m-d', strtotime($dateExcel));
+        }
+        // Escapar valores para evitar problemas con comillas
+        $upc_sku = $mysqli->real_escape_string($cells[1]->getValue());
+        $brand = $mysqli->real_escape_string($cells[2]->getValue());
+        $item = $mysqli->real_escape_string($cells[3]->getValue());
+        $ref = $mysqli->real_escape_string($cells[4]->getValue());
+        $color = $mysqli->real_escape_string($cells[5]->getValue());
+        $size = $mysqli->real_escape_string($cells[6]->getValue());
+        $category = $mysqli->real_escape_string($cells[7]->getValue());
+        $cost =($cells[8]->getValue());
+        $weight = ($cells[9]->getValue());
+        $inventory = ($cells[11]->getValue());
 
-        // Mostrar los valores obtenidos
-        echo implode(" | ", $data) . "\n";
+        // Consulta SQL
+        $sql = "INSERT INTO items (upc_item, date_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, estado_item, fecha_alta_item, id_usu) 
+                VALUES ('$upc_sku', '$dateFormatted', '$brand', '$item', '$ref', '$color', '$size', '$category', '$cost', '$weight', '$inventory', 1, NOW(), $id_usu)";
+
+        mysqli_query($mysqli, $sql) or die("Error en la consulta: " . mysqli_error($mysqli));
     }
 }
 
 $reader->close();
-echo "Carga completa.\n";
+echo "Carga completa e inserción exitosa.";
