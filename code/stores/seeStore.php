@@ -11,13 +11,13 @@ if (isset($_GET['delete'])) {
     $num_doc_cta = $_GET['delete'];
     deleteMember($num_doc_cta);
 }
-function deleteMember($id_sucursal)
+function deleteMember($id_store)
 {
     global $mysqli; // Asegurar acceso a la conexión global
 
-    $query = "DELETE FROM sucursal WHERE id_sucursal  = ?";
+    $query = "DELETE FROM store WHERE id_store  = ?";
     $stmt = $mysqli->prepare($query);
-    $stmt->bind_param("s", $id_sucursal);
+    $stmt->bind_param("s", $id_store);
 
     if ($stmt->execute()) {
         echo "<script>alert('sucursal deleted correctly');
@@ -138,16 +138,16 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
     <center style="margin-top: 20px;">
         <img src='../../img/logo.png' width="300" height="212" class="responsive">
     </center>
-    <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i class="fa-solid fa-file-signature"></i> SUCURSAL</b></h1>
+    <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i class="fa-solid fa-file-signature"></i> STORE</b></h1>
     <div class="flex">
         <div class="box">
-            <form action="seeSucursal.php" method="get" class="form">
+            <form action="seeStore.php" method="get" class="form">
                 <input name="store_name" type="text" placeholder="Store Name " value="<?= htmlspecialchars($store_name) ?>">
-                <input name="code_sucursal" type="text" placeholder="code" value="<?= htmlspecialchars($code_sucursal) ?>">
                 <input value="Search" type="submit">
             </form>
         </div>
     </div>
+
     <div class="top-bar">
         <div></div>
         <div class="center">
@@ -156,8 +156,8 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             </a>
         </div>
         <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
-            <button type="button" class="btn-add-store" data-bs-toggle="modal" data-bs-target="#modalAddSucursal">
-                Add Sucursal
+            <button type="button" class="btn-add-store" data-bs-toggle="modal" data-bs-target="#modalAddStore">
+                Add Store
             </button>
         </div>
     </div>
@@ -166,48 +166,28 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
     include("../../conexion.php");
     require_once("../../zebra.php");
 
-    //traigo las tiendas para el select del modal
-    $sql_store = "SELECT * FROM store ORDER BY store_name ASC";
-    $result_store = $mysqli->query($sql_store);
-    if (!$result_store) {
-        die("Error en la consulta: " . $mysqli->error);
-    }
-    $stores = $result_store->fetch_all(MYSQLI_ASSOC);
-
     // Inicializa la consulta base
-    $queryBase = "SELECT store.*, sucursal.* 
+    $queryBase = "SELECT *
     FROM store 
-    JOIN sucursal ON store.id_store = sucursal.id_store
     WHERE 1=1";
 
     // Filtro por nombre de tienda (store_name)
     if (!empty($_GET['store_name'])) {
         $nombre_store = ($_GET['store_name']);
-        $queryBase .= " AND store.store_name LIKE '%$nombre_store%'";
-    }
-
-    // Filtro por código de sucursal (code_sucursal en tabla sucursal)
-    if (!empty($_GET['code_sucursal'])) {
-        $code_sucursal = $mysqli->real_escape_string($_GET['code_sucursal']);
-        $queryBase .= " AND sucursal.code_sucursal LIKE '%$code_sucursal%'";
+        $queryBase .= " AND store_name LIKE '%$nombre_store%'";
     }
 
     // Ordenar por nombre de tienda
-    $queryBase .= " ORDER BY store.store_name ASC";
+    $queryBase .= " ORDER BY store_name ASC";
 
     // --------- Conteo ----------
-    $countQuery = "SELECT COUNT(DISTINCT store.id_store) as total 
+    $countQuery = "SELECT COUNT(DISTINCT id_store) as total 
     FROM store 
-    JOIN sucursal ON store.id_store = sucursal.id_store
     WHERE 1=1";
 
     // Aplica los mismos filtros al conteo
     if (!empty($_GET['store_name'])) {
-        $countQuery .= " AND store.store_name LIKE '%$nombre_store%'";
-    }
-
-    if (!empty($_GET['code_sucursal'])) {
-        $countQuery .= " AND sucursal.code_sucursal LIKE '%$code_sucursal%'";
+        $countQuery .= " AND store_name LIKE '%$nombre_store%'";
     }
 
     // Ejecutar conteo
@@ -243,8 +223,6 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                     <tr>
                         <th>No.</th>
                         <th>STORE NAME</th>
-                        <th>REFERENCE CODE</th>
-                        <th>FEE</th>
                         <th>EDIT</th>
                         <th>DELETE</th>
                     </tr>
@@ -256,41 +234,31 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             echo '<tr>
             <td data-label="NO.">' . $i . '</td>
             <td data-label="name">' . $row['store_name'] . '</td>
-            <td data-label="code">' . $row['code_sucursal'] . '</td>
-            <td data-label="comision">' . $row['comision_sucursal'] . '</td>
             <td data-label="Editar">
                 <button type="button" class="btn-edit" 
                     data-bs-toggle="modal" data-bs-target="#modalEdicion"
-                    data-id="' . $row['id_store'] . '"
-                    data-id_sucursal="' . $row['id_sucursal'] . '"
+                    data-id_store="' . $row['id_store'] . '"
                     data-name="' . $row['store_name'] . '"
-                    data-code_sucursal="' . $row['code_sucursal'] . '"
-                    data-comision_sucursal="' . $row['comision_sucursal'] . '"
                     style="background-color:transparent; border:none;">
                     <img src="../../img/editar.png" width="28" height="28">
                 </button>     
             </td>
             <td data-label="Eliminar">
-                <a href="?delete=' . $row['id_sucursal'] . '" onclick="return confirm(\'¿Are you sure to Delete this sucursal?\');">
+                <a href="?delete=' . $row['id_store'] . '" onclick="return confirm(\'¿Are you sure to Delete this sucursal?\');">
                     <i class="fa-sharp-duotone fa-solid fa-trash" style="color:red; height:20px;"></i>
                 </a>
             </td>   
         </tr>';
             $i++;
         }
-
         echo '</tbody></table></div>';
-
         // Mostrar paginación
         $paginacion->render();
         echo '</section>';
     } else {
         echo "<p>No se encontraron resultados.</p>";
     }
-
     ?>
-
-
     <!-- Modal Edicion -->
     <div class="modal fade" id="modalEdicion" tabindex="-1" aria-labelledby="modalEdicionLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -300,26 +268,15 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <form action="editSucursal.php" method="POST">
+                <form action="editStore.php" method="POST">
                     <div class="modal-body px-4 py-3">
-                        <input type="hidden" id="id_sucursal" name="id_sucursal">
+                        <input type="hidden" id="id_store" name="id_store">
 
                         <div class="mb-3">
                             <label for="edit-name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="edit-name" name="name" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="edit_code_sucursal" class="form-label">Code Sucursal</label>
-                            <input type="text" class="form-control" id="edit_code_sucursal" name="code_sucursal">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="edit_comision_sucursal" class="form-label">Fee</label>
-                            <input type="text" class="form-control" id="edit_comision_sucursal" name="comision_sucursal">
+                            <input type="text" class="form-control" id="edit-name" name="name">
                         </div>
                     </div>
-
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="guardarCambios">Save</button>
@@ -328,36 +285,24 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             </div>
         </div>
     </div>
-
-    <!-- Modal Add Sucursal -->
-    <div class="modal fade" id="modalAddSucursal" tabindex="-1" aria-labelledby="modalAddSucursalLabel" aria-hidden="true">
+    <!-- Modal Add Store -->
+    <div class="modal fade" id="modalAddStore" tabindex="-1" aria-labelledby="modalAddStoreLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form action="addSucursal.php" method="POST">
+                <form action="addStore.php" method="POST">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalAddSucursalLabel">Add Store</h5>
+                        <h5 class="modal-title" id="modalAddStoreLabel">Add Store</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body">
                         <!-- Aquí tus campos del formulario -->
                         <div class="mb-3">
-                            <label for="store_name" class="form-label">Select Store</label>
-                            <select name="id_store" class="form-control" id="id_store" required>
-                                <?php foreach ($stores as $store) { ?>
-                                    <option value="<?= $store['id_store'] ?>"><?= $store['store_name'] ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="code_sucursal" class="form-label">Sucursal Code</label>
-                            <input type="text" class="form-control" id="code_sucursal" name="code_sucursal" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="comision_sucursal" class="form-label">Fee</label>
-                            <input type="number" step="0.01" min="0" class="form-control" id="comision_sucursal" name="comision_sucursal" >
+                            <label for="store_name" class="form-label">Store Name</label>
+                            <input type="text" class="form-control" id="store_name" name="store_name" required>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-success">Save Store</button>
@@ -366,6 +311,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             </div>
         </div>
     </div>
+
 
     <center>
         <br /><a href="../access.php"><img src='../../img/atras.png' width="72" height="72" title="Regresar" /></a>
@@ -378,12 +324,8 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
 
             modalEdicion.addEventListener("show.bs.modal", function(event) {
                 let button = event.relatedTarget; // Botón que abrió el modal
-                document.getElementById("id_sucursal").value = button.getAttribute("data-id_sucursal");
-
+                document.getElementById("id_store").value = button.getAttribute("data-id_store");
                 document.getElementById("edit-name").value = button.getAttribute("data-name");
-                document.getElementById("edit_code_sucursal").value = button.getAttribute("data-code_sucursal");
-                document.getElementById("edit_comision_sucursal").value = button.getAttribute("data-comision_sucursal");
-
 
             });
 
