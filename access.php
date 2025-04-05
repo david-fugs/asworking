@@ -54,10 +54,8 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
           <li class="item">
             <div href="#" class="nav_link submenu_item">
               <span class="navlink_icon">
-                <i class="fa-solid fa-shop"></i>
-                <!--<i class="bx bx-home-alt"></i>-->
+              <i class="fa-solid fa-shirt"></i>
               </span>
-
               <span class="navlink">ITEMS</span>
               <i class="bx bx-chevron-right arrow-left"></i>
             </div>
@@ -67,15 +65,26 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
               <a href="code/items/showitems.php" class="nav_link sublink">Show Items</a>
               <a href="code/items/addrecord.php" class="nav_link sublink">Record</a>
               <a href="code/items/showrecord.php" class="nav_link sublink">Show Record</a>
-              <!--<a href="code/process/addConcilia1.php" class="nav_link sublink">Conciliaciones</a>-->
-
-              <!--<a href="#" class="nav_link sublink">Barrios</a>
-              <a href="#" class="nav_link sublink">Operadores</a>-->
             </ul>
           </li>
 
-          <!-- duplicate this li tag if you want to add or remove  navlink with submenu -->
-          <!-- start -->
+
+          <li class="item">
+            <div href="#" class="nav_link submenu_item">
+              <span class="navlink_icon">
+                <i class="fa-solid fa-shop"></i>
+                <!--<i class="bx bx-home-alt"></i>-->
+              </span>
+
+              <span class="navlink">SUCURSAL</span>
+              <i class="bx bx-chevron-right arrow-left"></i>
+            </div>
+
+            <ul class="menu_items submenu">
+              <a href="code/stores/seeSucursal.php" class="nav_link sublink">See Sucursal</a>
+            </ul>
+          </li>
+
           <li class="item">
             <div href="#" class="nav_link submenu_item">
               <span class="navlink_icon">
