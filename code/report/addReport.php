@@ -75,6 +75,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
         .top-bar .center {
             flex-grow: 1;
             text-align: center;
+            margin-left: 300px;
             
         }
 
@@ -148,13 +149,20 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                 <img src='../../img/atras.png' width="72" height="72" title="Back">
             </a>
         </div>
+        <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
+    <a href="seeReport.php" class="btn-add-store">
+        See Daily Report
+    </a>
+</div>
     </div>
     <?php
     date_default_timezone_set("America/Bogota");
     include("../../conexion.php");
     require_once("../../zebra.php");
     //traigo las tiendas para el select del modal
-    $sql_store = "SELECT * FROM store ORDER BY store_name ASC";
+    $sql_store = "SELECT * FROM store 
+    JOIN sucursal ON store.id_store = sucursal.id_store 
+    ORDER BY store_name ASC";
     $result_store = $mysqli->query($sql_store);
     if (!$result_store) {
         die("Error en la consulta: " . $mysqli->error);
@@ -248,7 +256,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                             <select class="form-select form-select-sm" id="sucursal_report" name="sucursal_report" required>
                                 <option value="">Select Sucursal</option>
                                 <?php foreach ($stores as $store) : ?>
-                                    <option value="<?= $store['id_store'] ?>"><?= $store['store_name'] ?></option>
+                                    <option value="<?= $store['id_sucursal'] ?>"><?= $store['code_sucursal'] ?></option>
                                 <?php endforeach; ?>
                                 </select>
                         </div>

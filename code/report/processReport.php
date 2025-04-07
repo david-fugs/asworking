@@ -36,18 +36,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     )";    // Ejecutar consulta
     if ($mysqli->query($query)) {
         echo "<script>
-            alert('Inser successful');
-            window.location.href = 'seeReport.php';
+            alert('Insert successful');
+            window.location.href = 'addReport.php';
           </script>";
     } else {
         echo "<script>
             alert('Error  " . $mysqli->error . "');
-            window.location.href = 'seeReport.php';
+            window.location.href = 'addReport.php';
           </script>";
     }
 } else {
     echo "<script>
             alert('Method not valid');
-            window.location.href = 'seeReport.php';
+            window.location.href = 'addReport.php';
           </script>";
 }
