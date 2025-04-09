@@ -67,25 +67,44 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
               <a href="code/items/showrecord.php" class="nav_link sublink">Show Record</a>
             </ul>
           </li>
-
-
           <li class="item">
             <div href="#" class="nav_link submenu_item">
               <span class="navlink_icon">
                 <i class="fa-solid fa-shop"></i>
                 <!--<i class="bx bx-home-alt"></i>-->
               </span>
-
+              <span class="navlink">STORE</span>
+              <i class="bx bx-chevron-right arrow-left"></i>
+            </div>
+            <ul class="menu_items submenu">
+              <a href="code/stores/seeStore.php" class="nav_link sublink">See Store</a>
+            </ul>
+          </li>
+          <li class="item">
+            <div href="#" class="nav_link submenu_item">
+              <span class="navlink_icon">
+                <i class="fa-solid fa-store"></i>
+              </span>
               <span class="navlink">SUCURSAL</span>
               <i class="bx bx-chevron-right arrow-left"></i>
             </div>
-
             <ul class="menu_items submenu">
               <a href="code/stores/seeSucursal.php" class="nav_link sublink">See Sucursal</a>
             </ul>
           </li>
 
-
+          <li class="item">
+            <div href="#" class="nav_link submenu_item">
+              <span class="navlink_icon">
+                <i class="fa-solid fa-file-lines"></i> </span>
+              <span class="navlink">DAILY REPORT</span>
+              <i class="bx bx-chevron-right arrow-left"></i>
+            </div>
+            <ul class="menu_items submenu">
+              <a href="code/report/addReport.php" class="nav_link sublink">Daily Report</a>
+              <a href="code/report/seeReport.php" class="nav_link sublink">See Report</a>
+            </ul>
+          </li>
           <li class="item">
             <div href="#" class="nav_link submenu_item">
               <span class="navlink_icon">
