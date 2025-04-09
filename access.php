@@ -54,7 +54,7 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
           <li class="item">
             <div href="#" class="nav_link submenu_item">
               <span class="navlink_icon">
-              <i class="fa-solid fa-shirt"></i>
+                <i class="fa-solid fa-shirt"></i>
               </span>
               <span class="navlink">ITEMS</span>
               <i class="bx bx-chevron-right arrow-left"></i>
@@ -93,12 +93,12 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
                 <!--<i class="bx bx-home-alt"></i>-->
               </span>
 
-              <span class="navlink">MENU BOMBU</span>
+              <span class="navlink">SELLS</span>
               <i class="bx bx-chevron-right arrow-left"></i>
             </div>
 
             <ul class="menu_items submenu">
-              <a href="code/stores/seeSucursal.php" class="nav_link sublink">See Sucursal</a>
+              <a href="code/sells/sell.php" class="nav_link sublink">Sells</a>
             </ul>
           </li>
 
