@@ -57,9 +57,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
     <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="../items/css/styles.css">
     <link rel="stylesheet" type="text/css" href="../items/css/estilos2024.css">
-    <link href="../../../fontawesome/css/all.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/fed2435e21.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -76,7 +74,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             flex-grow: 1;
             text-align: center;
             margin-left: 300px;
-            
+
         }
 
         .btn-add-store {
@@ -150,10 +148,10 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             </a>
         </div>
         <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
-    <a href="seeReport.php" class="btn-add-store">
-        See Daily Report
-    </a>
-</div>
+            <a href="seeReport.php" class="btn-add-store">
+                See Daily Report
+            </a>
+        </div>
     </div>
     <?php
     date_default_timezone_set("America/Bogota");
@@ -258,7 +256,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                 <?php foreach ($stores as $store) : ?>
                                     <option value="<?= $store['id_sucursal'] ?>"><?= $store['code_sucursal'] ?></option>
                                 <?php endforeach; ?>
-                                </select>
+                            </select>
                         </div>
 
                         <div class="col-12">
@@ -273,6 +271,20 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             </div>
         </div>
     </div>
+    <!-- modal opciones -->
+    <div class="modal fade" id="modalOpcionesUPC" tabindex="-1" aria-labelledby="modalOpcionesUPCLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select the correct reference</h5>
+                </div>
+                <div class="modal-body" id="contenedorOpcionesUPC">
+                    <!-- Aquí se insertan las opciones -->
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <center>
         <br /><a href="../access.php"><img src='../../img/atras.png' width="72" height="72" title="Regresar" /></a>
@@ -294,18 +306,12 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                 },
                 success: function(data) {
                     if (data.success) {
-                        $('#quantity_report').val(data.quantity_inventory);
-                        $('#brand_report').val(data.brand_item);
-                        $('#item_report').val(data.item);
-                        $('#color_report').val(data.color_item);
-                        $('#size_report').val(data.size_item);
-                        $('#category_report').val(data.category_item);
-                        $('#weight_report').val(data.weight_item);
-                        $('#inventory_report').val(data.inventory_item);
-                        $('#sku_report').val(data.sku);
-                        $('#vendor_report').val(data.ref_item);
-
-                        alert("✅ UPC Found.");
+                        if (data.multiple) {
+                            mostrarOpcionesUPC(data.data);
+                        } else {
+                            llenarFormulario(data.data[0]);
+                            alert("✅ UPC Found.");
+                        }
                     } else {
                         limpiarCampos();
                         alert("❌ UPC not found.");
@@ -315,6 +321,50 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                     alert("⚠️ Error .");
                 }
             });
+        }
+
+        function llenarFormulario(item) {
+            $('#quantity_report').val(item.quantity_inventory);
+            $('#brand_report').val(item.brand_item);
+            $('#item_report').val(item.item);
+            $('#color_report').val(item.color_item);
+            $('#size_report').val(item.size_item);
+            $('#category_report').val(item.category_item);
+            $('#weight_report').val(item.weight_item);
+            $('#inventory_report').val(item.inventory_item);
+            $('#sku_report').val(item.sku);
+            $('#vendor_report').val(item.ref_item);
+        }
+
+        function mostrarOpcionesUPC(opciones) {
+            let contenedor = $('#contenedorOpcionesUPC');
+            contenedor.empty();
+
+            opciones.forEach((item, index) => {
+                contenedor.append(`
+        <div class="card mb-2 shadow-sm border-0">
+            <div class="card-body p-2">
+                <button 
+                    class="btn btn-light text-start w-100 border rounded d-flex flex-column align-items-start" 
+                    onclick='seleccionarUPC(${JSON.stringify(item)})'
+                >
+                    <strong class="text-primary">${item.item}</strong>
+                    <small class="text-muted">
+                        Color: ${item.color_item} | Size ${item.size_item} | Ref: ${item.ref_item}
+                    </small>
+                </button>
+            </div>
+        </div>
+    `);
+            });
+
+            $('#modalOpcionesUPC').modal('show');
+        }
+
+        function seleccionarUPC(item) {
+            $('#modalOpcionesUPC').modal('hide');
+            llenarFormulario(item);
+            alert("✅ UPC selected correctly.");
         }
 
         function limpiarCampos() {
