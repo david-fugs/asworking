@@ -46,7 +46,7 @@ td {
 .form-inline-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 20px;
   align-items: center;
   margin-top: 10px;
 }
@@ -65,4 +65,10 @@ td {
   white-space: nowrap;
   padding: 8px 16px;
 }
+/*
+*/
 
+.form_firstline {
+  display: flex;
+      gap: 30px;
+  }

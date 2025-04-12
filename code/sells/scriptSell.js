@@ -10,9 +10,12 @@ document.addEventListener("DOMContentLoaded", function () {
   const bodyTable = document.querySelector("#tableItems tbody");
   const brandItem = document.getElementById("brandItemInput");
   const sellDateInput = document.getElementById("sellDate");
-  const comision = document.getElementById("comisionItem");
+  const comisionInput = document.getElementById("comisionItem");
   const receivedShipping = document.getElementById("receivedShipping");
   const payedShipping = document.getElementById("payedShipping");
+
+  const today = new Date().toISOString().split("T")[0];
+  sellDateInput.value = today;
 
   // Cargar sucursales al cambiar la tienda
   tiendaSelect.addEventListener("change", function () {
@@ -40,6 +43,9 @@ document.addEventListener("DOMContentLoaded", function () {
   sucursalSelect.addEventListener("change", function () {
     const selectedOption = this.options[this.selectedIndex];
     const comision = selectedOption.getAttribute("data-comision") || "0";
+    const cargo_fijo = selectedOption.getAttribute("data-cargo") || "0";
+    //aca se hara la operacion para la comision
+    //console.log("Comisión:", comision, "Cargo fijo:", cargo_fijo);
     document.getElementById("comisionItem").value = comision;
   });
 
@@ -73,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
     upcInput.value = "";
     quantityInput.value = "";
     refInput.value = "";
-    comision.value = "";
+    comisionInput.value = "";
     receivedShipping.value = "";
     payedShipping.value = "";
 
@@ -115,7 +121,16 @@ document.addEventListener("DOMContentLoaded", function () {
   quantityInput.addEventListener("input", () => {
     const quantity = parseFloat(quantityInput.value) || 0;
     const price = parseFloat(priceInput.value.replace("$", "")) || 0;
-    const total = quantity * price;
+    const comision = parseFloat(comisionInput.value) || 0;
+    const total = quantity * price + comision;
+    refInput.value = `$${total.toFixed(2)}`;
+  });
+
+  comisionInput.addEventListener("input", () => {
+    const quantity = parseFloat(quantityInput.value) || 0;
+    const price = parseFloat(priceInput.value.replace("$", "")) || 0;
+    const comision = parseFloat(comisionInput.value) || 0;
+    const total = quantity * price + comision;
     refInput.value = `$${total.toFixed(2)}`;
   });
 
@@ -148,6 +163,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const comision =
       parseFloat(document.getElementById("comisionItem").value) || 0;
     const date = sellDateInput.value;
+
+    if (!date) {
+      alert("⚠️ Debes ingresar una fecha para poder continuar.");
+      return; // No hace nada más si no hay fecha
+    }
 
     if (nombre !== "" && upc && quantity > 0 && tienda && sucursal) {
       const fila = document.createElement("tr");
@@ -192,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("comisionItem").value = "";
       upcInput.focus();
     } else {
-      alert("Verifica que todos los datos estén completos y correctos.");
+      alert("Verifica que todos aatos estén completos y correctos.");
     }
   });
 
@@ -222,10 +242,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const id_sucursal = parseInt(
           row.querySelector(".id_sucursal")?.dataset.id || "0"
         );
+        const comision = parseFloat(
+          row.querySelector(".comision")?.textContent.replace("$", "").trim() ||
+            "0"
+        );
         const total_item = parseFloat(
           row.querySelector(".total_item")?.textContent || "0"
         );
 
+        const date = row.querySelector(".fecha")?.textContent || "";
         ventas.push({
           upc_item,
           quantity,
@@ -233,7 +258,9 @@ document.addEventListener("DOMContentLoaded", function () {
           payed_shipping,
           id_store,
           id_sucursal,
+          comision,
           total_item,
+          date,
         });
       });
 

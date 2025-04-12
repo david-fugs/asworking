@@ -7,6 +7,7 @@ header("Content-Type: application/json");
 // Obtener datos JSON desde fetch
 $data = json_decode(file_get_contents("php://input"), true);
 
+
 // Validación básica
 if (!isset($data['ventas']) || !is_array($data['ventas']) || count($data['ventas']) === 0) {
   http_response_code(400);
@@ -31,9 +32,10 @@ $sql = "INSERT INTO sell (
     payed_shipping, 
     id_store, 
     id_sucursal, 
+    comision_item,
     total_item, 
     date
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $mysqli->prepare($sql);
 
@@ -45,16 +47,20 @@ if (!$stmt) {
 
 // Insertar cada venta
 foreach ($data['ventas'] as $venta) {
+
   $upc_item = $venta['upc_item'];
   $quantity = (int) $venta['quantity'];
   $received_shipping = isset($venta['received_shipping']) ? (float) $venta['received_shipping'] : 0;
   $payed_shipping = isset($venta['payed_shipping']) ? (int) $venta['payed_shipping'] : 0;
   $id_store = isset($venta['id_store']) ? (int) $venta['id_store'] : 0;
   $id_sucursal = isset($venta['id_sucursal']) ? (int) $venta['id_sucursal'] : 0;
+  $comision_item = isset($venta['comision']) ? (float) $venta['comision'] : 0;
   $total_item = isset($venta['total_item']) ? (float) $venta['total_item'] : 0;
 
+
+  // Ahora, vincula los parámetros y ejecuta la consulta
   $stmt->bind_param(
-    "isidiiids",
+    "isidiiidds",
     $sell_order,
     $upc_item,
     $quantity,
@@ -62,6 +68,7 @@ foreach ($data['ventas'] as $venta) {
     $payed_shipping,
     $id_store,
     $id_sucursal,
+    $comision_item,
     $total_item,
     $sell_date
   );
@@ -77,4 +84,5 @@ foreach ($data['ventas'] as $venta) {
 $stmt->close();
 $mysqli->close();
 
+// Respuesta final
 echo json_encode(["success" => true, "message" => "Ventas guardadas exitosamente.", "sell_order" => $sell_order]);

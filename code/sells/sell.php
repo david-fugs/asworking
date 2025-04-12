@@ -43,20 +43,44 @@ $resultTiendas = $mysqli->query($queryTiendas);
   <div class="flex">
     <div class="box">
       <input type="date" name="sellDate" id="sellDate" placeholder="Date">
-      <form class="form">
-        <input name="upc" type="text" id="upc" placeholder="UPC">
 
-        <input name="item_name" id="item_name" type="text" placeholder="Item Name">
-        <input name="quantitySell" type="number" id="quantitySell" placeholder="Quantity">
-        <input name="priceItem" type="text" id="priceItem" placeholder="Price Item">
-        <input type="text" id="brandItemInput" name="brand" placeholder="Brand">
-        <input type="hidden" name="comisionItem" id="comisionItem">
-        <input type="number" name="receivedShipping" id="receivedShipping" placeholder="Received Shipping">
-        <input type="number" name="payedShipping" id="payedShipping" placeholder="Payed Shipping">
+      <form class="form">
+        <div class="form_firstline">
+          <div class="input-div">
+            <label for="upc">UPC</label>
+            <div><input name="upc" type="text" id="upc"></div>
+          </div>
+
+          <div class="input-div">
+            <label for="item_name">Item Name</label>
+            <div><input name="item_name" id="item_name" type="text"></div>
+          </div>
+
+          <div class="input-div">
+            <label for="priceItem">Price Item</label>
+            <div><input name="priceItem" type="text" id="priceItem"></div>
+          </div>
+
+          <div class="input-div">
+            <label for="brandItemInput">Brand</label>
+            <div><input type="text" id="brandItemInput" name="brand"></div>
+          </div>
+
+          <div class="input-div">
+            <label for="receivedShipping">Received Shipping</label>
+            <div><input type="number" name="receivedShipping" id="receivedShipping"></div>
+          </div>
+
+          <div class="input-div">
+            <label for="payedShipping">Payed Shipping</label>
+            <div><input type="number" name="payedShipping" id="payedShipping"></div>
+          </div>
+        </div>
 
         <div class="form-inline-group">
+          <label for="tienda">Store</label>
           <select id="tienda" name="id_store" class="form-select custom-inline">
-            <option value="">-- Selecciona una tienda --</option>
+            <option value="">--Select a store --</option>
             <?php
             while ($tienda = $resultTiendas->fetch_assoc()) {
               echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
@@ -64,49 +88,73 @@ $resultTiendas = $mysqli->query($queryTiendas);
             ?>
           </select>
 
+          <label for="sucursal">Sucursal</label>
           <select name="sucursal" id="sucursal" class="form-select custom-inline">
-            <option value="">-- Primero selecciona una tienda --</option>
+            <option value="">-- First select a store --</option>
           </select>
 
-          <!-- Campo solo lectura para mostrar el total calculado -->
-          <input name="ref" type="text" id="UnitTotal" placeholder="Unit Total" readonly class="custom-inline">
+          <div class="input-div">
+            <label for="comisionItem">Commission Shipping</label>
+            <div><input type="number" name="comisionItem" id="comisionItem" step="0.01" min="0"></div>
+          </div>
 
-          <button type="submit" id="validateButton" class="btn btn-success custom-inline">Validar</button>
+          <div class="input-div">
+            <label for="comisionItem">Quantity</label>
+            <div><input type="number" name="quantitySell" id="quantitySell" step="0.01" min="0"></div>
+          </div>
+
+          <div class="input-div">
+            <label for="UnitTotal">Unit Total</label>
+            <div><input type="number" name="quantitySell" id="quantitySell" step="0.01" min="0"></div>
+          </div>
+
+          <label for="UnitTotal">Unit Total</label>
+          <input name="ref" type="text" id="UnitTotal" readonly class="custom-inline">
+
+          <button type="submit" id="validateButton" class="btn btn-success custom-inline">Validate</button>
         </div>
+
+
       </form>
-
-
-      <table id="tableItems" border="1"
-        style="width: 90%; margin: 20px auto; text-align: center; border-collapse: collapse;">
-        <thead style="background-color:rgb(10, 9, 14); color: white;">
-          <tr>
-            <th>ITEM</th>
-            <th>UPC</th>
-            <th>CANTIDAD</th>
-            <th>TIENDA</th>
-            <th>CODIGO-Sucursal</th>
-            <th>BRAND</th>
-            <th>COMISIÓN</th>
-            <th>FECHA</th>
-            <th>PAGO RECIVIDO</th>
-            <th>PAGO ENVIADO</th>
-            <th>COSTO Unitario</th>
-            <th>TOTAL ARTICULO</th>
-            <th>ELIMINAR</th>
-
+      <div class="container mt-5">
+        <table id="tableItems" class="table table-striped"
+          style="width: 90%; margin: 20px auto; text-align: center; border-collapse: collapse;">
+          <thead style="background-color:rgb(10, 9, 14); color: white;">
+            <tr>
+              <th>ITEM</th>
+              <th>UPC</th>
+              <th>Quantity</th>
+              <th>Store</th>
+              <th>Sucursal Code</th>
+              <th>BRAND</th>
+              <th>COMISION</th>
+              <th>DATE</th>
+              <th>RECEIVED SHIPPING</th>
+              <th>PAYED SHIPPING</th>
+              <th>ITEM COST</th>
+              <th>TOTAL ITEM</th>
+              <th>DELETE</th>
+            </tr>
+          </thead>
+          <tbody id="bodyTable">
+            <!-- Aquí se agregarán las filas dinámicamente con JavaScript -->
+          </tbody>
+          <!--<tfoot>
+          <tr id="totalRow">
+            <td colspan="11">Total</td>
+            <td id="totalAmount">0</td>
+            <td></td>
           </tr>
-        </thead>
-        <tbody id="bodyTable">
-          <!-- Aquí se agregarán las filas dinámicamente con JavaScript -->
-        </tbody>
-      </table>
-      <button type="button" id="saveSellButton">Save Sell</button>
+       // </tfoot>-->
+        </table>
+      </div>
+      <div class="text-end mt-3" style="width: 90%; margin: 0 auto;">
+        <button type="button" id="saveSellButton" class="btn btn-success custom-inline">Save Sell</button>
+      </div>
+
     </div>
   </div>
-  <center>
-    <br /><a href="../access.php"><img src='../../img/atras.png' width="72" height="72" title="Regresar" /></a>
-  </center>
-
+  <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
   <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
   <script src="scriptSell.js"></script>
 

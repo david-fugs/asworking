@@ -117,7 +117,8 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
             </div>
 
             <ul class="menu_items submenu">
-              <a href="code/sells/sell.php" class="nav_link sublink">Sells</a>
+              <a href="code/sells/sell.php" class="nav_link sublink">Sell</a>
+              <a href="code/sells/seesells.php" class="nav_link sublink">See Sells</a>
             </ul>
           </li>
 
