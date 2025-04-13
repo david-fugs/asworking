@@ -34,91 +34,110 @@ $resultTiendas = $mysqli->query($queryTiendas);
     crossorigin="anonymous"></script>
 </head>
 
-<body>
-  <center style="margin-top: 20px;">
-    <img src='../../img/logo.png' width="300" height="212" class="responsive">
-  </center>
-  <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i
-        class="fa-solid fa-file-signature"></i> SELLS</b></h1>
+<body class="my-page-container">
+  <div class="flex">
+    <div class="flex">
+      <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
+    </div>
+    <div>
+      <center style="margin-top: 20px;">
+        <img src='../../img/logo.png' width="300" height="212" class="responsive">
+      </center>
+
+      <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i
+            class="fa-solid fa-file-signature"></i> SELLS</b></h1>
+
+    </div>
+
+  </div>
   <div class="flex">
     <div class="box">
+
       <input type="date" name="sellDate" id="sellDate" placeholder="Date">
 
       <form class="form">
-        <div class="form_firstline">
-          <div class="input-div">
-            <label for="upc">UPC</label>
-            <div><input name="upc" type="text" id="upc"></div>
-          </div>
+        <div class="container">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label for="upc" class="form-label">UPC</label>
+              <input name="upc" type="text" id="upc" class="form-control">
+            </div>
 
-          <div class="input-div">
-            <label for="item_name">Item Name</label>
-            <div><input name="item_name" id="item_name" type="text"></div>
-          </div>
+            <div class="col-md-3">
+              <label for="item_name" class="form-label">Item Name</label>
+              <input name="item_name" id="item_name" type="text" class="form-control">
+            </div>
 
-          <div class="input-div">
-            <label for="priceItem">Price Item</label>
-            <div><input name="priceItem" type="text" id="priceItem"></div>
-          </div>
+            <div class="col-md-3">
+              <label for="priceItem" class="form-label">Price Item</label>
+              <input name="priceItem" type="text" id="priceItem" class="form-control">
+            </div>
 
-          <div class="input-div">
-            <label for="brandItemInput">Brand</label>
-            <div><input type="text" id="brandItemInput" name="brand"></div>
-          </div>
+            <div class="col-md-3">
+              <label for="brandItemInput" class="form-label">Brand</label>
+              <input type="text" id="brandItemInput" name="brand" class="form-control">
+            </div>
 
-          <div class="input-div">
-            <label for="receivedShipping">Received Shipping</label>
-            <div><input type="number" name="receivedShipping" id="receivedShipping"></div>
-          </div>
+            <div class="col-md-3">
+              <label for="receivedShipping" class="form-label">Received Shipping</label>
+              <input type="number" name="receivedShipping" id="receivedShipping" class="form-control">
+            </div>
 
-          <div class="input-div">
-            <label for="payedShipping">Payed Shipping</label>
-            <div><input type="number" name="payedShipping" id="payedShipping"></div>
+            <div class="col-md-3">
+              <label for="payedShipping" class="form-label">Payed Shipping</label>
+              <input type="number" name="payedShipping" id="payedShipping" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+              <label for="tienda" class="form-label">Store</label>
+              <select id="tienda" name="id_store" class="form-select">
+                <option value="">--Select a store--</option>
+                <?php
+                $resultTiendas->data_seek(0); // Reinicia el puntero del resultado
+                while ($tienda = $resultTiendas->fetch_assoc()) {
+                  echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
+                }
+                ?>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="sucursal" class="form-label">Sucursal</label>
+              <select name="sucursal" id="sucursal" class="form-select">
+                <option value="">--First select a store--</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="comisionItem" class="form-label">Commission Shipping</label>
+              <input type="number" name="comisionItem" id="comisionItem" step="0.01" min="0" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+              <label for="quantitySell" class="form-label">Quantity</label>
+              <input type="number" name="quantitySell" id="quantitySell" step="0.01" min="0" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+              <label for="unitTotal" class="form-label">Unit Total</label>
+              <input type="number" name="unitTotal" id="unitTotal" step="0.01" min="0" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+              <label for="UnitTotal" class="form-label">Unit Total Ref</label>
+              <input name="ref" type="text" id="UnitTotal" readonly class="form-control">
+            </div>
+
+            <div class="col-12 text-end mt-3">
+              <button type="submit" id="validateButton" class="btn btn-success">Validate</button>
+            </div>
           </div>
         </div>
-
-        <div class="form-inline-group">
-          <label for="tienda">Store</label>
-          <select id="tienda" name="id_store" class="form-select custom-inline">
-            <option value="">--Select a store --</option>
-            <?php
-            while ($tienda = $resultTiendas->fetch_assoc()) {
-              echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
-            }
-            ?>
-          </select>
-
-          <label for="sucursal">Sucursal</label>
-          <select name="sucursal" id="sucursal" class="form-select custom-inline">
-            <option value="">-- First select a store --</option>
-          </select>
-
-          <div class="input-div">
-            <label for="comisionItem">Commission Shipping</label>
-            <div><input type="number" name="comisionItem" id="comisionItem" step="0.01" min="0"></div>
-          </div>
-
-          <div class="input-div">
-            <label for="comisionItem">Quantity</label>
-            <div><input type="number" name="quantitySell" id="quantitySell" step="0.01" min="0"></div>
-          </div>
-
-          <div class="input-div">
-            <label for="UnitTotal">Unit Total</label>
-            <div><input type="number" name="quantitySell" id="quantitySell" step="0.01" min="0"></div>
-          </div>
-
-          <label for="UnitTotal">Unit Total</label>
-          <input name="ref" type="text" id="UnitTotal" readonly class="custom-inline">
-
-          <button type="submit" id="validateButton" class="btn btn-success custom-inline">Validate</button>
-        </div>
-
-
       </form>
-      <div class="container mt-5">
+
+      <div class="container mt-4">
         <table id="tableItems" class="table table-striped"
-          style="width: 90%; margin: 20px auto; text-align: center; border-collapse: collapse;">
+          style="width: 100%; margin: 20px auto; text-align: center; border-collapse: collapse;">
           <thead style="background-color:rgb(10, 9, 14); color: white;">
             <tr>
               <th>ITEM</th>
@@ -154,7 +173,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
     </div>
   </div>
-  <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
+
   <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
   <script src="scriptSell.js"></script>
 

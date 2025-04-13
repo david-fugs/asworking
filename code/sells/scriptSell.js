@@ -297,4 +297,5 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Error al enviar las ventas: " + error.message);
       }
     });
+    
 });

@@ -1,9 +1,10 @@
 <?php
-session_start();
+
 include("../../conexion.php");
 
 // Consulta SQL para obtener los datos
 $query = "SELECT 
+            id_sell,
             sell_order,
             date,
             upc_item,
@@ -12,6 +13,7 @@ $query = "SELECT
             store_name,
             code_sucursal,
             comision_item,
+            quantity,
             total_item
           FROM sell 
           LEFT JOIN store  ON store.id_store = sell.id_store
@@ -32,7 +34,25 @@ if ($result->num_rows > 0) {
     echo "<td>" . $row['store_name'] . "</td>";
     echo "<td>" . $row['code_sucursal'] . "</td>";
     echo "<td>" . $row['comision_item'] . "</td>";
+    echo "<td>" . $row['quantity'] . "</td>";
     echo "<td>" . $row['total_item'] . "</td>";
+    echo "<td>
+    <button class='edit-btn'
+      data-id='" . $row['id_sell'] . "'
+      data-sell_order='" . $row['sell_order'] . "'
+      data-date='" . $row['date'] . "'
+      data-upc='" . $row['upc_item'] . "'
+      data-received_shipping='" . $row['received_shipping'] . "'
+      data-payed_shipping='" . $row['payed_shipping'] . "'
+      data-store='" . $row['store_name'] . "'
+      data-sucursal='" . $row['code_sucursal'] . "'
+      data-comision='" . $row['comision_item'] . "'
+      data-quantity='" . $row['quantity'] . "'
+      data-total='" . $row['total_item'] . "'>
+      ✏️
+    </button>
+    <button class='delete-btn' data-id='" . $row['id_sell'] . "'>🗑️</button>
+  </td>";
     echo "</tr>";
   }
 } else {

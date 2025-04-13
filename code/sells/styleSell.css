@@ -72,3 +72,28 @@ td {
   display: flex;
       gap: 30px;
   }
+
+  .my-page-container {
+    overflow-x: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Asegura que el formulario no desborde */
+.form_firstline, .form-inline-group {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  max-width: 100%;
+}
+
+/* Que los inputs no se pasen del ancho */
+.input-div {
+  min-width: 150px;
+  max-width: 220px;
+  flex: 1 1 auto;
+}
+
+/* Permite scroll si aún se pasa ligeramente */
+body {
+  overflow-x: auto;
+}
