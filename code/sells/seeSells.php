@@ -13,7 +13,6 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
 
 $queryTiendas = "SELECT id_store, store_name FROM store ORDER BY store_name ASC";
 $resultTiendas = $mysqli->query($queryTiendas);
-
 ?>
 
 <!DOCTYPE html>
@@ -87,89 +86,90 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
   <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
 
-  <!-- Modal de Edición -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content p-4">
+  <!-- Modal de edición -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl"> <!-- Modal extra ancho -->
+      <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Editar Venta</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title" id="editModalLabel">Editar Venta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-
         <div class="modal-body">
           <form id="editForm">
-            <input type="hidden" id="edit-id-sell" name="id_sell">
+            <!-- Input oculto para el ID (no visible pero se envía) -->
+            <input type="hidden" id="edit-id-sell" name="id">
+            <input type="hidden" id="edit-store-id" name="store_id">
+            <input type="hidden" id="edit-sucursal-id" name="sucursal_id">
 
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <label class="form-label">Sell Order</label>
-                <input type="text" class="form-control" id="edit-sell-order" name="sell_order" readonly>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Fecha</label>
-                <input type="date" class="form-control" id="edit-date" name="date">
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">UPC</label>
-                <input type="text" class="form-control" id="edit-upc" name="upc_item">
-              </div>
-            </div>
 
-            <div class="row mb-3">
+            <!-- Fila 1: 3 columnas -->
+            <div class="row g-3 mb-3">
               <div class="col-md-4">
-                <label class="form-label">Comisión</label>
-                <input type="text" class="form-control" id="edit-comision" name="comision_item">
+                <label for="edit-sell-order" class="form-label">Sell Order</label>
+                <input type="text" class="form-control" id="edit-sell-order" required>
               </div>
               <div class="col-md-4">
-                <label class="form-label">Shipping Recibido</label>
-                <input type="text" class="form-control" id="edit-rec-shipping" name="received_shipping">
+                <label for="edit-date" class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="edit-date">
               </div>
               <div class="col-md-4">
-                <label class="form-label">Shipping Pagado</label>
-                <input type="text" class="form-control" id="edit-pay-shipping" name="payed_shipping">
+                <label for="edit-upc" class="form-label">UPC</label>
+                <input type="text" class="form-control" id="edit-upc">
               </div>
             </div>
 
-            <div class="col-md-4">
-              <label class="form-label">Tienda</label>
-              <select class="form-control" id="edit-store" name="store_name">
-                <option value="">Seleccione una tienda</option>
-                <?php
-                while ($tienda = $resultTiendas->fetch_assoc()) {
-                  echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
-                }
-                ?>
-              </select>
+            <!-- Fila 2: 3 columnas -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label for="edit-comision" class="form-label">Comisión</label>
+                <input type="text" class="form-control" id="edit-comision">
+              </div>
+              <div class="col-md-4">
+                <label for="edit-rec-shipping" class="form-label">Envío recibido</label>
+                <input type="text" class="form-control" id="edit-rec-shipping">
+              </div>
+              <div class="col-md-4">
+                <label for="edit-pay-shipping" class="form-label">Envío pagado</label>
+                <input type="text" class="form-control" id="edit-pay-shipping">
+              </div>
             </div>
 
-            <div class="col-md-4">
-              <label class="form-label">Sucursal</label>
-              <input type="text" class="form-control" id="edit-sucursal" name="code_sucursal">
+            <!-- Fila 3: 3 columnas -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label for="edit-store" class="form-label">Tienda</label>
+                <input type="text" class="form-control" id="edit-store">
+              </div>
+              <div class="col-md-4">
+                <label for="edit-sucursal" class="form-label">Sucursal</label>
+                <input type="text" class="form-control" id="edit-sucursal">
+              </div>
+              <div class="col-md-4">
+                <label for="edit-quantity" class="form-label">Cantidad</label>
+                <input type="number" class="form-control" id="edit-quantity">
+              </div>
             </div>
-            <div class="col-md-4">
-              <label class="form-label">Cantidad</label>
-              <input type="number" class="form-control" id="edit-quantity" name="quantity">
+
+            <!-- Fila 4: 1 campo + espacio para botones -->
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label for="edit-total-item" class="form-label">Total</label>
+                <input type="text" class="form-control" id="edit-total-item">
+              </div>
+              <!-- Columnas vacías para mantener alineación -->
+              <div class="col-md-4"></div>
+              <div class="col-md-4"></div>
             </div>
+          </form>
         </div>
-
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <label class="form-label">Total Item</label>
-            <input type="text" class="form-control" id="edit-total-item" name="total_item">
-          </div>
-        </div>
-
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Guardar cambios</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-primary" id="saveEdit">Guardar cambios</button>
         </div>
-        </form>
       </div>
     </div>
   </div>
   </div>
-
-
 
   <script src="scriptSeeSells.js"></script>
 </body>

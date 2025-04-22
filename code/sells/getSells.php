@@ -11,6 +11,8 @@ $query = "SELECT
             received_shipping,
             payed_shipping,
             store_name,
+            sell.id_store,
+            sell.id_sucursal,
             code_sucursal,
             comision_item,
             quantity,
@@ -37,22 +39,25 @@ if ($result->num_rows > 0) {
     echo "<td>" . $row['quantity'] . "</td>";
     echo "<td>" . $row['total_item'] . "</td>";
     echo "<td>
-    <button class='edit-btn'
-      data-id='" . $row['id_sell'] . "'
-      data-sell_order='" . $row['sell_order'] . "'
-      data-date='" . $row['date'] . "'
-      data-upc='" . $row['upc_item'] . "'
-      data-received_shipping='" . $row['received_shipping'] . "'
-      data-payed_shipping='" . $row['payed_shipping'] . "'
-      data-store='" . $row['store_name'] . "'
-      data-sucursal='" . $row['code_sucursal'] . "'
-      data-comision='" . $row['comision_item'] . "'
-      data-quantity='" . $row['quantity'] . "'
-      data-total='" . $row['total_item'] . "'>
-      ✏️
-    </button>
-    <button class='delete-btn' data-id='" . $row['id_sell'] . "'>🗑️</button>
-  </td>";
+      <button class='edit-btn'
+        data-id='" . $row['id_sell'] . "'
+        data-sell_order='" . $row['sell_order'] . "'
+        data-date='" . $row['date'] . "'
+        data-upc='" . $row['upc_item'] . "'
+        data-received_shipping='" . $row['received_shipping'] . "'
+        data-payed_shipping='" . $row['payed_shipping'] . "'
+        data-store-name='" . $row['store_name'] . "'
+        data-store-id='" . $row['id_store'] . "'     
+        data-sucursal-code='" . $row['code_sucursal'] . "'
+        data-sucursal-id='" . $row['id_sucursal'] . "' 
+        data-comision='" . $row['comision_item'] . "'
+        data-quantity='" . $row['quantity'] . "'
+        data-total='" . $row['total_item'] . "'>
+        ✏️
+      </button>
+    </td>";
+    echo "<td>
+    <button class='delete-btn' data-id='" . $row['id_sell'] . "'>🗑️</button> </td>";
     echo "</tr>";
   }
 } else {

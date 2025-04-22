@@ -68,13 +68,94 @@ document.addEventListener("DOMContentLoaded", function () {
         this.dataset.received_shipping;
       document.getElementById("edit-pay-shipping").value =
         this.dataset.payed_shipping;
-      document.getElementById("edit-store").value = this.dataset.store;
-      document.getElementById("edit-sucursal").value = this.dataset.sucursal;
       document.getElementById("edit-quantity").value = this.dataset.quantity;
       document.getElementById("edit-total-item").value = this.dataset.total;
+
+      // Mostrar nombre de tienda y sucursal en los campos correspondientes
+      document.getElementById("edit-store").value = this.dataset.storeName; // Nombre de la tienda
+      document.getElementById("edit-sucursal").value =
+        this.dataset.sucursalCode; // Código de sucursal
+
+      // Guardar los IDs de tienda y sucursal en inputs invisibles
+      document.getElementById("edit-store-id").value = this.dataset.storeId; // ID de la tienda
+      document.getElementById("edit-sucursal-id").value =
+        this.dataset.sucursalId; // ID de la sucursal
 
       // Mostrar el modal
       editModal.show();
     });
   });
+
+  // Obtener el botón "Guardar cambios"
+  const saveEditButton = document.getElementById("saveEdit");
+
+  // Añadir el evento de clic al botón
+  saveEditButton.addEventListener("click", function () {
+    // Obtener los datos del formulario
+    const idSell = document.getElementById("edit-id-sell").value;
+    const sellOrder = document.getElementById("edit-sell-order").value;
+    const date = document.getElementById("edit-date").value;
+    const upc = document.getElementById("edit-upc").value;
+    const comision = document.getElementById("edit-comision").value;
+    const receivedShipping = document.getElementById("edit-rec-shipping").value;
+    const payedShipping = document.getElementById("edit-pay-shipping").value;
+    const storeID = document.getElementById("edit-store-id").value;
+    const sucursalID = document.getElementById("edit-sucursal-id").value;
+    const quantity = document.getElementById("edit-quantity").value;
+    const totalItem = document.getElementById("edit-total-item").value;
+
+    // Validar que los campos requeridos estén llenos (puedes agregar más validaciones si lo deseas)
+    if (
+      !sellOrder ||
+      !date ||
+      !upc ||
+      !storeID ||
+      !sucursalID ||
+      !quantity ||
+      !totalItem
+    ) {
+      alert("Por favor, completa todos los campos.");
+      return;
+    }
+
+    // Crear un objeto con los datos a enviar
+    const formData = new FormData();
+    formData.append("id_sell", idSell);
+    formData.append("sell_order", sellOrder);
+    formData.append("date", date);
+    formData.append("upc", upc);
+    formData.append("comision", comision);
+    formData.append("received_shipping", receivedShipping);
+    formData.append("payed_shipping", payedShipping);
+    formData.append("storeID", storeID);
+    formData.append("sucursalID", sucursalID);
+    formData.append("quantity", quantity);
+    formData.append("total_item", totalItem);
+
+    // Enviar los datos al servidor
+    fetch("updateSell.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json()) // Suponiendo que el servidor responde con un JSON
+      .then((data) => {
+        if (data.success) {
+          alert("Venta actualizada con éxito.");
+          // Aquí puedes cerrar el modal si todo fue exitoso
+          $("#editModal").modal("hide");
+          // Puedes actualizar la tabla de ventas con los nuevos datos si es necesario
+          // location.reload(); // Para recargar la página y mostrar los datos actualizados
+        } else {
+          alert("Error al actualizar la venta: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Hubo un problema con la actualización.");
+      });
+  });
+
+
+
+  
 });
