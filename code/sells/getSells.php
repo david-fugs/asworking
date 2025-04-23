@@ -16,7 +16,8 @@ $query = "SELECT
             code_sucursal,
             comision_item,
             quantity,
-            total_item
+            total_item,
+            item_price
           FROM sell 
           LEFT JOIN store  ON store.id_store = sell.id_store
           LEFT JOIN sucursal  ON sucursal.id_sucursal = sell.id_sucursal";
@@ -37,6 +38,7 @@ if ($result->num_rows > 0) {
     echo "<td>" . $row['code_sucursal'] . "</td>";
     echo "<td>" . $row['comision_item'] . "</td>";
     echo "<td>" . $row['quantity'] . "</td>";
+    echo "<td>" . $row['item_price'] . "</td>";
     echo "<td>" . $row['total_item'] . "</td>";
     echo "<td>
       <button class='edit-btn'
@@ -52,6 +54,7 @@ if ($result->num_rows > 0) {
         data-sucursal-id='" . $row['id_sucursal'] . "' 
         data-comision='" . $row['comision_item'] . "'
         data-quantity='" . $row['quantity'] . "'
+        data-item_price='" . $row['item_price'] . "'
         data-total='" . $row['total_item'] . "'>
         ✏️
       </button>

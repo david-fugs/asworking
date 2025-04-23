@@ -112,13 +112,13 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
                 <!--<i class="bx bx-home-alt"></i>-->
               </span>
 
-              <span class="navlink">SELLS</span>
+              <span class="navlink">SALES</span>
               <i class="bx bx-chevron-right arrow-left"></i>
             </div>
 
             <ul class="menu_items submenu">
-              <a href="code/sells/sell.php" class="nav_link sublink">Sell</a>
-              <a href="code/sells/seesells.php" class="nav_link sublink">See Sells</a>
+              <a href="code/sells/sell.php" class="nav_link sublink">Sales</a>
+              <a href="code/sells/seesells.php" class="nav_link sublink">See Sales</a>
             </ul>
           </li>
 

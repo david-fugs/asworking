@@ -45,7 +45,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <img src='../../img/logo.png' width="300" height="212" class="responsive">
   </center>
   <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i
-        class="fa-solid fa-file-signature"></i> ITEMS</b></h1>
+        class="fa-solid fa-file-signature"></i> SALES </b></h1>
 
   <div class="flex">
     <div class="box">
@@ -60,7 +60,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
   <!-- Tabla de Ventas -->
   <div class="container mt-5">
-    <h2 class="text-center">Ventas Registradas</h2>
+    <h2 class="text-center">Registered Sales</h2>
     <table class="table table-striped" id="salesTable">
       <thead>
         <tr>
@@ -73,6 +73,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
           <th>Sucursal</th>
           <th>Comision</th>
           <th>Quantity</th>
+          <th>Price Item</th>
           <th>Total Item</th>
           <th>Edit Sell</th>
           <th>Delete Sell</th>
@@ -106,10 +107,10 @@ $resultTiendas = $mysqli->query($queryTiendas);
             <div class="row g-3 mb-3">
               <div class="col-md-4">
                 <label for="edit-sell-order" class="form-label">Sell Order</label>
-                <input type="text" class="form-control" id="edit-sell-order" required>
+                <input type="text" class="form-control" id="edit-sell-order" readonly>
               </div>
               <div class="col-md-4">
-                <label for="edit-date" class="form-label">Fecha</label>
+                <label for="edit-date" class="form-label">Date</label>
                 <input type="date" class="form-control" id="edit-date">
               </div>
               <div class="col-md-4">
@@ -121,50 +122,65 @@ $resultTiendas = $mysqli->query($queryTiendas);
             <!-- Fila 2: 3 columnas -->
             <div class="row g-3 mb-3">
               <div class="col-md-4">
-                <label for="edit-comision" class="form-label">Comisión</label>
-                <input type="text" class="form-control" id="edit-comision">
+                <label for="edit-store" class="form-label">Store</label>
+                <select class="form-select" id="edit-store">
+                  <option value="" selected disabled hidden>--Select a store--</option>
+                  <?php
+                  $resultTiendas->data_seek(0); // Reinicia el puntero del resultado
+                  while ($tienda = $resultTiendas->fetch_assoc()) {
+                    echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
+                  }
+                  ?>
+                </select>
               </div>
               <div class="col-md-4">
-                <label for="edit-rec-shipping" class="form-label">Envío recibido</label>
-                <input type="text" class="form-control" id="edit-rec-shipping">
+                <label for="edit-sucursal" class="form-label">Sucursal</label>
+                <select class="form-select" id="edit-sucursal">
+                  <option value="">Select a Sucursal</option>
+                </select>
               </div>
               <div class="col-md-4">
-                <label for="edit-pay-shipping" class="form-label">Envío pagado</label>
-                <input type="text" class="form-control" id="edit-pay-shipping">
+                <label for="edit-quantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="edit-quantity">
               </div>
             </div>
 
             <!-- Fila 3: 3 columnas -->
             <div class="row g-3 mb-3">
               <div class="col-md-4">
-                <label for="edit-store" class="form-label">Tienda</label>
-                <input type="text" class="form-control" id="edit-store">
+                <label for="edit-comision" class="form-label">Comision</label>
+                <input type="text" class="form-control" id="edit-comision">
               </div>
               <div class="col-md-4">
-                <label for="edit-sucursal" class="form-label">Sucursal</label>
-                <input type="text" class="form-control" id="edit-sucursal">
+                <label for="edit-rec-shipping" class="form-label">Received Shipping</label>
+                <input type="text" class="form-control" id="edit-rec-shipping">
               </div>
               <div class="col-md-4">
-                <label for="edit-quantity" class="form-label">Cantidad</label>
-                <input type="number" class="form-control" id="edit-quantity">
+                <label for="edit-pay-shipping" class="form-label">Paid shipping</label>
+                <input type="text" class="form-control" id="edit-pay-shipping">
               </div>
             </div>
 
             <!-- Fila 4: 1 campo + espacio para botones -->
             <div class="row g-3">
               <div class="col-md-4">
+                <label for="edit-item_price" class="form-label">Item Price</label>
+                <input type="text" class="form-control" id="edit-item_price">
+              </div>
+              <div class="col-md-4">
                 <label for="edit-total-item" class="form-label">Total</label>
                 <input type="text" class="form-control" id="edit-total-item">
               </div>
               <!-- Columnas vacías para mantener alineación -->
-              <div class="col-md-4"></div>
-              <div class="col-md-4"></div>
+              <div class="col-md-4">
+                <input type="hidden" id="editComision" name="comision_item">
+              </div>
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary" id="saveEdit">Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="saveEdit">Save Changes</button>
         </div>
       </div>
     </div>

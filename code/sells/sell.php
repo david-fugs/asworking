@@ -45,15 +45,18 @@ $resultTiendas = $mysqli->query($queryTiendas);
       </center>
 
       <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i
-            class="fa-solid fa-file-signature"></i> SELLS</b></h1>
+            class="fa-solid fa-file-signature"></i> SALES</b></h1>
 
     </div>
 
   </div>
   <div class="flex">
     <div class="box">
+      <div class="mb-3 d-inline-block " style="width: 275px; margin: 0 10px">
+        <label for="sellDate" class="form-label">Date</label>
+        <input type="date" class="form-control" name="sellDate" id="sellDate">
+      </div>
 
-      <input type="date" name="sellDate" id="sellDate" placeholder="Date">
 
       <form class="form">
         <div class="container">
@@ -84,7 +87,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
             </div>
 
             <div class="col-md-3">
-              <label for="payedShipping" class="form-label">Payed Shipping</label>
+              <label for="payedShipping" class="form-label">Paid Shipping</label>
               <input type="number" name="payedShipping" id="payedShipping" class="form-control">
             </div>
 
@@ -119,12 +122,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
             </div>
 
             <div class="col-md-3">
-              <label for="unitTotal" class="form-label">Unit Total</label>
-              <input type="number" name="unitTotal" id="unitTotal" step="0.01" min="0" class="form-control">
-            </div>
-
-            <div class="col-md-3">
-              <label for="UnitTotal" class="form-label">Unit Total Ref</label>
+              <label for="UnitTotal" class="form-label">Total Item</label>
               <input name="ref" type="text" id="UnitTotal" readonly class="form-control">
             </div>
 
@@ -140,19 +138,19 @@ $resultTiendas = $mysqli->query($queryTiendas);
           style="width: 100%; margin: 20px auto; text-align: center; border-collapse: collapse;">
           <thead style="background-color:rgb(10, 9, 14); color: white;">
             <tr>
-              <th>ITEM</th>
+              <th>Item</th>
               <th>UPC</th>
               <th>Quantity</th>
               <th>Store</th>
               <th>Sucursal Code</th>
-              <th>BRAND</th>
-              <th>COMISION</th>
-              <th>DATE</th>
-              <th>RECEIVED SHIPPING</th>
-              <th>PAYED SHIPPING</th>
-              <th>ITEM COST</th>
-              <th>TOTAL ITEM</th>
-              <th>DELETE</th>
+              <th>Brand</th>
+              <th>Comision</th>
+              <th>Date</th>
+              <th>Received Shipping</th>
+              <th>Paid Shipping</th>
+              <th>Price Item </th>
+              <th>Total Item</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody id="bodyTable">
@@ -168,7 +166,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
         </table>
       </div>
       <div class="text-end mt-3" style="width: 90%; margin: 0 auto;">
-        <button type="button" id="saveSellButton" class="btn btn-success custom-inline">Save Sell</button>
+        <button type="button" id="saveSellButton" class="btn btn-success custom-inline">Save Sale</button>
       </div>
 
     </div>

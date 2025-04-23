@@ -69,6 +69,8 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("edit-pay-shipping").value =
         this.dataset.payed_shipping;
       document.getElementById("edit-quantity").value = this.dataset.quantity;
+      document.getElementById("edit-item_price").value =
+        this.dataset.item_price;
       document.getElementById("edit-total-item").value = this.dataset.total;
 
       // Mostrar nombre de tienda y sucursal en los campos correspondientes
@@ -80,6 +82,9 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("edit-store-id").value = this.dataset.storeId; // ID de la tienda
       document.getElementById("edit-sucursal-id").value =
         this.dataset.sucursalId; // ID de la sucursal
+
+      const storeSelect = document.getElementById("edit-store");
+      storeSelect.value = this.dataset.storeId;
 
       // Mostrar el modal
       editModal.show();
@@ -155,7 +160,89 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
+  function cargarSucursalesEdit(storeId, selectedSucursalId = null) {
+    const sucursalSelect = document.getElementById("edit-sucursal");
 
+    if (!storeId) {
+      sucursalSelect.innerHTML =
+        '<option value="">Selecciona una sucursal</option>';
+      return;
+    }
 
-  
+    const formData = new FormData();
+    formData.append("id_store", storeId);
+
+    fetch("getSucursales.php", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.text())
+      .then((html) => {
+        sucursalSelect.innerHTML = html;
+
+        // Seleccionar la sucursal que viene cargada desde la tabla
+        if (selectedSucursalId) {
+          sucursalSelect.value = selectedSucursalId;
+        }
+      })
+      .catch((error) => {
+        console.error("Error al cargar sucursales:", error);
+      });
+  }
+
+  document
+    .getElementById("editModal")
+    .addEventListener("show.bs.modal", function () {
+      const storeId = document.getElementById("edit-store").value;
+      const sucursalId = document.getElementById("edit-sucursal-id").value; // este hidden viene con la info de la tabla
+
+      cargarSucursalesEdit(storeId, sucursalId);
+    });
+
+  // También actualiza las sucursales si cambian la tienda manualmente en el modal
+  document.getElementById("edit-store").addEventListener("change", function () {
+    const nuevoStoreId = this.value;
+    cargarSucursalesEdit(nuevoStoreId);
+  });
+
+  document
+    .getElementById("edit-sucursal")
+    .addEventListener("change", function () {
+      const selectedOption = this.options[this.selectedIndex];
+      const comision = parseFloat(selectedOption.dataset.comision) || 0;
+      const cargoFijo = parseFloat(selectedOption.dataset.cargo) || 0;
+
+      // Rellenar el input invisible o hacer lo que necesites con la comisión
+      document.getElementById("editComision").value = comision;
+
+      // Opcional: mostrar en consola o hacer el siguiente paso
+      console.log("Comisión:", comision, "Cargo fijo:", cargoFijo);
+
+      // Aquí podrías llamar una función para actualizar el total automáticamente
+      actualizarTotal();
+    });
+
+  function actualizarTotal() {
+    const cantidad =
+      parseFloat(document.getElementById("edit-quantity").value) || 0;
+    const precio =
+      parseFloat(document.getElementById("edit-item_price").value) || 0;
+    const sucursalSelect = document.getElementById("edit-sucursal");
+    const comision =
+      parseFloat(sucursalSelect.selectedOptions[0].dataset.comision) || 0;
+    document.getElementById("edit-comision").value = comision.toFixed(2);
+    const total = cantidad * precio * comision;
+    document.getElementById("edit-total-item").value = total.toFixed(2);
+  }
+
+  // Listeners
+  document
+    .getElementById("edit-quantity")
+    .addEventListener("input", actualizarTotal);
+  document
+    .getElementById("edit-item_price")
+    .addEventListener("input", actualizarTotal);
+  document
+    .getElementById("edit-sucursal")
+    .addEventListener("change", actualizarTotal);
 });

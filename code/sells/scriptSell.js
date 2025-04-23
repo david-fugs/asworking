@@ -249,6 +249,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const total_item = parseFloat(
           row.querySelector(".total_item")?.textContent || "0"
         );
+        const item_price = parseFloat(
+          row
+            .querySelector(".precio_unitario")
+            ?.textContent.replace("$", "")
+            .trim() || "0"
+        );
 
         const date = row.querySelector(".fecha")?.textContent || "";
         ventas.push({
@@ -259,6 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
           id_store,
           id_sucursal,
           comision,
+          item_price,
           total_item,
           date,
         });
@@ -297,5 +304,4 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Error al enviar las ventas: " + error.message);
       }
     });
-    
 });
