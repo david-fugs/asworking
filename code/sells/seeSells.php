@@ -73,7 +73,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
           <th>Sucursal</th>
           <th>Comision</th>
           <th>Quantity</th>
-          <th>Price Item</th>
+          <th>Item Price</th>
           <th>Total Item</th>
           <th>Edit Sell</th>
           <th>Delete Sell</th>

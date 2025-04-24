@@ -107,6 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const storeID = document.getElementById("edit-store-id").value;
     const sucursalID = document.getElementById("edit-sucursal-id").value;
     const quantity = document.getElementById("edit-quantity").value;
+    const item_price = document.getElementById("edit-item_price").value;
     const totalItem = document.getElementById("edit-total-item").value;
 
     // Validar que los campos requeridos estén llenos (puedes agregar más validaciones si lo deseas)
@@ -117,6 +118,8 @@ document.addEventListener("DOMContentLoaded", function () {
       !storeID ||
       !sucursalID ||
       !quantity ||
+      !item_price ||
+      !comision ||
       !totalItem
     ) {
       alert("Por favor, completa todos los campos.");
@@ -124,23 +127,28 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Crear un objeto con los datos a enviar
-    const formData = new FormData();
-    formData.append("id_sell", idSell);
-    formData.append("sell_order", sellOrder);
-    formData.append("date", date);
-    formData.append("upc", upc);
-    formData.append("comision", comision);
-    formData.append("received_shipping", receivedShipping);
-    formData.append("payed_shipping", payedShipping);
-    formData.append("storeID", storeID);
-    formData.append("sucursalID", sucursalID);
-    formData.append("quantity", quantity);
-    formData.append("total_item", totalItem);
+    const formData = {
+      id_sell: idSell,
+      sell_order: sellOrder,
+      date: date,
+      upc: upc,
+      comision: comision,
+      received_shipping: receivedShipping,
+      payed_shipping: payedShipping,
+      storeID: storeID,
+      sucursalID: sucursalID,
+      quantity: quantity,
+      item_price: item_price,
+      total_item: totalItem,
+    };
 
-    // Enviar los datos al servidor
+    // Enviar los datos al servidor en formato JSON
     fetch("updateSell.php", {
-      method: "POST",
-      body: formData,
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json", // Especifica que el contenido es JSON
+      },
+      body: JSON.stringify(formData), // Convierte el objeto JavaScript en JSON
     })
       .then((response) => response.json()) // Suponiendo que el servidor responde con un JSON
       .then((data) => {
@@ -213,10 +221,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const cargoFijo = parseFloat(selectedOption.dataset.cargo) || 0;
 
       // Rellenar el input invisible o hacer lo que necesites con la comisión
-      document.getElementById("editComision").value = comision;
+      document.getElementById("edit-comision").value = comision;
 
       // Opcional: mostrar en consola o hacer el siguiente paso
-      console.log("Comisión:", comision, "Cargo fijo:", cargoFijo);
 
       // Aquí podrías llamar una función para actualizar el total automáticamente
       actualizarTotal();
@@ -229,8 +236,9 @@ document.addEventListener("DOMContentLoaded", function () {
       parseFloat(document.getElementById("edit-item_price").value) || 0;
     const sucursalSelect = document.getElementById("edit-sucursal");
     const comision =
-      parseFloat(sucursalSelect.selectedOptions[0].dataset.comision) || 0;
-    document.getElementById("edit-comision").value = comision.toFixed(2);
+      parseFloat(document.getElementById("edit-comision").value) || 0;
+
+    //document.getElementById("edit-comision").value = comision.toFixed(2);
     const total = cantidad * precio * comision;
     document.getElementById("edit-total-item").value = total.toFixed(2);
   }
@@ -243,6 +251,13 @@ document.addEventListener("DOMContentLoaded", function () {
     .getElementById("edit-item_price")
     .addEventListener("input", actualizarTotal);
   document
-    .getElementById("edit-sucursal")
-    .addEventListener("change", actualizarTotal);
+    .getElementById("edit-item_price")
+    .addEventListener("change", function () {
+      console.log("Cambio en el precio");
+      actualizarTotal();
+    });
+
+  document
+    .getElementById("edit-comision")
+    .addEventListener("input", actualizarTotal);
 });

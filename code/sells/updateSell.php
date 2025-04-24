@@ -2,41 +2,72 @@
 // Conectar a la base de datos
 include("../../conexion.php");
 
-// Obtener los datos enviados
-$id_sell = $_POST['id_sell'];
-$sell_order = $_POST['sell_order'];
-$date = $_POST['date'];
-$upc = $_POST['upc'];
-$comision = $_POST['comision'];
-$received_shipping = $_POST['received_shipping'];
-$payed_shipping = $_POST['payed_shipping'];
-$storeID = $_POST['storeID'];
-$sucursalID = $_POST['sucursalID'];
-$quantity = $_POST['quantity'];
-$total_item = $_POST['total_item'];
+// Verificar si la solicitud es PATCH o PUT
+if ($_SERVER['REQUEST_METHOD'] == 'PATCH' || $_SERVER['REQUEST_METHOD'] == 'PUT') {
 
-// Realizar la actualización en la base de datos
-$query = "UPDATE sell SET
-            sell_order = '$sell_order',
-            date = '$date',
-            upc_item = '$upc',
-            comision_item = '$comision',
-            received_shipping = '$received_shipping',
-            payed_shipping = '$payed_shipping',
-            id_store = '$storeID',
-            id_sucursal = '$sucursalID',
-            quantity = '$quantity',
-            total_item = '$total_item'
-          WHERE id_sell = '$id_sell'";
+    // Obtener los datos enviados en formato JSON
+    $data = json_decode(file_get_contents('php://input'), true);
 
-if ($mysqli->query($query) === TRUE) {
-    // Responder con éxito
-    echo json_encode(['success' => true]);
-} else {
-    // Responder con error
-    echo json_encode(['success' => false, 'message' => $mysqli->error]);
+    // Verificar si los datos son válidos
+    if ($data && isset($data['id_sell'])) {
+        // Obtener los valores del array
+        $id_sell = $data['id_sell'];
+        $sell_order = $data['sell_order'];
+        $date = $data['date'];
+        $upc = $data['upc'];
+        $comision = $data['comision'];
+        $received_shipping = $data['received_shipping'];
+        $payed_shipping = $data['payed_shipping'];
+        $storeID = $data['storeID'];
+        $sucursalID = $data['sucursalID'];
+        $quantity = $data['quantity'];
+        $item_price = $data['item_price'];
+        $total_item = $data['total_item'];
+
+        // Consulta SQL para actualizar los datos
+        $query = "UPDATE sell SET
+                    sell_order = ?,
+                    date = ?,
+                    upc_item = ?,
+                    comision_item = ?,
+                    received_shipping = ?,
+                    payed_shipping = ?,
+                    id_store = ?,
+                    id_sucursal = ?,
+                    quantity = ?,
+                    item_price = ?,
+                    total_item = ?
+                  WHERE id_sell = ?";
+
+        // Preparar la consulta
+        $stmt = $mysqli->prepare($query);
+        $stmt->bind_param(
+            'ssssssssdddi',
+            $sell_order,
+            $date,
+            $upc,
+            $comision,
+            $received_shipping,
+            $payed_shipping,
+            $storeID,
+            $sucursalID,
+            $quantity,
+            $item_price,
+            $total_item,
+            $id_sell
+        );
+
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => $stmt->error]);
+        }
+
+        $stmt->close();
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Datos incompletos']);
+    }
 }
 
-// Cerrar la conexión
 $mysqli->close();
-?>
+
