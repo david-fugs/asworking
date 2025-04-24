@@ -11,7 +11,9 @@ if (!isset($_SESSION['id'])) {
 
 $upc = $_POST["upc"] ?? '';
 
-$stmt = $mysqli->prepare("SELECT item_item, cost_item, brand_item FROM items WHERE upc_item = ? LIMIT 1");
+$stmt = $mysqli->prepare("SELECT * FROM items
+  LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory
+ WHERE upc_item = ? LIMIT 1");
 if (!$stmt) {
   die("Error al preparar la consulta: " . $mysqli->error);
 }
@@ -25,7 +27,8 @@ if ($row = $result->fetch_assoc()) {
     "success" => true,
     "item" => $row["item_item"],
     "cost" => number_format($row["cost_item"], 2),
-    "brand" => $row["brand_item"]
+    "brand" => $row["brand_item"],
+    "quantity" => $row["quantity_inventory"],
   ]);
 } else {
   echo json_encode(["success" => false]);

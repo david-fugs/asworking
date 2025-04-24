@@ -21,7 +21,7 @@ $query = "SELECT
           FROM sell 
           LEFT JOIN store  ON store.id_store = sell.id_store
           LEFT JOIN sucursal  ON sucursal.id_sucursal = sell.id_sucursal
-          WHERE sell.estado_sell = 1 "
+          WHERE sell.estado_sell = 0 "
           ;
 
 $result = $mysqli->query($query);
@@ -61,6 +61,10 @@ if ($result->num_rows > 0) {
         data-total='" . $row['total_item'] . "'>
         ✏️
       </button>
+    </td>";
+    //boton para enviar devolucion
+    echo "<td>
+      <button class='return-btn' data-id='" . $row['id_sell'] . "'>↩️</button>
     </td>";
     echo "<td>
     <button class='delete-btn' data-id='" . $row['id_sell'] . "'>🗑️</button> </td>";

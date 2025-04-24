@@ -121,6 +121,22 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
               <a href="code/sells/seesells.php" class="nav_link sublink">See Sales</a>
             </ul>
           </li>
+          <li class="item">
+            <div href="#" class="nav_link submenu_item">
+              <span class="navlink_icon">
+                <i class="fa-solid fa-shop"></i>
+                <!--<i class="bx bx-home-alt"></i>-->
+              </span>
+
+              <span class="navlink">DEVOLUTIONS</span>
+              <i class="bx bx-chevron-right arrow-left"></i>
+            </div>
+
+            <ul class="menu_items submenu">
+              <a href="code/devolutions/seeDevolutions.php" class="nav_link sublink">See Devolutions</a>
+            </ul>
+          </li>
+
 
 
           <li class="item">

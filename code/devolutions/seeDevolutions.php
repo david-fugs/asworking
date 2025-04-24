@@ -45,7 +45,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <img src='../../img/logo.png' width="300" height="212" class="responsive">
   </center>
   <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i
-        class="fa-solid fa-file-signature"></i> SALES </b></h1>
+        class="fa-solid fa-file-signature"></i> DEVOLUTIONS </b></h1>
 
   <div class="flex">
     <div class="box">
@@ -58,15 +58,9 @@ $resultTiendas = $mysqli->query($queryTiendas);
     </div>
   </div>
   <div class="position-relative mb-3">
-            <button id="bulkReturnBtn" class="btn btn-success position-absolute "  style="margin-left: 310px; margin-top: 33px; " data-bs-target="#modalNewPerson">
-                Make devolutions
-            </button>
-
-        </div>
-
   <!-- Tabla de Ventas -->
   <div class="container mt-5">
-    <h2 class="text-center">Registered Sales</h2>
+    <h2 class="text-center">Registered Devolutions</h2>
     <table class="table table-striped" id="salesTable">
       <thead>
         <tr>
@@ -83,11 +77,12 @@ $resultTiendas = $mysqli->query($queryTiendas);
           <th>Item Price</th>
           <th>Total Item</th>
           <th>Edit Sell</th>
+          <th>Devolution</th>
           <th>Delete Sell</th>
         </tr>
       </thead>
       <tbody>
-        <?php include "getSells.php"; ?>
+        <?php include "getDevolutions.php"; ?>
       </tbody>
     </table>
   </div>
@@ -194,7 +189,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
   </div>
   </div>
 
-  <script src="scriptSeeSells.js"></script>
+  <script src="../sells/scriptSeeSells.js"></script>
 </body>
 
 </html>

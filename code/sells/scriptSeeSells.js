@@ -1,6 +1,49 @@
 document.addEventListener("DOMContentLoaded", function () {
   const deleteButtons = document.querySelectorAll(".delete-btn"); // Selecciona todos los botones de eliminar
 
+  document.getElementById("bulkReturnBtn").addEventListener("click", function () {
+    const selectedCheckboxes = document.querySelectorAll(".select-sell:checked");
+    const ids = Array.from(selectedCheckboxes).map(cb => cb.value);
+  
+    if (ids.length === 0) {
+      Swal.fire("Nothing selected", "Select at leat 1 record", "info");
+      return;
+    }
+    Swal.fire({
+      title: "¿Are you sure to do this devolutions?",
+      text: "The records will be send to the devolution menu.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, enviar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch("devolution.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: "id_sell[]=" + ids.join("&id_sell[]="),
+        })
+        .then(response => response.text())
+        .then(data => {
+          if (data.trim() === "success") {
+            Swal.fire("¡Sent!", "Records are now on Devolutions.", "success");
+            selectedCheckboxes.forEach(cb => cb.closest("tr").remove());
+          } else {
+            Swal.fire("Error", data);
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          Swal.fire("Error", "error.");
+        });
+      }
+    });
+  });
+  
   deleteButtons.forEach((button) => {
     button.addEventListener("click", function () {
       const id_sell = this.getAttribute("data-id"); // Obtén el ID del sell_order
@@ -8,14 +51,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Mostrar mensaje de confirmación con SweetAlert2
       Swal.fire({
-        title: "¿Estás seguro?",
-        text: "¡Esta acción no se puede deshacer!",
+        title: "¿Are you sure?",
+        text: "¡This action can not be undone!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
-        confirmButtonText: "Sí, eliminar",
-        cancelButtonText: "Cancelar",
+        confirmButtonText: "Yes, Delete it", 
+        cancelButtonText: "Cancel",
       }).then((result) => {
         if (result.isConfirmed) {
           // Si se confirma, realiza una solicitud para eliminar el registro
@@ -30,20 +73,20 @@ document.addEventListener("DOMContentLoaded", function () {
             .then((data) => {
               if (data.trim() === "success") {
                 Swal.fire(
-                  "¡Eliminado!",
-                  "El registro ha sido eliminado.",
+                  "¡Eliminated!",
+                  "The record has been deleted.",
                   "success"
                 );
                 row.remove(); // Elimina la fila de la tabla sin recargar la página
               } else {
-                Swal.fire("Error", "No se pudo eliminar el registro.", "error");
+                Swal.fire("Error", "deleting the record.", "error");
               }
             })
             .catch((error) => {
               console.error("Error:", error);
               Swal.fire(
                 "Error",
-                "Hubo un problema al conectar con el servidor.",
+                "Error conecting to the server.",
                 "error"
               );
             });

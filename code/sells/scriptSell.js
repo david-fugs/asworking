@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const comisionInput = document.getElementById("comisionItem");
   const receivedShipping = document.getElementById("receivedShipping");
   const payedShipping = document.getElementById("payedShipping");
-
+  const quantitySell = document.getElementById("quantitySell");
   const today = new Date().toISOString().split("T")[0];
   sellDateInput.value = today;
 
@@ -108,6 +108,19 @@ document.addEventListener("DOMContentLoaded", function () {
           itemNameInput.value = data.item;
           priceInput.value = "$" + parseFloat(data.cost).toFixed(2);
           brandItem.value = data.brand || "";
+          console.log(data.quantity);
+          const maxCantidad = parseInt(data.quantity);
+          const quantityInput1 = document.getElementById("quantitySell");
+
+          quantityInput1.max = maxCantidad;
+          quantityInput1.value = ""; // Limpiar cualquier valor previo
+
+          quantityInput1.addEventListener("input", function () {
+            if (parseInt(this.value) > maxCantidad) {
+              alert(`Only ${maxCantidad} units are available.`);
+              this.value = maxCantidad;
+            }
+          });
         } else {
           limpiarCamposProducto();
         }
