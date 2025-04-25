@@ -13,6 +13,29 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
 
 $queryTiendas = "SELECT id_store, store_name FROM store ORDER BY store_name ASC";
 $resultTiendas = $mysqli->query($queryTiendas);
+
+if (isset($_GET['delete'])) {
+  $id_devolution = $_GET['delete'];
+  deleteMember($id_devolution);
+}
+function deleteMember($id_devolution)
+{
+  global $mysqli; // Asegurar acceso a la conexión global
+
+  $query = "DELETE FROM devolutions WHERE id_devolution  = ?";
+  $stmt = $mysqli->prepare($query);
+  $stmt->bind_param("s", $id_devolution);
+
+  if ($stmt->execute()) {
+    echo "<script>alert('devolution deleted correctly');
+      window.location = 'seeDevolutions.php';</script>";
+  } else {
+    echo "<script>alert('Error deleting the devolution');
+      window.location = 'seeDevolutions.php';</script>";
+  }
+
+  $stmt->close();
+}
 ?>
 
 <!DOCTYPE html>
@@ -28,6 +51,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
   <link rel="stylesheet" href="styleSell.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Librerías de DataTables -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
@@ -41,6 +65,12 @@ $resultTiendas = $mysqli->query($queryTiendas);
 </head>
 
 <body>
+  <style>
+    btn-danger:hover {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
   <center style="margin-top: 20px;">
     <img src='../../img/logo.png' width="300" height="212" class="responsive">
   </center>
@@ -49,144 +79,142 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
   <div class="flex">
     <div class="box">
-      <form action="showitems.php" method="get" class="form">
+      <form action="seeDevolutions.php" method="get" class="form">
         <input name="upc_item" type="text" placeholder="Upc ">
-        <input name="item" type="text" placeholder="Item">
-        <input name="ref" type="text" placeholder="Reference">
+        <input name="date_devolution" type="text" placeholder="Devolution Date">
         <input value="Search" type="submit">
       </form>
     </div>
   </div>
   <div class="position-relative mb-3">
-  <!-- Tabla de Ventas -->
-  <div class="container mt-5">
-    <h2 class="text-center">Registered Devolutions</h2>
-    <table class="table table-striped" id="salesTable">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Sell Number</th>
-          <th>Date</th>
-          <th>UPC</th>
-          <th>Received Shipping</th>
-          <th>Payeed Shipping</th>
-          <th>Store</th>
-          <th>Sucursal</th>
-          <th>Comision</th>
-          <th>Quantity</th>
-          <th>Item Price</th>
-          <th>Total Item</th>
-          <th>Edit Sell</th>
-          <th>Devolution</th>
-          <th>Delete Sell</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php include "getDevolutions.php"; ?>
-      </tbody>
-    </table>
-  </div>
+    <!-- Tabla de Ventas -->
+    <div class="container mt-5">
+      <h2 class="text-center">Registered Devolutions</h2>
+      <table class="table table-striped" id="salesTable">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Sell Number</th>
+            <th>Date</th>
+            <th>UPC</th>
+            <th>Received Shipping</th>
+            <th>Payeed Shipping</th>
+            <th>Store</th>
+            <th>Sucursal</th>
+            <th>Comision</th>
+            <th>Quantity</th>
+            <th>Item Price</th>
+            <th>Total Item</th>
+            <th>Devolution Date</th>
+            <th>Delete Sell</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php include "getDevolutions.php"; ?>
+        </tbody>
+      </table>
+    </div>
 
-  <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
+    <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
 
-  <!-- Modal de edición -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl"> <!-- Modal extra ancho -->
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editModalLabel">Editar Venta</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form id="editForm">
-            <!-- Input oculto para el ID (no visible pero se envía) -->
-            <input type="hidden" id="edit-id-sell" name="id">
-            <input type="hidden" id="edit-store-id" name="store_id">
-            <input type="hidden" id="edit-sucursal-id" name="sucursal_id">
+    <!-- Modal de edición -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl"> <!-- Modal extra ancho -->
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editModalLabel">Editar Venta</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="editForm">
+              <!-- Input oculto para el ID (no visible pero se envía) -->
+              <input type="hidden" id="edit-id-sell" name="id">
+              <input type="hidden" id="edit-store-id" name="store_id">
+              <input type="hidden" id="edit-sucursal-id" name="sucursal_id">
 
 
-            <!-- Fila 1: 3 columnas -->
-            <div class="row g-3 mb-3">
-              <div class="col-md-4">
-                <label for="edit-sell-order" class="form-label">Sell Order</label>
-                <input type="text" class="form-control" id="edit-sell-order" readonly>
+              <!-- Fila 1: 3 columnas -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <label for="edit-sell-order" class="form-label">Sell Order</label>
+                  <input type="text" class="form-control" id="edit-sell-order" readonly>
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-date" class="form-label">Date</label>
+                  <input type="date" class="form-control" id="edit-date">
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-upc" class="form-label">UPC</label>
+                  <input type="text" class="form-control" id="edit-upc">
+                </div>
               </div>
-              <div class="col-md-4">
-                <label for="edit-date" class="form-label">Date</label>
-                <input type="date" class="form-control" id="edit-date">
-              </div>
-              <div class="col-md-4">
-                <label for="edit-upc" class="form-label">UPC</label>
-                <input type="text" class="form-control" id="edit-upc">
-              </div>
-            </div>
 
-            <!-- Fila 2: 3 columnas -->
-            <div class="row g-3 mb-3">
-              <div class="col-md-4">
-                <label for="edit-store" class="form-label">Store</label>
-                <select class="form-select" id="edit-store">
-                  <option value="" selected disabled hidden>--Select a store--</option>
-                  <?php
-                  $resultTiendas->data_seek(0); // Reinicia el puntero del resultado
-                  while ($tienda = $resultTiendas->fetch_assoc()) {
-                    echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
-                  }
-                  ?>
-                </select>
+              <!-- Fila 2: 3 columnas -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <label for="edit-store" class="form-label">Store</label>
+                  <select class="form-select" id="edit-store">
+                    <option value="" selected disabled hidden>--Select a store--</option>
+                    <?php
+                    $resultTiendas->data_seek(0); // Reinicia el puntero del resultado
+                    while ($tienda = $resultTiendas->fetch_assoc()) {
+                      echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
+                    }
+                    ?>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-sucursal" class="form-label">Sucursal</label>
+                  <select class="form-select" id="edit-sucursal">
+                    <option value="">Select a Sucursal</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-quantity" class="form-label">Quantity</label>
+                  <input type="number" class="form-control" id="edit-quantity">
+                </div>
               </div>
-              <div class="col-md-4">
-                <label for="edit-sucursal" class="form-label">Sucursal</label>
-                <select class="form-select" id="edit-sucursal">
-                  <option value="">Select a Sucursal</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label for="edit-quantity" class="form-label">Quantity</label>
-                <input type="number" class="form-control" id="edit-quantity">
-              </div>
-            </div>
 
-            <!-- Fila 3: 3 columnas -->
-            <div class="row g-3 mb-3">
-              <div class="col-md-4">
-                <label for="edit-comision" class="form-label">Comision</label>
-                <input type="text" class="form-control" id="edit-comision">
+              <!-- Fila 3: 3 columnas -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <label for="edit-comision" class="form-label">Comision</label>
+                  <input type="text" class="form-control" id="edit-comision">
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-rec-shipping" class="form-label">Received Shipping</label>
+                  <input type="text" class="form-control" id="edit-rec-shipping">
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-pay-shipping" class="form-label">Paid shipping</label>
+                  <input type="text" class="form-control" id="edit-pay-shipping">
+                </div>
               </div>
-              <div class="col-md-4">
-                <label for="edit-rec-shipping" class="form-label">Received Shipping</label>
-                <input type="text" class="form-control" id="edit-rec-shipping">
-              </div>
-              <div class="col-md-4">
-                <label for="edit-pay-shipping" class="form-label">Paid shipping</label>
-                <input type="text" class="form-control" id="edit-pay-shipping">
-              </div>
-            </div>
 
-            <!-- Fila 4: 1 campo + espacio para botones -->
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label for="edit-item_price" class="form-label">Item Price</label>
-                <input type="text" class="form-control" id="edit-item_price">
+              <!-- Fila 4: 1 campo + espacio para botones -->
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label for="edit-item_price" class="form-label">Item Price</label>
+                  <input type="text" class="form-control" id="edit-item_price">
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-total-item" class="form-label">Total</label>
+                  <input type="text" class="form-control" id="edit-total-item">
+                </div>
+                <!-- Columnas vacías para mantener alineación -->
+                <div class="col-md-4">
+                  <input type="hidden" id="editComision" name="comision_item">
+                </div>
               </div>
-              <div class="col-md-4">
-                <label for="edit-total-item" class="form-label">Total</label>
-                <input type="text" class="form-control" id="edit-total-item">
-              </div>
-              <!-- Columnas vacías para mantener alineación -->
-              <div class="col-md-4">
-                <input type="hidden" id="editComision" name="comision_item">
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="saveEdit">Save Changes</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="saveEdit">Save Changes</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   </div>
 
   <script src="../sells/scriptSeeSells.js"></script>

@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
+
   
   deleteButtons.forEach((button) => {
     button.addEventListener("click", function () {

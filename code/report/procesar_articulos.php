@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
         $vendor = $_POST['vendor_report'][$i];
         $color = $_POST['color_report'][$i];
         $size = $_POST['size_report'][$i];
-        $cost = $_POST['cost_report'][$i] ?? '';
+        $cost = floatval($_POST['cost_report'][$i] ?? 0.0);
         $category = $_POST['category_report'][$i];
         $weight = $_POST['weight_report'][$i];
         $inventory = $_POST['inventory_report'][$i];

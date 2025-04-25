@@ -176,8 +176,8 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             </a>
         </div>
         <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
-            <a href="seeReport.php" class="btn-add-store">
-                See Daily Report
+            <a href="addReport.php" class="btn-add-store">
+                Go To Report
             </a>
         </div>
     </div>
