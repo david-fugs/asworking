@@ -1,140 +1,145 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const deleteButtons = document.querySelectorAll(".delete-btn"); // Selecciona todos los botones de eliminar
+  agregarEventosEliminar();
+  agregarEventosEditar();
 
-  document.getElementById("bulkReturnBtn").addEventListener("click", function () {
-    const selectedCheckboxes = document.querySelectorAll(".select-sell:checked");
-    const ids = Array.from(selectedCheckboxes).map(cb => cb.value);
-  
-    if (ids.length === 0) {
-      Swal.fire("Nothing selected", "Select at leat 1 record", "info");
-      return;
-    }
-    Swal.fire({
-      title: "¿Are you sure to do this devolutions?",
-      text: "The records will be send to the devolution menu.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Sí, enviar",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        fetch("devolution.php", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: "id_sell[]=" + ids.join("&id_sell[]="),
-        })
-        .then(response => response.text())
-        .then(data => {
-          if (data.trim() === "success") {
-            Swal.fire("¡Sent!", "Records are now on Devolutions.", "success");
-            selectedCheckboxes.forEach(cb => cb.closest("tr").remove());
-          } else {
-            Swal.fire("Error", data);
-          }
-        })
-        .catch(error => {
-          console.error("Error:", error);
-          Swal.fire("Error", "error.");
-        });
+  document
+    .getElementById("bulkReturnBtn")
+    .addEventListener("click", function () {
+      const selectedCheckboxes = document.querySelectorAll(
+        ".select-sell:checked"
+      );
+      const ids = Array.from(selectedCheckboxes).map((cb) => cb.value);
+
+      if (ids.length === 0) {
+        Swal.fire("Nothing selected", "Select at leat 1 record", "info");
+        return;
       }
-    });
-  });
-
-  
-  deleteButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const id_sell = this.getAttribute("data-id"); // Obtén el ID del sell_order
-      const row = this.closest("tr"); // Encuentra la fila (tr) correspondiente
-
-      // Mostrar mensaje de confirmación con SweetAlert2
       Swal.fire({
-        title: "¿Are you sure?",
-        text: "¡This action can not be undone!",
+        title: "¿Are you sure to do this devolutions?",
+        text: "The records will be send to the devolution menu.",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, Delete it", 
-        cancelButtonText: "Cancel",
+        confirmButtonText: "Sí, enviar",
+        cancelButtonText: "Cancelar",
       }).then((result) => {
         if (result.isConfirmed) {
-          // Si se confirma, realiza una solicitud para eliminar el registro
-          fetch("deleteSell.php", {
+          fetch("devolution.php", {
             method: "POST",
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: "id_sell=" + encodeURIComponent(id_sell), // Envía el sell_order como parámetro
+            body: "id_sell[]=" + ids.join("&id_sell[]="),
           })
             .then((response) => response.text())
             .then((data) => {
               if (data.trim() === "success") {
                 Swal.fire(
-                  "¡Eliminated!",
-                  "The record has been deleted.",
+                  "¡Sent!",
+                  "Records are now on Devolutions.",
                   "success"
                 );
-                row.remove(); // Elimina la fila de la tabla sin recargar la página
+                selectedCheckboxes.forEach((cb) => cb.closest("tr").remove());
               } else {
-                Swal.fire("Error", "deleting the record.", "error");
+                Swal.fire("Error", data);
               }
             })
             .catch((error) => {
               console.error("Error:", error);
-              Swal.fire(
-                "Error",
-                "Error conecting to the server.",
-                "error"
-              );
+              Swal.fire("Error", "error.");
             });
         }
       });
     });
-  });
 
-  const editButtons = document.querySelectorAll(".edit-btn");
-  const editModal = new bootstrap.Modal(document.getElementById("editModal"));
+  function agregarEventosEliminar() {
+    const deleteButtons = document.querySelectorAll(".delete-btn");
 
-  editButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      // Llenar los campos del modal con los valores de la fila
-      document.getElementById("edit-id-sell").value = this.dataset.id;
-      document.getElementById("edit-sell-order").value =
-        this.dataset.sell_order;
-      document.getElementById("edit-date").value = this.dataset.date;
-      document.getElementById("edit-upc").value = this.dataset.upc;
-      document.getElementById("edit-comision").value = this.dataset.comision;
-      document.getElementById("edit-rec-shipping").value =
-        this.dataset.received_shipping;
-      document.getElementById("edit-pay-shipping").value =
-        this.dataset.payed_shipping;
-      document.getElementById("edit-quantity").value = this.dataset.quantity;
-      document.getElementById("edit-item_price").value =
-        this.dataset.item_price;
-      document.getElementById("edit-total-item").value = this.dataset.total;
+    deleteButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const id_sell = this.getAttribute("data-id");
+        const row = this.closest("tr");
 
-      // Mostrar nombre de tienda y sucursal en los campos correspondientes
-      document.getElementById("edit-store").value = this.dataset.storeName; // Nombre de la tienda
-      document.getElementById("edit-sucursal").value =
-        this.dataset.sucursalCode; // Código de sucursal
-
-      // Guardar los IDs de tienda y sucursal en inputs invisibles
-      document.getElementById("edit-store-id").value = this.dataset.storeId; // ID de la tienda
-      document.getElementById("edit-sucursal-id").value =
-        this.dataset.sucursalId; // ID de la sucursal
-
-      const storeSelect = document.getElementById("edit-store");
-      storeSelect.value = this.dataset.storeId;
-
-      // Mostrar el modal
-      editModal.show();
+        Swal.fire({
+          title: "¿Are you sure?",
+          text: "¡This action can not be undone!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, Delete it",
+          cancelButtonText: "Cancel",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch("deleteSell.php", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: "id_sell=" + encodeURIComponent(id_sell),
+            })
+              .then((response) => response.text())
+              .then((data) => {
+                if (data.trim() === "success") {
+                  Swal.fire(
+                    "¡Eliminated!",
+                    "The record has been deleted.",
+                    "success"
+                  );
+                  row.remove();
+                } else {
+                  Swal.fire("Error", "Error deleting the record.", "error");
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+                Swal.fire("Error", "Error conecting to the server.", "error");
+              });
+          }
+        });
+      });
     });
-  });
+  }
 
+  function agregarEventosEditar() {
+    const editButtons = document.querySelectorAll(".edit-btn");
+    const editModal = new bootstrap.Modal(document.getElementById("editModal"));
+
+    editButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        document.getElementById("edit-id-sell").value = this.dataset.id;
+        document.getElementById("edit-sell-order").value =
+          this.dataset.sell_order;
+        document.getElementById("edit-date").value = this.dataset.date;
+        document.getElementById("edit-upc").value = this.dataset.upc;
+        document.getElementById("edit-comision").value = this.dataset.comision;
+        document.getElementById("edit-rec-shipping").value =
+          this.dataset.received_shipping;
+        document.getElementById("edit-pay-shipping").value =
+          this.dataset.payed_shipping;
+        document.getElementById("edit-quantity").value = this.dataset.quantity;
+        document.getElementById("edit-item_price").value =
+          this.dataset.item_price;
+        document.getElementById("edit-total-item").value = this.dataset.total;
+
+        document.getElementById("edit-store").value = this.dataset.storeName;
+        document.getElementById("edit-sucursal").value =
+          this.dataset.sucursalCode;
+
+        document.getElementById("edit-store-id").value = this.dataset.storeId;
+        document.getElementById("edit-sucursal-id").value =
+          this.dataset.sucursalId;
+
+        const storeSelect = document.getElementById("edit-store");
+        storeSelect.value = this.dataset.storeId;
+
+        editModal.show();
+      });
+    });
+  }
+
+  // Obtener el formulario de edición
   // Obtener el botón "Guardar cambios"
   const saveEditButton = document.getElementById("saveEdit");
 
@@ -304,4 +309,104 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .getElementById("edit-comision")
     .addEventListener("input", actualizarTotal);
+
+  // Función para filtrar ventas
+  document
+    .getElementById("filterForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault(); // Prevenir el envío del formulario
+
+      const upc = document.getElementById("upc").value;
+      const sell_order = document.getElementById("sell_order").value;
+      const date = document.getElementById("date").value;
+
+      // Crear el objeto con los filtros
+      const filters = {
+        upc: upc,
+        sell_order: sell_order,
+        date: date,
+      };
+
+      // Hacer la petición al servidor
+      fetch("filterSells.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `upc=${encodeURIComponent(
+          filters.upc
+        )}&sell_order=${encodeURIComponent(
+          filters.sell_order
+        )}&date=${encodeURIComponent(filters.date)}`,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            console.log(data.ventas); // Verifica la respuesta del servidor
+
+            // Si la respuesta es exitosa, actualizar la tabla
+            const ventasTableBody = document
+              .getElementById("salesTable")
+              .getElementsByTagName("tbody")[0];
+
+            ventasTableBody.innerHTML = ""; // Limpiar la tabla antes de llenarla
+
+            data.ventas.forEach((venta) => {
+              const row = ventasTableBody.insertRow();
+              row.innerHTML = `
+              <td><input type="checkbox" class="select-sell" value="${venta.id_sell}"></td>
+              <td>${venta.sell_order}</td>
+              <td>${venta.date}</td>
+              <td>${venta.upc_item}</td>
+              <td>${venta.received_shipping}</td>
+              <td>${venta.payed_shipping}</td>
+              <td>${venta.store_name}</td>
+              <td>${venta.code_sucursal}</td>
+              <td>${venta.comision_item}</td>
+              <td>${venta.quantity}</td>
+              <td>${venta.item_price}</td>
+              <td>${venta.total_item}</td>
+              <td>
+                <button class="edit-btn" data-id="${venta.id_sell}" data-sell_order="${venta.sell_order}" data-date="${venta.date}" data-upc="${venta.upc_item}" data-received_shipping="${venta.received_shipping}" data-payed_shipping="${venta.payed_shipping}" data-store-name="${venta.store_name}" data-store-id="${venta.id_store}" data-sucursal-code="${venta.code_sucursal}" data-sucursal-id="${venta.id_sucursal}" data-comision="${venta.comision_item}" data-quantity="${venta.quantity}" data-item_price="${venta.item_price}" data-total="${venta.total_item}">
+                  <img src='../../img/editar.png' width='28' height='28' alt='Editar'>
+                </button>
+              </td>
+              <td>
+                <button class="delete-btn" data-id="${venta.id_sell}">
+                  🗑️
+                </button>
+              </td>
+            `;
+            });
+            conectarBotones();
+            agregarEventosEliminar();
+            agregarEventosEditar();
+          } else {
+            alert("No se encontraron ventas con esos filtros.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error al filtrar ventas:", error);
+        });
+    });
+
+  function conectarBotones() {
+    document.querySelectorAll(".edit-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const id = this.getAttribute("data-id");
+        // Aquí pones tu función para abrir el modal de editar con ese ID
+        console.log("Editar venta con ID:", id);
+        // abrirModalEditar(id); <-- Tu función real
+      });
+    });
+
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const id = this.getAttribute("data-id");
+        // Aquí pones tu función para eliminar
+        console.log("Eliminar venta con ID:", id);
+        // eliminarVenta(id); <-- Tu función real
+      });
+    });
+  }
 });

@@ -97,3 +97,25 @@ td {
 body {
   overflow-x: auto;
 }
+
+.edit-btn {
+  border: none;
+  outline: none;
+  padding: 0; /* Para quitar cualquier espacio extra */
+  background: transparent; /* Asegura que no tenga fondo */
+}
+
+.edit-btn img {
+  border: none;
+  outline: none;
+  display: block; /* Elimina el espacio debajo de la imagen */
+}
+
+
+.delete-btn {
+  border: none;
+  outline: none;
+  padding: 0; /* Para quitar cualquier espacio extra */
+  background: transparent; /* Asegura que no tenga fondo */
+  size: 10px;
+}

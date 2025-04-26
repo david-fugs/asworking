@@ -49,20 +49,21 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
   <div class="flex">
     <div class="box">
-      <form action="showitems.php" method="get" class="form">
-        <input name="upc_item" type="text" placeholder="Upc ">
-        <input name="item" type="text" placeholder="Item">
-        <input name="ref" type="text" placeholder="Reference">
+      <form id="filterForm" class="form">
+        <input name="upc_item" type="text" placeholder="Upc" id="upc">
+        <input name="item" type="text" placeholder="#Order" id="sell_order">
+        <input type="date" name="sellDate" id="date" placeholder="Date">
         <input value="Search" type="submit">
       </form>
     </div>
   </div>
   <div class="position-relative mb-3">
-            <button id="bulkReturnBtn" class="btn btn-success position-absolute "  style="margin-left: 310px; margin-top: 33px; " data-bs-target="#modalNewPerson">
-                Make devolutions
-            </button>
+    <button id="bulkReturnBtn" class="btn btn-success position-absolute " style="margin-left: 310px; margin-top: 33px; "
+      data-bs-target="#modalNewPerson">
+      Make devolutions
+    </button>
 
-        </div>
+  </div>
 
   <!-- Tabla de Ventas -->
   <div class="container mt-5">

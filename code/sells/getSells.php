@@ -22,7 +22,7 @@ $query = "SELECT
           LEFT JOIN store  ON store.id_store = sell.id_store
           LEFT JOIN sucursal  ON sucursal.id_sucursal = sell.id_sucursal
           WHERE sell.estado_sell = 1 "
-          ;
+;
 
 $result = $mysqli->query($query);
 
@@ -44,7 +44,7 @@ if ($result->num_rows > 0) {
     echo "<td>" . $row['item_price'] . "</td>";
     echo "<td>" . $row['total_item'] . "</td>";
     echo "<td>
-      <button class='edit-btn'
+      <button class='edit-btn type=button'
         data-id='" . $row['id_sell'] . "'
         data-sell_order='" . $row['sell_order'] . "'
         data-date='" . $row['date'] . "'
@@ -59,7 +59,7 @@ if ($result->num_rows > 0) {
         data-quantity='" . $row['quantity'] . "'
         data-item_price='" . $row['item_price'] . "'
         data-total='" . $row['total_item'] . "'>
-        ✏️
+         <img src='../../img/editar.png' width='28' height='28' alt='Editar'>
       </button>
     </td>";
     echo "<td>

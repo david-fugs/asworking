@@ -28,7 +28,7 @@ if ($row = $result->fetch_assoc()) {
     "item" => $row["item_item"],
     "cost" => number_format($row["cost_item"], 2),
     "brand" => $row["brand_item"],
-    "quantity" => $row["quantity_inventory"],
+    "quantity" => isset($row["quantity_inventory"]) ? (int)$row["quantity_inventory"] : 0,
   ]);
 } else {
   echo json_encode(["success" => false]);

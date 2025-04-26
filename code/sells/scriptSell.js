@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reiniciar selects a su opción por defecto
     tiendaSelect.selectedIndex = 0;
     sucursalSelect.innerHTML =
-      '<option value="">-- Primero selecciona una tienda --</option>';
+      '<option value="">-- First select store --</option>';
   }
 
   function buscarItemPorUPC(upc) {
@@ -105,6 +105,17 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((response) => response.json())
       .then((data) => {
         if (data.success && data.item && data.cost) {
+          const maxCantidadInventory = parseInt(data.quantity);
+          if (maxCantidadInventory <= 0) {
+            Swal.fire({
+              icon: "warning",
+              title: "Out of stock",
+              text: "This product has no available inventory.",
+            });
+            limpiarCamposProducto();
+            return; // No seguir llenando campos
+          }
+
           itemNameInput.value = data.item;
           priceInput.value = "$" + parseFloat(data.cost).toFixed(2);
           brandItem.value = data.brand || "";
@@ -225,7 +236,11 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("comisionItem").value = "";
       upcInput.focus();
     } else {
-      alert("Verifica que todos aatos estén completos y correctos.");
+      Swal.fire({
+        icon: "error",
+        title: "Error validating",
+        text: "Verify that all data is complete and correct.",
+      });
     }
   });
 
@@ -285,11 +300,13 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       if (ventas.length === 0) {
-        alert("No hay productos para vender.");
+        Swal.fire({
+          icon: "error",
+          title: "Error creating sale",
+          text: "There are no products to create a sale.",
+        });
         return;
       }
-
-      console.log("Ventas a guardar:", ventas);
       try {
         const response = await fetch("saveSell.php", {
           method: "POST",
@@ -301,20 +318,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const result = await response.json();
         if (result.success) {
-          alert(
-            "Ventas guardadas correctamente. Sell Order: " + result.sell_order
-          );
+          if (ventas.length === 1) {
+            Swal.fire({
+              icon: "success",
+              title: "Sale saved successfully",
+              text: `The sale was created with order number ${result.sell_order}.`,
+            });
+          } else {
+            Swal.fire({
+              icon: "success",
+              title: "Sales saved successfully",
+              text: `They have registered ${ventas.length} ventas.`,
+            });
+          }
 
           // Limpiar tabla
           bodyTable.innerHTML = "";
 
           // Habilitar el campo de fecha
           sellDateInput.disabled = false;
-        } else {
-          alert("Error: " + result.message);
         }
       } catch (error) {
-        alert("Error al enviar las ventas: " + error.message);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: `Error sending sales.`,
+        });
       }
     });
 });
