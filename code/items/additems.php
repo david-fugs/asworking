@@ -25,17 +25,20 @@ header("Content-Type: text/html;charset=utf-8");
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
 	<link href="../../fontawesome/css/all.css" rel="stylesheet">
 	<script src="https://kit.fontawesome.com/fed2435e21.js" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 	<style>
 		.responsive {
 			max-width: 100%;
 			height: auto;
 		}
+
 		.mensaje-error {
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-	display: none; 
-}
+			padding: 10px;
+			border-radius: 5px;
+			margin-bottom: 10px;
+			display: none;
+		}
 	</style>
 	<!--SCRIPT PARA VALIDAR SI EL REGISTRO YA ESTÁ EN LA BD-->
 	<script type="text/javascript">
@@ -177,36 +180,56 @@ header("Content-Type: text/html;charset=utf-8");
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
 
 	<script>
-			$(document).ready(function() {
-				$('#upc_item').on('blur', function() {
-					var upc = $(this).val().toUpperCase();
+		$(document).ready(function() {
+			$('#upc_item').on('blur', function() {
+				var upc = $(this).val().toUpperCase();
 
-					if (upc.trim() !== '') {
-						$.ajax({
-							url: 'verificar_upc.php',
-							type: 'POST',
-							data: {
-								upc_item: upc
-							},
-							success: function(respuesta) {
-								//cambiar el atributo de mensaje-error de display none a display 
+				if (upc.trim() !== '') {
+					$.ajax({
+						url: 'verificar_upc.php',
+						type: 'POST',
+						data: {
+							upc_item: upc
+						},
+						success: function(respuesta) {
+							var data = JSON.parse(respuesta);
+
+							// Si se encontró el UPC
+							if (data.status === 'existe') {
+								var itemsMessage = '';
+
+								// Si hay múltiples coincidencias, mostramos todas
+								data.items.forEach(function(item) {
+									itemsMessage += 'Brand: ' + item.brand_item + ', Item: ' + item.item_item + '\n';
+
+									// Llenar los campos con los primeros valores encontrados
+									$('#brand_item').val(item.brand_item);
+									$('#item_item').val(item.item_item);
+								});
+
+								// Usamos SweetAlert para mostrar las coincidencias
+								Swal.fire({
+									title: 'UPC already exists!',
+									text: itemsMessage,
+									icon: 'warning',
+									confirmButtonText: 'Ok'
+								});
+
+								// Cambiar el atributo de mensaje-error de display none a display
 								$('#mensaje-upc').show();
-								if (respuesta === 'existe') {
-									$('#mensaje-upc').text('This UPC already exists in the database.').css('color', 'red');
-									//agregar la clase alert alert-danger a mensaje-upc
-									$('#mensaje-upc').addClass('alert alert-danger');
-								} else {
-									//cambiar  el color de mensaje-upc a verde
-									//agregar la clase alert alert-success a mensaje-upc
-									$('#mensaje-upc').removeClass('alert alert-danger');
-									$('#mensaje-upc').addClass('alert alert-success');
-									$('#mensaje-upc').text('This UPC is available.').css('color', 'green');
-								}
+								$('#mensaje-upc').text('This UPC already exists in the database.').css('color', 'red');
+								$('#mensaje-upc').addClass('alert alert-danger');
+							} else {
+								// Cambiar el color de mensaje-upc a verde
+								$('#mensaje-upc').removeClass('alert alert-danger');
+								$('#mensaje-upc').addClass('alert alert-success');
+								$('#mensaje-upc').text('This UPC is available.').css('color', 'green');
 							}
-						});
-					}
-				});
+						}
+					});
+				}
 			});
+		});
 	</script>
 </body>
 

@@ -82,6 +82,14 @@ foreach ($data['ventas'] as $venta) {
     echo json_encode(["success" => false, "message" => "Error al guardar venta: " . $stmt->error]);
     exit();
   }
+  
+  //  UPDATE de inventario restando la cantidad vendida
+  $updateQuery = "UPDATE inventory SET quantity_inventory = quantity_inventory - $quantity WHERE upc_inventory = '$upc_item'";
+  if (!$mysqli->query($updateQuery)) {
+    http_response_code(500);
+    echo json_encode(["success" => false, "message" => "Error al actualizar inventario: " . $mysqli->error]);
+    exit();
+  }
 }
 
 // Cierre

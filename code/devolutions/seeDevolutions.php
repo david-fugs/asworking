@@ -36,6 +36,14 @@ function deleteMember($id_devolution)
 
   $stmt->close();
 }
+
+
+//traer lo que traiga el formulario de busqueda
+if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['sell_order'])) {
+  $upc_item = $_GET['upc_item'];
+  $date_devolution = $_GET['date_devolution'];
+  $sell_order = $_GET['sell_order'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -51,7 +59,7 @@ function deleteMember($id_devolution)
   <link rel="stylesheet" href="styleSell.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Librerías de DataTables -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
@@ -74,16 +82,17 @@ function deleteMember($id_devolution)
   <center style="margin-top: 20px;">
     <img src='../../img/logo.png' width="300" height="212" class="responsive">
   </center>
-  <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i
-        class="fa-solid fa-file-signature"></i> DEVOLUTIONS </b></h1>
+  <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i class="fas fa-file-alt"></i> DEVOLUTIONS </b></h1>
 
   <div class="flex">
     <div class="box">
       <form action="seeDevolutions.php" method="get" class="form">
-        <input name="upc_item" type="text" placeholder="Upc ">
-        <input name="date_devolution" type="text" placeholder="Devolution Date">
+        <input name="upc_item" type="text" placeholder="Upc" value="<?= isset($_GET['upc_item']) ? htmlspecialchars($_GET['upc_item']) : '' ?>">
+        <input name="date_devolution" type="date" placeholder="Devolution Date" value="<?= isset($_GET['date_devolution']) ? htmlspecialchars($_GET['date_devolution']) : '' ?>">
+        <input name="sell_order" type="text" placeholder="Sell Order" value="<?= isset($_GET['sell_order']) ? htmlspecialchars($_GET['sell_order']) : '' ?>">
         <input value="Search" type="submit">
       </form>
+
     </div>
   </div>
   <div class="position-relative mb-3">

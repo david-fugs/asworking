@@ -1,20 +1,41 @@
 <?php
-
 include("../../conexion.php");
 
-// Consulta SQL para obtener los datos
-$query = "SELECT DISTINCT d.*, s.store_name, su.code_sucursal
-FROM devolutions AS d
-JOIN store AS s ON d.id_store = s.id_store
-JOIN sucursal AS su ON d.id_sucursal = su.id_sucursal
-JOIN items AS i ON d.upc_item = i.upc_item;
+// Inicializamos las condiciones de búsqueda
+$where = [];
 
-          ";
+// Verifica si se ha enviado el valor de sell_order
+if (isset($_GET['sell_order']) && $_GET['sell_order'] !== '') {
+    $where[] = "d.sell_order = '" . $mysqli->real_escape_string($_GET['sell_order']) . "'";
+}
 
+// Verifica si se ha enviado el valor de date_devolution
+if (isset($_GET['date_devolution']) && $_GET['date_devolution'] !== '') {
+    $where[] = "d.date = '" . $mysqli->real_escape_string($_GET['date_devolution']) . "'";
+}
+
+// Verifica si se ha enviado el valor de upc_item
+if (isset($_GET['upc_item']) && $_GET['upc_item'] !== '') {
+    $where[] = "d.upc_item = '" . $mysqli->real_escape_string($_GET['upc_item']) . "'";
+}
+
+// Construye la consulta base
+$query = "
+    SELECT DISTINCT d.*, s.store_name, su.code_sucursal
+    FROM devolutions AS d
+    JOIN store AS s ON d.id_store = s.id_store
+    JOIN sucursal AS su ON d.id_sucursal = su.id_sucursal
+    JOIN items AS i ON d.upc_item = i.upc_item
+";
+
+// Si existen filtros, agregamos la cláusula WHERE
+if (!empty($where)) {
+    $query .= " WHERE " . implode(" AND ", $where);
+}
+
+// Ejecutamos la consulta
 $result = $mysqli->query($query);
-
 $data = [];
-
 if ($result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
     echo "<tr>";

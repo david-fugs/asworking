@@ -1,6 +1,17 @@
 <?php
 
 include("../../conexion.php");
+require_once '../../zebra.php';
+// Incluir la librería de Zebra_Pagination
+$totalQuery = "SELECT COUNT(*) as total FROM sell WHERE estado_sell = 1";
+$totalResult = $mysqli->query($totalQuery);
+$totalRow = $totalResult->fetch_assoc();
+$totalRegistros = $totalRow['total'];
+
+$pagination = new Zebra_Pagination();
+$pagination->records($totalRegistros);
+$pagination->records_per_page(15); // Cambia 10 por los registros por página que desees
+$inicio = ($pagination->get_page() - 1) * 1;
 
 // Consulta SQL para obtener los datos
 $query = "SELECT 
@@ -21,8 +32,8 @@ $query = "SELECT
           FROM sell 
           LEFT JOIN store  ON store.id_store = sell.id_store
           LEFT JOIN sucursal  ON sucursal.id_sucursal = sell.id_sucursal
-          WHERE sell.estado_sell = 1 "
-;
+          WHERE sell.estado_sell = 1
+          limit $inicio, 15";
 
 $result = $mysqli->query($query);
 
@@ -69,6 +80,7 @@ if ($result->num_rows > 0) {
 } else {
   echo "<tr><td colspan='9'>No se encontraron registros.</td></tr>";
 }
+$pagination->render();
 
 
 $mysqli->close();
