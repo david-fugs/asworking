@@ -35,6 +35,11 @@ $tipo_usu = $_SESSION['tipo_usuario'];
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
 
 
 
@@ -42,11 +47,19 @@ $tipo_usu = $_SESSION['tipo_usuario'];
 
 <body>
     <style>
+        #totalSales {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         #print-area {
-            display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 40px;
+            width: 800px;
+            height: 400px;
+            
+
         }
 
         btn-danger:hover {
@@ -74,38 +87,31 @@ $tipo_usu = $_SESSION['tipo_usuario'];
 
         </div>
     </div>
+    <div class="d-flex justify-content-end ">
+        <button onclick="window.printChart()" class="btn btn-secondary mt-2 me-5">Print Report</button>
 
-    <button onclick="window.printChart()" class="btn btn-secondary mt-2">Print Report</button>
-
-    <!-- Aquí va el contenedor para mostrar el total de ventas -->
-
-    <!-- aparece el grafico -->
-    <div id="print-area">
-        <div id="totalSales" class="mb-4"></div>
-        <canvas id="salesChart" width="300" height="100"></canvas>
     </div>
+    <!-- aparece el grafico -->
+    <center style="margin-bottom: 50px;" >
+        <div id="print-area" >
+            <div id="totalSales" class="mb-4"></div>
+            <canvas id="salesChart" width="800" height="400"></canvas>
+        </div>
+    </center>
+
     <script>
         const startDate = '<?= $_GET['start_date'] ?? '' ?>';
         const endDate = '<?= $_GET['end_date'] ?? '' ?>';
 
-        // Realizamos el fetch para obtener los datos de las ventas
         fetch(`get_sales_data.php?start_date=${startDate}&end_date=${endDate}`)
             .then(response => response.json())
             .then(data => {
-                // Obtener las etiquetas (meses) y las ventas totales por mes
                 const labels = data.map(item => item.month);
-                const totals = data.map(item => parseFloat(item.total_sales)); // Aseguramos que sea un número
+                const totals = data.map(item => parseFloat(item.total_sales));
 
-                // Calcular el total de todas las ventas
-                const totalSales = totals.reduce(function(acc, curr) {
-                    return acc + curr;
-                }, 0);
+                const totalSales = totals.reduce((acc, curr) => acc + curr, 0);
+                document.getElementById('totalSales').innerHTML = `<h3>Total Sales: $${totalSales.toFixed(2)}</h3>`;
 
-                // Mostrar el total de ventas en la parte superior
-                const totalSalesElement = document.getElementById('totalSales');
-                totalSalesElement.innerHTML = `<h3>Total Sales: $${totalSales.toFixed(2)}</h3>`; // Formateado a 2 decimales
-
-                // Crear el gráfico
                 const ctx = document.getElementById('salesChart').getContext('2d');
                 new Chart(ctx, {
                     type: 'bar',
@@ -114,25 +120,42 @@ $tipo_usu = $_SESSION['tipo_usuario'];
                         datasets: [{
                             label: 'Monthly Sales ($)',
                             data: totals,
-                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
+                            backgroundColor: 'rgba(199, 110, 215, 0.6)',
+                            borderColor: 'rgb(116, 36, 125)',
+                            borderWidth: 1,
+                            barThickness: 60
                         }]
                     },
                     options: {
+                        plugins: {
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                formatter: (value) => '$' + value.toFixed(2),
+                                color: '#000',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
                         scales: {
                             y: {
                                 beginAtZero: true
                             }
                         }
-                    }
+                    },
+                    plugins: [ChartDataLabels] // Activar el plugin
                 });
             });
     </script>
     <script>
         function printChart() {
+            //evitar envio de form
+            event.preventDefault();
             const canvas = document.getElementById("salesChart");
             const dataUrl = canvas.toDataURL("image/png");
+
+            const totalSalesHTML = document.getElementById("totalSales").innerHTML;
 
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
@@ -144,14 +167,22 @@ $tipo_usu = $_SESSION['tipo_usuario'];
                         text-align: center;
                         margin: 0;
                         padding: 20px;
+                        font-family: Arial, sans-serif;
                     }
                     img {
                         max-width: 100%;
                         height: auto;
+                        margin-top: 20px;
+                    }
+                    .total-sales {
+                        font-size: 20px;
+                        font-weight: bold;
+                        margin-bottom: 10px;
                     }
                 </style>
             </head>
             <body>
+                <div class="total-sales">${totalSalesHTML}</div>
                 <img src="${dataUrl}" alt="Chart"/>
                 <script>
                     window.onload = function() {

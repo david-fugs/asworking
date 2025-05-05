@@ -129,10 +129,16 @@ document.addEventListener("DOMContentLoaded", function () {
           quantityInput1.addEventListener("input", function () {
             if (parseInt(this.value) > maxCantidad) {
               alert(`Only ${maxCantidad} units are available.`);
-              this.value = maxCantidad;
+              this.value = "";
+              refInput.value = ""; // Limpiar el campo de total
             }
           });
         } else {
+          Swal.fire({
+            icon: "error",
+            title: "UPC Not Found",
+            text: "This UPC does not exist in the database.",
+          });
           limpiarCamposProducto();
         }
       })

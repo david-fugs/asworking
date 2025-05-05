@@ -57,99 +57,37 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
     <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="../items/css/styles.css">
     <link rel="stylesheet" type="text/css" href="../items/css/estilos2024.css">
+    <link rel="stylesheet" href="../../css/navbar.css">
     <script src="https://kit.fontawesome.com/fed2435e21.js" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <style>
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .top-bar .center {
-            flex-grow: 1;
-            text-align: center;
-            margin-left: 300px;
-
-        }
-
-        .btn-add-store {
-            padding: 10px 20px;
-            background-color: #198754;
-            /* verde tipo Bootstrap */
-            color: white;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-right: 100px;
-        }
-
-        .btn-add-store:hover {
-            background-color: #157347;
-        }
-
-        th {
-            font-size: 15px;
-        }
-
-        td {
-            font-size: 15px;
-        }
-
-        .responsive {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .selector-for-some-widget {
-            box-sizing: content-box;
-        }
-
-        .pending {
-            background-color: orange;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .ok {
-            background-color: lightblue;
-            color: black;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .disabled-link {
-            pointer-events: none;
-            opacity: 0.6;
-        }
-    </style>
 </head>
 
 <body>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"></script>
-    <center style="margin-top: 20px;">
-        <img src='../../img/logo.png' width="300" height="212" class="responsive">
-    </center>
-    <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i class="fa-solid fa-file-signature"></i> REPORT </b></h1>
+    <div class="header-container">
+        <div class="header">
+            <div class="logo-container">
+                <img src='../../img/logo.png' class="logo" alt="Logo">
+            </div>
+            <h1 class="title"><i class="fa-solid fa-file-signature"></i> DAILY REPORT</h1>
+        </div>
+    </div>
 
     <div class="top-bar">
         <div></div>
         <div class="center">
-            <a href="../../access.php">
-                <img src='../../img/atras.png' width="72" height="72" title="Back">
+            <a href="../../access.php" class="back-btn" title="Go Back">
+                <i class="fas fa-arrow-circle-left fa-xl"></i>
             </a>
         </div>
         <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
             <a href="seeReport.php" class="btn-add-store">
-                See Daily Report
+                <i class="fas fa-file-alt"></i> See Daily Report
             </a>
         </div>
     </div>
@@ -171,85 +109,85 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-10 col-lg-8">
-                <form action="processReport.php" method="POST" class="bg-white p-4 rounded shadow-sm border">
-                    <h5 class="mb-4 text-center">New Report</h5>
+                <form action="processReport.php" method="POST" class="form-container">
+                    <h5 class="form-title">New Report</h5>
                     <div class="row g-3">
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="upc_asignado_report" class="form-label"> Assigned UPC</label>
                             <input type="text" class="form-control form-control-sm" id="upc_asignado_report" onblur="buscarUPC() " name="upc_asignado_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="upc_final_report" class="form-label"> Final UPC</label>
                             <input type="text" class="form-control form-control-sm" id="upc_final_report" name="upc_final_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="cons_report" class="form-label">Cons</label>
                             <input type="text" class="form-control form-control-sm" id="cons_report" name="cons_report" required>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="folder_report" class="form-label">Folder</label>
                             <input type="text" class="form-control form-control-sm" id="folder_report" name="folder_report" required>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="loc_report" class="form-label">Location</label>
                             <input type="text" class="form-control form-control-sm" id="loc_report" name="loc_report">
                         </div>
 
-                        <div class="col-md-6 mt-4">
+                        <div class="col-md-6 form-group mt-4">
                             <label for="quantity_report" class="form-label">Quantity</label>
                             <input type="number" class="form-control form-control-sm" id="quantity_report" name="quantity_report" required>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="sku_report" class="form-label">SKU</label>
                             <input type="text" class="form-control form-control-sm" id="sku_report" name="sku_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="brand_report" class="form-label">Brand</label>
                             <input type="text" class="form-control form-control-sm" id="brand_report" name="brand_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="item_report" class="form-label">Item</label>
                             <input type="text" class="form-control form-control-sm" id="item_report" name="item_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="vendor_report" class="form-label">Vendor </label>
                             <input type="text" class="form-control form-control-sm" id="vendor_report" name="vendor_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="color_report" class="form-label">Color</label>
                             <input type="text" class="form-control form-control-sm" id="color_report" name="color_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="size_report" class="form-label">Size</label>
                             <input type="text" class="form-control form-control-sm" id="size_report" name="size_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="category_report" class="form-label">Category</label>
                             <input type="text" class="form-control form-control-sm" id="category_report" name="category_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="weight_report" class="form-label">Weight</label>
                             <input type="text" step="0.01" class="form-control form-control-sm" id="weight_report" name="weight_report">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-6 form-group">
                             <label for="inventory_report" class="form-label">Inventory</label>
                             <input type="text" class="form-control form-control-sm" id="inventory_report" name="inventory_report">
                         </div>
 
-                        <div class="col-md-6 mt-4">
+                        <div class="col-md-6 form-group mt-4">
                             <label for="sucursal_report" class="form-label">Sucursal</label>
                             <select class="form-select form-select-sm" id="sucursal_report" name="sucursal_report" required>
                                 <option value="">Select Sucursal</option>
@@ -264,8 +202,8 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                             <textarea class="form-control form-control-sm" id="observacion_report" name="observacion_report" rows="2"></textarea>
                         </div>
                     </div>
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-success btn-sm px-4">Send</button>
+                    <div class=" mt-4 d-flex justify-content-center " style="margin-left: 90px;" >
+                        <button type="submit" class="btn-add-store">Send</button>
                     </div>
                 </form>
             </div>
@@ -284,11 +222,14 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             </div>
         </div>
     </div>
-
-
-    <center>
-        <br /><a href="../access.php"><img src='../../img/atras.png' width="72" height="72" title="Regresar" /></a>
-    </center>
+    <div class="back">
+        <div></div>
+        <div class="">
+            <a href="../../access.php" class="back-btn" title="Go Back">
+                <i class="fas fa-arrow-circle-left fa-xl"></i>
+            </a>
+        </div>
+    </div>
 
     <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
     <script>
