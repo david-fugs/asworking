@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <td class="payed_shipping">${payedShipping.toFixed(2)}</td>
       <td class="precio_unitario">$${precioUnitario.toFixed(2)}</td>
       <td class="total_item">${total.toFixed(2)}</td>
-      <td><button type="button" class="btn-delete">🗑️</button></td>
+      <td><button type="button" class="btn-action btn-delete"><i class="fas fa-trash-alt"></i></button></td>
     `;
 
       // Agregar evento al botón de eliminar

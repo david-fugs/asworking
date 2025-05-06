@@ -53,237 +53,460 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>ASWWORKING | SOFT</title>
-    <script src="js/64d58efce2.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
-    <link rel="stylesheet" type="text/css" href="css/estilos2024.css">
+    <title>ASWWORKING | ITEMS</title>
     <link href="../../../fontawesome/css/all.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/fed2435e21.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <style>
-        th {
-            font-size: 15px;
+        :root {
+            --primary-dark: #4a2568;
+            --primary: #632b8b;
+            --primary-light: #5d337a;
+            --secondary: #997cab;
+            --secondary-light: #dac7e5;
+            --text-dark: #2d2d2d;
+            --text-light: #f8f9fa;
+            --bg-light: #f5f3f7;
         }
 
-        td {
-            font-size: 15px;
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .responsive {
-            max-width: 100%;
-            height: auto;
+        /* Header styles */
+        .header-container {
+            width: 100%;
+            background-color: var(--secondary-light);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            margin-bottom: 30px;
         }
 
-        .selector-for-some-widget {
-            box-sizing: content-box;
+        .logo {
+            height: 100px;
+            width: auto;
+            transition: transform 0.3s ease;
         }
 
-        .pending {
-            background-color: orange;
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .page-title {
+            color: var(--primary);
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--secondary-light));
+            border-radius: 3px;
+        }
+
+        /* Search form */
+        .search-form {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .search-form input[type="text"] {
+            border: 1px solid var(--secondary);
+            border-radius: 6px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .search-form input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 43, 139, 0.2);
+            outline: none;
+        }
+
+        .search-form input[type="submit"] {
+            background: linear-gradient(to bottom, var(--primary), var(--primary-light));
             color: white;
-            font-weight: bold;
-            text-align: center;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
-        .ok {
-            background-color: lightblue;
-            color: black;
-            font-weight: bold;
-            text-align: center;
+
+        .search-form input[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .disabled-link {
-            pointer-events: none;
-            opacity: 0.6;
+
+        /* Table styles */
+        
+        .table-container {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            background: white;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        thead {
+            background: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        thead th {
+            padding: 14px 10px;
+            text-align: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.82rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        tbody tr {
+            background-color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgba(248, 240, 255, 0.8);
+        }
+
+        tbody tr:hover {
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(99, 43, 139, 0.1);
+        }
+
+        tbody td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(153, 124, 171, 0.3);
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        /* Action buttons */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            color: var(--primary);
+        }
+
+        .btn-edit:hover {
+            background-color: rgba(99, 43, 139, 0.1);
+            transform: scale(1.1);
+        }
+
+        .btn-delete {
+            color: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+            transform: scale(1.1);
+        }
+
+        /* Back button */
+      .back-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: transparent;
+        border: none;
+        color: #5d337a; /* Morado oscuro */
+        font-size: 1.8rem;
+        cursor: pointer;
+        padding: 15px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        width: 50px;
+        height: 50px;
+    }
+
+    .back-btn:hover {
+        background-color: rgba(93, 51, 122, 0.1);
+        color: #632b8b;
+        transform: translateX(-3px);
+    }
+
+    .back-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .back-btn:hover i {
+        transform: scale(1.1);
+    }
+
+
+        /* Modal styles */
+        .modal-header {
+            background-color: var(--secondary-light);
+            border-bottom: 1px solid var(--secondary);
+        }
+
+        .modal-title {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to bottom, var(--primary), var(--primary-light));
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to bottom, var(--primary-light), var(--primary));
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .logo {
+                height: 80px;
+            }
+            
+            .page-title {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 
 <body>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"></script>
-    <center style="margin-top: 20px;">
-        <img src='../../img/logo.png' width="300" height="212" class="responsive">
-    </center>
-    <h1 style="color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i class="fa-solid fa-file-signature"></i> ITEMS</b></h1>
-    <div class="flex">
-        <div class="box">
-            <form action="showitems.php" method="get" class="form">
-                <input name="upc_item" type="text" placeholder="Upc " value="<?= htmlspecialchars($upc_item) ?>">
-                <input name="item" type="text" placeholder="Item" value="<?= htmlspecialchars($item) ?>">
-                <input name="ref" type="text" placeholder="Reference" value="<?= htmlspecialchars($reference) ?>">
-                <input value="Search" type="submit">
-            </form>
+    <div class="header-container">
+        <div class="container text-center">
+            <img src='../../img/logo.png' class="logo" alt="ASWWORKING Logo">
         </div>
     </div>
-    <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
-    <?php 
-date_default_timezone_set("America/Bogota");
-include("../../conexion.php");
-require_once("../../zebra.php");
 
-// Inicializa la consulta base
-$queryBase = "SELECT items.*, inventory.quantity_inventory 
-FROM items 
-LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
-WHERE 1=1";
+    <div class="container">
+        <h1 class="page-title text-center"><i class="fa-solid fa-file-signature"></i> ITEMS</h1>
+        
+        <!-- Search Form -->
+        <div class="search-form">
+            <form action="showitems.php" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="upc_item" class="form-control" placeholder="UPC" value="<?= htmlspecialchars($upc_item) ?>">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="item" class="form-control" placeholder="Item" value="<?= htmlspecialchars($item) ?>">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="ref" class="form-control" placeholder="Reference" value="<?= htmlspecialchars($reference) ?>">
+                </div>
+                <div class="col-md-1">
+                    <input type="submit" value="Search" class="btn btn-primary w-100">
+                </div>
+            </form>
+        </div>
 
-// Agrega filtros si existen
-if (!empty($_GET['upc_item'])) {
-    $upc_item = $mysqli->real_escape_string($_GET['upc_item']);
-    $queryBase .= " AND upc_item LIKE '%$upc_item%'";
-}
-if (!empty($_GET['item'])) {
-    $item = $mysqli->real_escape_string($_GET['item']);
-    $queryBase .= " AND item_item LIKE '%$item%'";
-}
-if (!empty($_GET['ref'])) {
-    $reference = $mysqli->real_escape_string($_GET['ref']);
-    $queryBase .= " AND ref_item = '$reference'";
-}
+        <?php 
+        date_default_timezone_set("America/Bogota");
+        require_once("../../zebra.php");
 
-// Ordenar por cantidad en inventory
-$queryBase .= " ORDER BY inventory.quantity_inventory DESC";
+        // Inicializa la consulta base
+        $queryBase = "SELECT items.*, inventory.quantity_inventory 
+        FROM items 
+        LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
+        WHERE 1=1";
 
-// Consulta para conteo (sin duplicados)
-$countQuery = "SELECT COUNT(DISTINCT items.id_item) as total 
-               FROM items 
-               LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
-               WHERE 1=1";
+        // Agrega filtros si existen
+        if (!empty($_GET['upc_item'])) {
+            $upc_item = $mysqli->real_escape_string($_GET['upc_item']);
+            $queryBase .= " AND upc_item LIKE '%$upc_item%'";
+        }
+        if (!empty($_GET['item'])) {
+            $item = $mysqli->real_escape_string($_GET['item']);
+            $queryBase .= " AND item_item LIKE '%$item%'";
+        }
+        if (!empty($_GET['ref'])) {
+            $reference = $mysqli->real_escape_string($_GET['ref']);
+            $queryBase .= " AND ref_item = '$reference'";
+        }
 
-// Aplicar mismos filtros a countQuery
-if (!empty($_GET['upc_item'])) {
-    $countQuery .= " AND items.upc_item LIKE '%$upc_item%'";
-}
-if (!empty($_GET['item'])) {
-    $countQuery .= " AND items.item_item LIKE '%$item%'";
-}
-if (!empty($_GET['ref'])) {
-    $countQuery .= " AND items.ref_item = '$reference'";
-}
+        // Ordenar por cantidad en inventory
+        $queryBase .= " ORDER BY inventory.quantity_inventory DESC";
 
-$countResult = $mysqli->query($countQuery);
-if (!$countResult) die("Error en conteo: " . $mysqli->error);
-$countRow = $countResult->fetch_assoc();
-$num_registros = $countRow['total'];
+        // Consulta para conteo (sin duplicados)
+        $countQuery = "SELECT COUNT(DISTINCT items.id_item) as total 
+                       FROM items 
+                       LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
+                       WHERE 1=1";
 
-$resul_x_pagina = 50;
-// Si no hay registros, evita errores en la paginación
-if ($num_registros > 0) {
-    // Configuración de Zebra_Pagination
-    $paginacion = new Zebra_Pagination();
-    $paginacion->records($num_registros);
-    $paginacion->records_per_page($resul_x_pagina);
+        // Aplicar mismos filtros a countQuery
+        if (!empty($_GET['upc_item'])) {
+            $countQuery .= " AND items.upc_item LIKE '%$upc_item%'";
+        }
+        if (!empty($_GET['item'])) {
+            $countQuery .= " AND items.item_item LIKE '%$item%'";
+        }
+        if (!empty($_GET['ref'])) {
+            $countQuery .= " AND items.ref_item = '$reference'";
+        }
 
-    $page = $paginacion->get_page(); // Obtiene la página actual
-    $offset = ($page - 1) * $resul_x_pagina; // Calcula el desplazamiento
-    $queryFinal = $queryBase . " LIMIT $offset, $resul_x_pagina";
-    $result = $mysqli->query($queryFinal);
+        $countResult = $mysqli->query($countQuery);
+        if (!$countResult) die("Error en conteo: " . $mysqli->error);
+        $countRow = $countResult->fetch_assoc();
+        $num_registros = $countRow['total'];
 
-    if (!$result) {
-        die("Error en la consulta: " . $mysqli->error);
-    }
+        $resul_x_pagina = 50;
+        
+        if ($num_registros > 0) {
+            // Configuración de Zebra_Pagination
+            $paginacion = new Zebra_Pagination();
+            $paginacion->records($num_registros);
+            $paginacion->records_per_page($resul_x_pagina);
 
-    echo "<section class='content'>
-    <div class='card-body'>
-        <div class='table-responsive'>
-            <table class='table table-striped table-hover' style='width:1300px;'>
-                <thead class='table-dark'>
-                    <tr>
-                        <th>No.</th>
-                        <th>UPC </th>
-                        <th>SKU</th>
-                        <th>DATE</th>
-                        <th>BRAND</th>
-                        <th style='width: 400px; !important' >ITEM</th>
-                        <th>REF</th>
-                        <th>COLOR</th>
-                        <th>SIZE</th>
-                        <th>CATEGORY</th>
-                        <th>COST</th>
-                        <th>WEIGHT</th>
-                        <th>STOCK</th>
-                        <th>BATCH</th>
-                        <th>EDIT</th>
-                        <th>DELETE</th>
-                    </tr>
-                </thead>
-                <tbody>";
+            $page = $paginacion->get_page(); // Obtiene la página actual
+            $offset = ($page - 1) * $resul_x_pagina; // Calcula el desplazamiento
+            $queryFinal = $queryBase . " LIMIT $offset, $resul_x_pagina";
+            $result = $mysqli->query($queryFinal);
 
-    $i = 1;
-    while ($row = mysqli_fetch_array($result)) {
-        echo '<tr>
-            <td data-label="NO.">' . $i . '</td>
-            <td data-label="UPC">' . $row['upc_item'] . '</td>
-            <td data-label="SKU">' . $row['sku_item'] . '</td>
-            <td data-label="Date">' . $row['date_item'] . '</td>
-            <td style="text-transform:uppercase;" data-label="Brand">' . $row['brand_item'] . '</td>
-            <td style="width: 400px; !important" data-label="Item">' . $row['item_item'] . '</td>
-            <td data-label="Ref">' . $row['ref_item'] . '</td>
-            <td data-label="Color">' . $row['color_item'] . '</td>
-            <td data-label="Size">' . $row['size_item'] . '</td>
-            <td data-label="Category">' . $row['category_item'] . '</td>
-            <td data-label="Cost">' . $row['cost_item'] . '</td>
-            <td data-label="Weight">' . $row['weight_item'] . '</td>
-            <td data-label="Stock">' . $row['quantity_inventory'] . '</td>
-            <td data-label="Estado">' . $row['inventory_item'] . '</td>
-            <td data-label="Editar">
-                <button type="button" class="btn-edit" 
-                    data-bs-toggle="modal" data-bs-target="#modalEdicion"
-                    data-upc="' . $row['upc_item'] . '"
-                    data-sku="' . $row['sku_item'] . '"
-                    data-date="' . $row['date_item'] . '"
-                    data-brand="' . $row['brand_item'] . '"
-                    data-item="' . $row['item_item'] . '"
-                    data-ref="' . $row['ref_item'] . '"
-                    data-color="' . $row['color_item'] . '"
-                    data-size="' . $row['size_item'] . '"
-                    data-category="' . $row['category_item'] . '"
-                    data-cost="' . $row['cost_item'] . '"
-                    data-weight="' . $row['weight_item'] . '"
-                    data-id="' . $row['id_item'] . '"
-                    data-estado="' . $row['estado_item'] . '"
-                    data-stock="' . $row['quantity_inventory'] . '"
-                    data-batch="' . $row['inventory_item'] . '"
-                    style="background-color:transparent; border:none;">
-                    <img src="../../img/editar.png" width="28" height="28">
-                </button>     
-            </td>
-            <td data-label="Eliminar">
-                <a href="?delete=' . $row['id_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');">
-                    <i class="fa-sharp-duotone fa-solid fa-trash" style="color:red; height:20px;"></i>
-                </a>
-            </td>   
-        </tr>';
-        $i++;
-    }
+            if (!$result) {
+                die("Error en la consulta: " . $mysqli->error);
+            }
+        ?>
+        
+        <div class="table-container">
+            <div class="">
+                <table class="">
+                <thead style="background-color: #632b8b; color: white;">
+                       
+                        <tr>
+                            <th>No.</th>
+                            <th>UPC</th>
+                            <th>SKU</th>
+                            <th>DATE</th>
+                            <th>BRAND</th>
+                            <th>ITEM</th>
+                            <th>REF</th>
+                            <th>COLOR</th>
+                            <th>SIZE</th>
+                            <th>CATEGORY</th>
+                            <th>COST</th>
+                            <th>WEIGHT</th>
+                            <th>STOCK</th>
+                            <th>BATCH</th>
+                            <th>EDIT</th>
+                            <th>DELETE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $i = 1;
+                        while ($row = mysqli_fetch_array($result)) {
+                            echo '<tr>
+                                <td>' . $i . '</td>
+                                <td>' . $row['upc_item'] . '</td>
+                                <td>' . $row['sku_item'] . '</td>
+                                <td>' . $row['date_item'] . '</td>
+                                <td style="text-transform:uppercase;">' . $row['brand_item'] . '</td>
+                                <td>' . $row['item_item'] . '</td>
+                                <td>' . $row['ref_item'] . '</td>
+                                <td>' . $row['color_item'] . '</td>
+                                <td>' . $row['size_item'] . '</td>
+                                <td>' . $row['category_item'] . '</td>
+                                <td>' . $row['cost_item'] . '</td>
+                                <td>' . $row['weight_item'] . '</td>
+                                <td>' . $row['quantity_inventory'] . '</td>
+                                <td>' . $row['inventory_item'] . '</td>
+                                <td>
+                                    <button type="button" class="btn-action btn-edit" 
+                                        data-bs-toggle="modal" data-bs-target="#modalEdicion"
+                                        data-upc="' . $row['upc_item'] . '"
+                                        data-sku="' . $row['sku_item'] . '"
+                                        data-date="' . $row['date_item'] . '"
+                                        data-brand="' . $row['brand_item'] . '"
+                                        data-item="' . $row['item_item'] . '"
+                                        data-ref="' . $row['ref_item'] . '"
+                                        data-color="' . $row['color_item'] . '"
+                                        data-size="' . $row['size_item'] . '"
+                                        data-category="' . $row['category_item'] . '"
+                                        data-cost="' . $row['cost_item'] . '"
+                                        data-weight="' . $row['weight_item'] . '"
+                                        data-id="' . $row['id_item'] . '"
+                                        data-estado="' . $row['estado_item'] . '"
+                                        data-stock="' . $row['quantity_inventory'] . '"
+                                        data-batch="' . $row['inventory_item'] . '">
+                                        <i class="fas fa-edit"></i>
+                                    </button>     
+                                </td>
+                                <td>
+                                    <a href="?delete=' . $row['id_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');" class="btn-action btn-delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </td>   
+                            </tr>';
+                            $i++;
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    echo '</tbody></table></div>';
+        <?php
+            // Mostrar paginación
+            $paginacion->render();
+        } else {
+            echo '<div class="alert alert-info text-center">No items found matching your criteria.</div>';
+        }
+        ?>
 
-    // Mostrar paginación
-    $paginacion->render();
-    echo '</section>';
-} else {
-    echo "<p>No se encontraron resultados.</p>";
-}
-
-?>
-
+        <div class="text-center mb-4">
+            <a href="../access.php" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+    </div>
 
     <!-- Modal Edicion -->
     <div class="modal fade" id="modalEdicion" tabindex="-1" aria-labelledby="modalEdicionLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg"> <!-- Modal más ancho -->
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="modalEdicionLabel">Edit </h1>
+                    <h1 class="modal-title fs-5" id="modalEdicionLabel">Edit Item</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form  action="editItems.php" method="POST" >
+                    <form action="editItems.php" method="POST">
                         <input type="hidden" id="edit-id" name="id">
 
                         <!-- Primera Sección: Datos Generales -->
@@ -399,11 +622,6 @@ if ($num_registros > 0) {
         </div>
     </div>
 
-    <center>
-        <br /><a href="../access.php"><img src='../../img/atras.png' width="72" height="72" title="Regresar" /></a>
-    </center>
-
-    <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             let modalEdicion = document.getElementById("modalEdicion");
@@ -425,31 +643,8 @@ if ($num_registros > 0) {
                 document.getElementById("edit-stock").value = button.getAttribute("data-stock");
                 document.getElementById("edit-batch").value = button.getAttribute("data-batch");
                 document.getElementById("edit-id").value = button.getAttribute("data-id");
-
-
-            });
-
-            // Enviar datos al servidor con AJAX al hacer clic en "Guardar cambios"
-            document.getElementById("guardarCambios").addEventListener("click", function() {
-                let formData = new FormData(document.getElementById("formEditar"));
-
-                fetch("editItems.php", {
-                        method: "POST",
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert("Registro actualizado correctamente");
-                            window.location.reload(); // Recargar la página para ver los cambios
-                        } else {
-                            alert("Error al actualizar");
-                        }
-                    })
-                    .catch(error => console.error("Error:", error));
             });
         });
     </script>
 </body>
-
 </html>

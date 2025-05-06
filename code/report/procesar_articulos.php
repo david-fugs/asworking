@@ -1,11 +1,10 @@
 <?php
 include("../../conexion.php");
 session_start();
-
 // Verificamos si llegaron los datos
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
 
-    $id_usu = $_SESSION['id_usu'];
+    $id_usu =  1;
     $seleccionados = $_POST['seleccionados'];
 
     foreach ($seleccionados as $index) {
@@ -50,14 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
             category_item = '$category',
             cost_item = '$cost',
             weight_item = '$weight',
-            inventory_item = '$inventory'
+            inventory_item = '$inventory', 
+            id_usu = '$id_usu'
 
             ";
         // Ejecutar consulta
         if ($mysqli->query($sql_insert)) {
             echo "<script>alert('Insert Item  successful');</script>";
         } else {
-            echo "<script>alert('Error " . $mysqli->error . "');</script>";
+            echo "<script>alert('Error " . $mysqli->error . "');             window.location.href = 'seeReport.php';
+</script>";
         }
 
         // Insertar la tabla items
@@ -67,16 +68,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
         if ($mysqli->query($sql_insert_inventory)) {
             echo "<script>alert('Insert Inventory successful');</script>";
         } else {
-            echo "<script>alert('Error " . $mysqli->error . "');</script>";
+            echo "<script>alert('Error " . $mysqli->error . "');            window.location.href = 'seeReport.php';
+</script>";
         }
         // Actualizar la tabla daily_report
         //solamente cambiamos el estado_reporte a 0 del id_reporte
         $sql_update = "UPDATE daily_report SET estado_reporte = 0 WHERE id_report = $id_report";
         // Ejecutar consulta
         if ($mysqli->query($sql_update)) {
-            echo "<script>alert('Update report successful');</script>";
+            echo "<script>alert('Update report successful');
+            window.location.href = 'seeReport.php';
+            </script>";
         } else {
-            echo "<script>alert('Error " . $mysqli->error . "');</script>";
+            echo "<script>alert('Error " . $mysqli->error . "');
+                window.location.href = 'seeReport.php';
+            </script>";
         }
     }
 }

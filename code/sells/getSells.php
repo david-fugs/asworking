@@ -55,7 +55,7 @@ if ($result->num_rows > 0) {
     echo "<td>" . $row['item_price'] . "</td>";
     echo "<td>" . $row['total_item'] . "</td>";
     echo "<td>
-      <button class='edit-btn type=button'
+      <button class='btn-action-icon btn-edit'
         data-id='" . $row['id_sell'] . "'
         data-sell_order='" . $row['sell_order'] . "'
         data-date='" . $row['date'] . "'
@@ -70,11 +70,11 @@ if ($result->num_rows > 0) {
         data-quantity='" . $row['quantity'] . "'
         data-item_price='" . $row['item_price'] . "'
         data-total='" . $row['total_item'] . "'>
-         <img src='../../img/editar.png' width='28' height='28' alt='Editar'>
+         <i class='fas fa-edit'></i>
       </button>
     </td>";
     echo "<td>
-    <button class='delete-btn' data-id='" . $row['id_sell'] . "'>🗑️</button> </td>";
+    <button class='btn-action-icon btn-delete' data-id='" . $row['id_sell'] . "'><i class='fas fa-trash-alt'></i></button> </td>";
     echo "</tr>";
   }
 } else {
