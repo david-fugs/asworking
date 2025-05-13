@@ -311,13 +311,13 @@ $resultTiendas = $mysqli->query($queryTiendas);
 </head>
 
 <body>
-<div class="header-container">
-        <div class="container text-center">
-            <img src='../../img/logo.png' class="logo" alt="ASWWORKING Logo">
-        </div>
+  <div class="header-container">
+    <div class="container text-center">
+      <img src='../../img/logo.png' class="logo" alt="ASWWORKING Logo">
     </div>
+  </div>
   <div class="flex-container">
-  
+
 
     <h1 class="page-title"><i class="fa-solid fa-file-signature"></i> SALES</h1>
 
@@ -385,6 +385,10 @@ $resultTiendas = $mysqli->query($queryTiendas);
                 <label for="comisionItem" class="form-label">Commission Shipping</label>
                 <input type="number" name="comisionItem" id="comisionItem" step="0.01" min="0" class="form-control">
               </div>
+              <div class="col-md-3">
+                <label for="cargo_fijo" class="form-label">Fixed Charge</label>
+                <input type="number" name="cargo_fijo" id="cargo_fijo" step="0.01" min="0" class="form-control">
+              </div>
 
               <div class="col-md-3">
                 <label for="quantitySell" class="form-label">Quantity</label>
@@ -417,6 +421,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
               <th>Sucursal Code</th>
               <th>Brand</th>
               <th>Comision</th>
+              <th>Fixed Charge</th>
               <th>Date</th>
               <th>Received Shipping</th>
               <th>Paid Shipping</th>

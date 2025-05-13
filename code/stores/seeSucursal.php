@@ -443,6 +443,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             echo '<th>STORE NAME</th>';
             echo '<th>REFERENCE CODE</th>';
             echo '<th>FEE</th>';
+            echo '<th>FIXED CHARGE</th>';
             echo '<th>ACTIONS</th>';
             echo '</tr>';
             echo '</thead>';
@@ -451,10 +452,11 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             $i = 1;
             while ($row = mysqli_fetch_array($result)) {
                 echo '<tr>';
-                echo '<td>' . $i . '</td>';
+                echo '<td>' . $row['id_sucursal'] . '</td>';
                 echo '<td>' . htmlspecialchars($row['store_name']) . '</td>';
                 echo '<td>' . htmlspecialchars($row['code_sucursal']) . '</td>';
                 echo '<td>' . htmlspecialchars($row['comision_sucursal']) . '</td>';
+                echo '<td>' . htmlspecialchars($row['cargo_fijo']) . '</td>';
                 echo '<td class="action-buttons">';
                 echo '<button type="button" class="btn-action btn-edit" 
                         data-bs-toggle="modal" data-bs-target="#modalEdicion"
@@ -462,7 +464,8 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                         data-id_sucursal="' . $row['id_sucursal'] . '"
                         data-name="' . htmlspecialchars($row['store_name']) . '"
                         data-code_sucursal="' . htmlspecialchars($row['code_sucursal']) . '"
-                        data-comision_sucursal="' . htmlspecialchars($row['comision_sucursal']) . '">
+                        data-comision_sucursal="' . htmlspecialchars($row['comision_sucursal']) . '"
+                        data-cargo_fijo="' . htmlspecialchars($row['cargo_fijo']) . '">
                         <i class="fas fa-edit"></i>
                     </button>';
                 echo '<a href="?delete=' . $row['id_sucursal'] . '" onclick="return confirm(\'¿Are you sure to Delete this sucursal?\');" class="btn-action btn-delete">
@@ -511,6 +514,10 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                             <label for="edit_comision_sucursal" class="form-label">Fee</label>
                             <input type="text" class="form-control" id="edit_comision_sucursal" name="comision_sucursal">
                         </div>
+                        <div class="mb-3">
+                            <label for="cargo_fijo" class="form-label">Fixed Charge</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="edit_cargo_fijo" name="cargo_fijo">
+                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -549,6 +556,10 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                             <label for="comision_sucursal" class="form-label">Fee</label>
                             <input type="number" step="0.01" min="0" class="form-control" id="comision_sucursal" name="comision_sucursal">
                         </div>
+                        <div class="mb-3">
+                            <label for="cargo_fijo" class="form-label">Fixed Charge</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="cargo_fijo1" name="cargo_fijo">
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -569,6 +580,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                 document.getElementById("edit-name").value = button.getAttribute("data-name");
                 document.getElementById("edit_code_sucursal").value = button.getAttribute("data-code_sucursal");
                 document.getElementById("edit_comision_sucursal").value = button.getAttribute("data-comision_sucursal");
+                document.getElementById("edit_cargo_fijo").value = button.getAttribute("data-cargo_fijo");
             });
         });
     </script>

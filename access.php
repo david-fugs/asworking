@@ -1,5 +1,6 @@
 <?php
 session_start();
+include("conexion.php");
 
 if (!isset($_SESSION['id'])) {
   header("Location: index.php");
@@ -7,10 +8,67 @@ if (!isset($_SESSION['id'])) {
 
 $nombre = $_SESSION['nombre'];
 $tipo_usuario = $_SESSION['tipo_usuario'];
+
+//traer las store
+$stores = "SELECT * FROM store";
+$result_stores = mysqli_query($mysqli, $stores);
+if (!$result_stores) {
+  die("Error in the query: " . mysqli_error($mysqli));
+}
+
+//cantidad de prendas 
+$inventory = "SELECT SUM(quantity_inventory) as total_items FROM inventory";
+$result_inventory = mysqli_query($mysqli, $inventory);
+if (!$result_inventory) {
+  die("Error in the query: " . mysqli_error($mysqli));
+}
+// Obtener la fila como array asociativo
+$row_invetario = mysqli_fetch_assoc($result_inventory);
+// Acceder directamente al valor
+$total_items = $row_invetario['total_items'];
+
+
+$query = "SELECT SUM(total_item) AS total_vendido_hoy ,MAX(`date`) AS ultima_fecha  FROM sell WHERE DATE(date) = CURDATE();";
+$result = mysqli_query($mysqli, $query);
+
+if (!$result) {
+  die("Error en la consulta: " . mysqli_error($mysqli));
+}
+
+$row_ventas_diarias = mysqli_fetch_assoc($result);
+$ultima_fecha_venta = $row_ventas_diarias['ultima_fecha'];
+$total_vendido_hoy = $row_ventas_diarias['total_vendido_hoy'];
+
+//total devoluciones
+$total_devoluciones = "SELECT 
+                        SUM(total_item) AS total_devoluciones,
+                        COUNT(*) AS cantidad_devoluciones,
+                        MAX(`date`) AS ultima_fecha
+                        FROM devolutions
+                          WHERE MONTH(`date`) = MONTH(CURDATE()) 
+                          AND YEAR(`date`) = YEAR(CURDATE());
+";
+$result_devoluciones = mysqli_query($mysqli, $total_devoluciones);
+if (!$result_devoluciones) {
+  die("Error in the query: " . mysqli_error($mysqli));
+}
+$row_devoluciones = mysqli_fetch_assoc($result_devoluciones);
+$total_devoluciones = $row_devoluciones['total_devoluciones'];
+$total_devoluciones_count = $row_devoluciones['COUNT(*)'];
+$ultima_devolucion = $row_devoluciones['ultima_fecha'];
+
+$cantidad_reportes = "SELECT COUNT(*) as total_reportes FROM daily_report WHERE estado_reporte = 1";
+$result_reportes = mysqli_query($mysqli, $cantidad_reportes);
+if (!$result_reportes) {
+  die("Error in the query: " . mysqli_error($mysqli));
+}
+$row_reportes = mysqli_fetch_assoc($result_reportes);
+$total_reportes = $row_reportes['total_reportes'];
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -371,12 +429,13 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
     }
 
     .activity-title {
-      font-weight: 600;
+      font-weight: bold;
+      font-size: 18px;
       margin-bottom: 5px;
     }
 
     .activity-time {
-      font-size: 0.8rem;
+      font-size: 18px;
       color: var(--secondary);
     }
 
@@ -418,36 +477,41 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
         width: 100%;
         left: -100%;
       }
-      
+
       .sidebar.active {
         left: 0;
       }
-      
+
       .main-content.active {
         margin-left: 0;
       }
     }
-     /* Añade estos estilos para quitar los puntos y manejar los submenús */
-     .menu_items {
-        list-style: none; /* Esto quita los puntos de la lista */
-        padding-left: 0; /* Elimina el padding izquierdo por defecto */
+
+    /* Añade estos estilos para quitar los puntos y manejar los submenús */
+    .menu_items {
+      list-style: none;
+      /* Esto quita los puntos de la lista */
+      padding-left: 0;
+      /* Elimina el padding izquierdo por defecto */
     }
 
     .submenu {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-        display: none; /* Ocultamos completamente el submenú inicialmente */
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      display: none;
+      /* Ocultamos completamente el submenú inicialmente */
     }
 
     .submenu.active {
-        max-height: 500px;
-        display: block; /* Mostramos el submenú cuando está activo */
+      max-height: 500px;
+      display: block;
+      /* Mostramos el submenú cuando está activo */
     }
 
     /* Estilo para el ícono de flecha cuando está activo */
     .arrow-left.rotate {
-        transform: rotate(90deg);
+      transform: rotate(90deg);
     }
   </style>
 </head>
@@ -473,7 +537,7 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
     <div class="menu_content">
       <ul class="menu_items">
         <div class="menu_title menu_dahsboard">MENÚ PRINCIPAL</div>
-        
+
         <!-- ITEMS -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
@@ -490,7 +554,7 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
             <a href="code/items/showrecord.php" class="nav_link sublink">Show Record</a>
           </ul>
         </li>
-        
+
         <!-- STORE -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
@@ -504,7 +568,7 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
             <a href="code/stores/seeStore.php" class="nav_link sublink">See Store</a>
           </ul>
         </li>
-        
+
         <!-- SUCURSAL -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
@@ -533,7 +597,7 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
             <a href="code/report/seeReport.php" class="nav_link sublink">See Report</a>
           </ul>
         </li>
-        
+
         <!-- SALES -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
@@ -548,7 +612,7 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
             <a href="code/sells/seesells.php" class="nav_link sublink">See Sales</a>
           </ul>
         </li>
-        
+
         <!-- DEVOLUTIONS -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
@@ -562,7 +626,7 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
             <a href="code/devolutions/seeDevolutions.php" class="nav_link sublink">See Devolutions</a>
           </ul>
         </li>
-        
+
         <!-- INFORMS -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
@@ -628,53 +692,50 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
         <div class="card-header">
           <div>
             <div class="card-title">Total Items</div>
-            <div class="card-value">1,248</div>
+            <div class="card-value"><?= $total_items; ?></div>
           </div>
           <div class="card-icon">
             <i class="fa-solid fa-shirt"></i>
           </div>
         </div>
-        <div class="card-footer">+12% from last month</div>
       </div>
-      
+
       <div class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Today's Sales</div>
-            <div class="card-value">$3,845</div>
+            <div class="card-value"> $ <?= $total_vendido_hoy ?></div>
           </div>
           <div class="card-icon">
             <i class="fa-solid fa-dollar-sign"></i>
           </div>
         </div>
-        <div class="card-footer">+8% from yesterday</div>
       </div>
-      
+
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="card-title">New Reports</div>
-            <div class="card-value">24</div>
+            <div class="card-title">Devolutions This Month</div>
+            <div class="card-value"> <?= $total_devoluciones_count ?></div>
           </div>
           <div class="card-icon">
             <i class="fa-solid fa-file-lines"></i>
           </div>
         </div>
-        <div class="card-footer">5 pending review</div>
       </div>
-      
+
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="card-title">Inventory</div>
-            <div class="card-value">87%</div>
+            <div class="card-title">Pending Reports</div>
+            <div class="card-value"><?= $total_reportes ?></div>
           </div>
           <div class="card-icon">
-            <i class="fa-solid fa-boxes-stacked"></i>
+            <i class="fa-solid fa-file-lines"></i>
           </div>
         </div>
-        <div class="card-footer">3 items low stock</div>
       </div>
+
     </div>
 
     <!-- Recent Activity -->
@@ -683,20 +744,11 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
       <ul class="activity-list">
         <li class="activity-item">
           <div class="activity-icon">
-            <i class="fa-solid fa-shirt"></i>
-          </div>
-          <div class="activity-content">
-            <div class="activity-title">New item added</div>
-            <div class="activity-time">Today, 10:45 AM</div>
-          </div>
-        </li>
-        <li class="activity-item">
-          <div class="activity-icon">
             <i class="fa-solid fa-dollar-sign"></i>
           </div>
           <div class="activity-content">
-            <div class="activity-title">Sale completed</div>
-            <div class="activity-time">Today, 09:30 AM</div>
+            <div class="activity-title">Devolutions This Month </div>
+            <div class="activity-time"> $ <?= $total_devoluciones ?></div>
           </div>
         </li>
         <li class="activity-item">
@@ -704,8 +756,8 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
             <i class="fa-solid fa-file-lines"></i>
           </div>
           <div class="activity-content">
-            <div class="activity-title">Daily report submitted</div>
-            <div class="activity-time">Yesterday, 5:45 PM</div>
+            <div class="activity-title">Latest Devolution </div>
+            <div class="activity-time"><?= $ultima_devolucion ?></div>
           </div>
         </li>
         <li class="activity-item">
@@ -713,8 +765,8 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
             <i class="fa-solid fa-arrows-rotate"></i>
           </div>
           <div class="activity-content">
-            <div class="activity-title">Devolution processed</div>
-            <div class="activity-time">Yesterday, 3:20 PM</div>
+            <div class="activity-title">Latest Sell</div>
+            <div class="activity-time"><?= $ultima_fecha_venta ?> </div>
           </div>
         </li>
       </ul>
@@ -723,7 +775,6 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
 
   <!-- JavaScript -->
   <script>
-    
     // Sidebar Toggle
     const sidebar = document.querySelector('.sidebar');
     const sidebarOpen = document.querySelector('#sidebarOpen');
@@ -741,7 +792,7 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
       item.addEventListener('click', () => {
         const submenu = item.nextElementSibling;
         const arrow = item.querySelector('.arrow-left');
-        
+
         submenu.classList.toggle('active');
         arrow.classList.toggle('rotate');
       });
@@ -766,7 +817,7 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
 
     darkLight.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
-      
+
       if (document.body.classList.contains('dark-mode')) {
         darkLight.classList.remove('fa-sun');
         darkLight.classList.add('fa-moon');
@@ -785,4 +836,5 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
     });
   </script>
 </body>
+
 </html>

@@ -8,14 +8,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $name = $mysqli->real_escape_string($_POST["name"]);
     $code_sucursal = $mysqli->real_escape_string($_POST["code_sucursal"]);
     $comision_sucursal = $mysqli->real_escape_string($_POST["comision_sucursal"]);
+    $cargo_fijo = $mysqli->real_escape_string($_POST["cargo_fijo"]);
 
     // Actualizar la tabla items (sin cambiar quantity_inventory)
     $sql_update_items = "UPDATE sucursal SET 
                             code_sucursal = '$code_sucursal', 
-                            comision_sucursal = '$comision_sucursal'
+                            comision_sucursal = '$comision_sucursal',
+                            cargo_fijo = '$cargo_fijo'
                         WHERE id_sucursal = $id_sucursal";
-
-
 // Ejecutar consulta
 if ($mysqli->query($sql_update_items)) {
     echo "<script>

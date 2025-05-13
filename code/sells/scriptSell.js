@@ -45,8 +45,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const comision = selectedOption.getAttribute("data-comision") || "0";
     const cargo_fijo = selectedOption.getAttribute("data-cargo") || "0";
     //aca se hara la operacion para la comision
-    //console.log("Comisión:", comision, "Cargo fijo:", cargo_fijo);
+    console.log("Comisión:", comision, "Cargo fijo:", cargo_fijo);
     document.getElementById("comisionItem").value = comision;
+    document.getElementById("cargo_fijo").value = cargo_fijo;
   });
 
   // Buscar item por UPC al perder foco
@@ -119,7 +120,6 @@ document.addEventListener("DOMContentLoaded", function () {
           itemNameInput.value = data.item;
           priceInput.value = "$" + parseFloat(data.cost).toFixed(2);
           brandItem.value = data.brand || "";
-          console.log(data.quantity);
           const maxCantidad = parseInt(data.quantity);
           const quantityInput1 = document.getElementById("quantitySell");
 
@@ -152,7 +152,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const quantity = parseFloat(quantityInput.value) || 0;
     const price = parseFloat(priceInput.value.replace("$", "")) || 0;
     const comision = parseFloat(comisionInput.value) || 0;
-    const total = quantity * price + comision;
+    const cargo_fijo = parseFloat(document.getElementById("cargo_fijo").value) || 0;
+    const total = quantity * price + comision + cargo_fijo;
     refInput.value = `$${total.toFixed(2)}`;
   });
 
@@ -188,11 +189,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const sucursal =
       sucursalSelect.options[sucursalSelect.selectedIndex]?.text || "";
     const precioUnitario = parseFloat(priceInput.value.replace("$", "")) || 0;
-    const total = precioUnitario * quantity;
     const brand = brandItem.value.trim();
-    const comision =
-      parseFloat(document.getElementById("comisionItem").value) || 0;
+    const comision =      parseFloat(document.getElementById("comisionItem").value) || 0;
+    const comisionFijo = parseFloat(document.getElementById("cargo_fijo").value) || 0;
     const date = sellDateInput.value;
+    const total = (precioUnitario * quantity) + comision + comisionFijo;
 
     if (!date) {
       alert("⚠️ Debes ingresar una fecha para poder continuar.");
@@ -209,6 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <td class="id_sucursal" data-id="${sucursalSelect.value}">${sucursal}</td>
       <td class="brand">${brand}</td>
       <td class="comision">$${comision.toFixed(2)}</td>
+      <td class="cargo_fijo">$${comisionFijo.toFixed(2)}</td>
       <td class="fecha">${date}</td>
       <td class="received_shipping">${receivedShipping.toFixed(2)}</td>
       <td class="payed_shipping">${payedShipping.toFixed(2)}</td>
@@ -280,6 +282,10 @@ document.addEventListener("DOMContentLoaded", function () {
           row.querySelector(".comision")?.textContent.replace("$", "").trim() ||
             "0"
         );
+        const cargo_fijo = parseFloat(
+          row.querySelector(".cargo_fijo")?.textContent.replace("$", "").trim() ||
+            "0"
+        );
         const total_item = parseFloat(
           row.querySelector(".total_item")?.textContent || "0"
         );
@@ -299,6 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
           id_store,
           id_sucursal,
           comision,
+          cargo_fijo,
           item_price,
           total_item,
           date,

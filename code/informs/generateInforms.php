@@ -7,6 +7,27 @@ if (!isset($_SESSION['id'])) {
 $nombre = $_SESSION['nombre'];
 $tipo_usu = $_SESSION['tipo_usuario'];
 
+//traer las store
+$stores = "SELECT * FROM store";
+$result_stores = mysqli_query($mysqli, $stores);
+if (!$result_stores) {
+    die("Error in the query: " . mysqli_error($mysqli));
+}
+
+function getStoreName($id_store)
+{
+    global $mysqli;
+    $query = "SELECT store_name FROM store WHERE id_store = ?";
+    $stmt = $mysqli->prepare($query);
+    $stmt->bind_param("i", $id_store);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        return $row['store_name'];
+    }
+    return null;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -58,7 +79,7 @@ $tipo_usu = $_SESSION['tipo_usuario'];
             margin-bottom: 40px;
             width: 800px;
             height: 400px;
-            
+
 
         }
 
@@ -80,8 +101,22 @@ $tipo_usu = $_SESSION['tipo_usuario'];
                     <div class="d-flex flex-wrap gap-2">
                         <input name="start_date" type="date" class="form-control" value="<?= isset($_GET['start_date']) ? htmlspecialchars($_GET['start_date']) : '' ?>">
                         <input name="end_date" type="date" class="form-control" value="<?= isset($_GET['end_date']) ? htmlspecialchars($_GET['end_date']) : '' ?>">
+                        <select name="store" class="form-select">
+                            <option value="">Select Store</option>
+                            <?php
+                            while ($row = mysqli_fetch_assoc($result_stores)) {
+                                print_r($row);
+                                $selected = (isset($_GET['store']) && $_GET['store'] == $row['id_store']) ? 'selected' : '';
+                                echo "<option value='" . $row['id_store'] . "' " . $selected . ">" . $row['store_name'] . "</option>";
+                            }
+                            ?>
+                        </select>
+
                         <button type="submit" class="btn btn-primary">Search</button>
                     </div>
+                    <!-- tambien agregar filtro para store -->
+
+
                 </div>
             </form>
 
@@ -92,8 +127,8 @@ $tipo_usu = $_SESSION['tipo_usuario'];
 
     </div>
     <!-- aparece el grafico -->
-    <center style="margin-bottom: 50px;" >
-        <div id="print-area" >
+    <center style="margin-bottom: 50px;">
+        <div id="print-area">
             <div id="totalSales" class="mb-4"></div>
             <canvas id="salesChart" width="800" height="400"></canvas>
         </div>
@@ -102,8 +137,10 @@ $tipo_usu = $_SESSION['tipo_usuario'];
     <script>
         const startDate = '<?= $_GET['start_date'] ?? '' ?>';
         const endDate = '<?= $_GET['end_date'] ?? '' ?>';
+        const store = '<?= $_GET['store'] ?? '' ?>';
+        const store_name = '<?= isset($_GET['store']) ? getStoreName($_GET['store']) : '' ?>';
 
-        fetch(`get_sales_data.php?start_date=${startDate}&end_date=${endDate}`)
+        fetch(`get_sales_data.php?start_date=${startDate}&end_date=${endDate}&store=${store}`)
             .then(response => response.json())
             .then(data => {
                 const labels = data.map(item => item.month);
@@ -111,6 +148,9 @@ $tipo_usu = $_SESSION['tipo_usuario'];
 
                 const totalSales = totals.reduce((acc, curr) => acc + curr, 0);
                 document.getElementById('totalSales').innerHTML = `<h3>Total Sales: $${totalSales.toFixed(2)}</h3>`;
+                if (store != '') {
+                    document.getElementById('totalSales').innerHTML += `<h3>Store: ${store_name}</h3>`;
+                }
 
                 const ctx = document.getElementById('salesChart').getContext('2d');
                 new Chart(ctx, {
@@ -118,16 +158,29 @@ $tipo_usu = $_SESSION['tipo_usuario'];
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Monthly Sales ($)',
                             data: totals,
                             backgroundColor: 'rgba(199, 110, 215, 0.6)',
                             borderColor: 'rgb(116, 36, 125)',
                             borderWidth: 1,
-                            barThickness: 60
+                            barThickness: 60,
                         }]
                     },
                     options: {
                         plugins: {
+                            // Agrega el título arriba del gráfico
+                            title: {
+                                display: true,
+                                text: 'Monthly Sales ($)',
+                                font: {
+                                    size: 18,
+                                    weight: 'bold'
+                                },
+                                padding: {
+                                    top: 20,
+                                    bottom: 10
+                                }
+                            },
+                            // Etiquetas de datos encima de cada barra
                             datalabels: {
                                 anchor: 'end',
                                 align: 'top',
@@ -136,16 +189,22 @@ $tipo_usu = $_SESSION['tipo_usuario'];
                                 font: {
                                     weight: 'bold'
                                 }
+                            },
+                            // Opcional: Oculta leyenda si ya no hay label
+                            legend: {
+                                display: false
                             }
                         },
                         scales: {
                             y: {
-                                beginAtZero: true
+                                beginAtZero: true,
+                                suggestedMax: Math.max(...totals) + 3 // Aumenta un poco el máximo
                             }
                         }
                     },
-                    plugins: [ChartDataLabels] // Activar el plugin
+                    plugins: [ChartDataLabels]
                 });
+
             });
     </script>
     <script>

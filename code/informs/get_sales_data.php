@@ -3,6 +3,7 @@ include("../../conexion.php");
 
 $startDate = $_GET['start_date'] ?? null;
 $endDate = $_GET['end_date'] ?? null;
+$store = $_GET['store'] ?? null;
 
 $response = [];
 
@@ -13,12 +14,24 @@ if ($startDate && $endDate) {
             SUM(total_item) AS total_sales
         FROM sell
         WHERE date BETWEEN ? AND ?
-        GROUP BY month
-        ORDER BY month ASC
     ";
 
+    // Agregamos condición si $store tiene valor
+    if (!empty($store)) {
+        $query .= " AND id_store = ?";
+    }
+
+    $query .= " GROUP BY month ORDER BY month ASC";
+
     $stmt = $mysqli->prepare($query);
-    $stmt->bind_param("ss", $startDate, $endDate);
+
+    // Asociamos los parámetros dinámicamente
+    if (!empty($store)) {
+        $stmt->bind_param("sss", $startDate, $endDate, $store);
+    } else {
+        $stmt->bind_param("ss", $startDate, $endDate);
+    }
+
     $stmt->execute();
     $result = $stmt->get_result();
 

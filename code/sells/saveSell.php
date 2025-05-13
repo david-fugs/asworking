@@ -33,10 +33,11 @@ $sql = "INSERT INTO sell (
   id_store, 
   id_sucursal, 
   comision_item,
+  cargo_fijo,
   item_price,  
   total_item, 
   date
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 
 $stmt = $mysqli->prepare($sql);
@@ -57,13 +58,14 @@ foreach ($data['ventas'] as $venta) {
   $id_store = isset($venta['id_store']) ? (int) $venta['id_store'] : 0;
   $id_sucursal = isset($venta['id_sucursal']) ? (int) $venta['id_sucursal'] : 0;
   $comision_item = isset($venta['comision']) ? (float) $venta['comision'] : 0;
+  $cargo_fijo = isset($venta['cargo_fijo']) ? (float) $venta['cargo_fijo'] : 0;
   $item_price = isset($venta['item_price']) ? (float) $venta['item_price'] : 0;
   $total_item = isset($venta['total_item']) ? (float) $venta['total_item'] : 0;
 
 
   // Ahora, vincula los parámetros y ejecuta la consulta
   $stmt->bind_param(
-    "isidiiiddds",
+    "isidiiidddds",
     $sell_order,
     $upc_item,
     $quantity,
@@ -72,6 +74,7 @@ foreach ($data['ventas'] as $venta) {
     $id_store,
     $id_sucursal,
     $comision_item,
+    $cargo_fijo,
     $item_price,
     $total_item,
     $sell_date
