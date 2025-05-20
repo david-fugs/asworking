@@ -60,6 +60,8 @@ function getStoreName($id_store)
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 
 
@@ -73,6 +75,19 @@ function getStoreName($id_store)
             margin-bottom: 20px;
         }
 
+        .custom-label {
+            color: #4a2568;
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            display: block;
+        }
+
+        .custom-title {
+            color: #4a2568;
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+        }
+
         #print-area {
             justify-content: center;
             align-items: center;
@@ -83,48 +98,196 @@ function getStoreName($id_store)
 
         }
 
+        :root {
+            --primary-dark: #4a2568;
+            --primary: #632b8b;
+            --primary-light: #5d337a;
+            --secondary: #997cab;
+            --secondary-light: #dac7e5;
+            --text-dark: #2d2d2d;
+            --text-light: #f8f9fa;
+            --bg-light: #f5f3f7;
+            --success: #28a745;
+            --danger: #dc3545;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 50px;
+        }
+
+        .header-container {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            height: 120px;
+            width: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .page-title {
+            color: var(--primary);
+            font-weight: 700;
+            margin: 20px 0;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--secondary-light));
+            border-radius: 3px;
+        }
+
+        .search-form {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        .search-form label {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .search-form input {
+            border: 1px solid var(--secondary);
+            border-radius: 6px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .search-form input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 43, 139, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to bottom, var(--primary), var(--primary-light));
+            border: none;
+            padding: 10px 25px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to bottom, var(--primary-light), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-light);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            margin: 30px auto;
+            max-width: 900px;
+        }
+
+        .total-sales {
+            background: var(--secondary-light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                height: 80px;
+            }
+
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .search-form {
+                padding: 15px;
+            }
+        }
+
         btn-danger:hover {
             background-color: #dc3545;
             color: white;
         }
     </style>
-    <center style="margin-top: 20px;">
-        <img src='../../img/logo.png' width="300" height="212" class="responsive">
-    </center>
-    <h1 style=" margin-top:12px;color: #412fd1; text-shadow: #FFFFFF 0.1em 0.1em 0.2em; font-size: 40px; text-align: center;"><b><i
-                class="fa-solid fa-file-signature"></i> GENERATE INFORMS </b></h1>
+    <div class="header-container">
+        <img src='../../img/logo.png' class="logo" alt="ASWWORKING Logo">
+        <h1 class="page-title"><i class="fa-solid fa-chart-line"></i> SALES REPORTS</h1>
+    </div>
     <div class="flex">
         <div class="box">
-            <form action="generateInforms.php" method="get" class="form p-3 border rounded shadow-sm bg-light">
-                <div class="mb-3">
-                    <label class="form-label fw-bold fs-5 text-primary">Sales within the selected date range</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        <input name="start_date" type="date" class="form-control" value="<?= isset($_GET['start_date']) ? htmlspecialchars($_GET['start_date']) : '' ?>">
-                        <input name="end_date" type="date" class="form-control" value="<?= isset($_GET['end_date']) ? htmlspecialchars($_GET['end_date']) : '' ?>">
-                        <select name="store" class="form-select">
-                            <option value="">Select Store</option>
-                            <?php
-                            while ($row = mysqli_fetch_assoc($result_stores)) {
-                                print_r($row);
-                                $selected = (isset($_GET['store']) && $_GET['store'] == $row['id_store']) ? 'selected' : '';
-                                echo "<option value='" . $row['id_store'] . "' " . $selected . ">" . $row['store_name'] . "</option>";
-                            }
-                            ?>
-                        </select>
+            <form action="generateInforms.php" method="get" class="form p-4 border rounded shadow-sm bg-light">
+                <div class="mb-4">
+                    <label class="form-label fw-bold fs-5 custom-title">Sales within the selected date range</label>
+                    <div class="row g-3 text-center">
+                        <div class="col-md-4">
+                             <label for="start_date" class="form-label custom-label">Start Date</label>
+                            <input name="start_date" id="start_date" type="date" class="form-control"
+                                value="<?= isset($_GET['start_date']) ? htmlspecialchars($_GET['start_date']) : '' ?>">
+                        </div>
 
+                        <div class="col-md-4 text-center">
+                            <label for="end_date" class="form-label custom-label">End Date</label>
+                            <input name="end_date" id="end_date" type="date" class="form-control"
+                                value="<?= isset($_GET['end_date']) ? htmlspecialchars($_GET['end_date']) : '' ?>">
+                        </div>
+
+                        <div class="col-md-4 text-center">
+                            <label for="store" class="form-label custom-label">Store</label>
+                            <select name="store" id="store" class="form-control" style="height: 54px; margin-top: 6px; ">
+                                <option value="">Select Store</option>
+                                <?php
+                                while ($row = mysqli_fetch_assoc($result_stores)) {
+                                    $selected = (isset($_GET['store']) && $_GET['store'] == $row['id_store']) ? 'selected' : '';
+                                    echo "<option value='" . $row['id_store'] . "' $selected>" . $row['store_name'] . "</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex justify-content-center">
                         <button type="submit" class="btn btn-primary">Search</button>
                     </div>
-                    <!-- tambien agregar filtro para store -->
-
-
                 </div>
             </form>
-
         </div>
-    </div>
-    <div class="d-flex justify-content-end ">
-        <button onclick="window.printChart()" class="btn btn-secondary mt-2 me-5">Print Report</button>
 
+    </div>
+    <div class="text-center mb-4">
+        <button onclick="window.printChart()" class="btn btn-secondary me-2">
+            <i class="fas fa-print"></i> Print Report
+        </button>
     </div>
     <!-- aparece el grafico -->
     <center style="margin-bottom: 50px;">
