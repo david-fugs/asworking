@@ -376,27 +376,36 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
         }
         $stores = $result_store->fetch_all(MYSQLI_ASSOC);
 
-        // Inicializa la consulta base
-        $queryBase = "SELECT store.*, sucursal.* 
-        FROM store 
-        JOIN sucursal ON store.id_store = sucursal.id_store
-        WHERE 1=1";
+        $queryBase = "
+    SELECT 
+        store.id_store,
+        store.store_name,
+        sucursal.id_sucursal,
+        sucursal.code_sucursal,
+        GROUP_CONCAT(CONCAT('Sales less than $', f.sales_less_than , ': ', f.comision, ' fee / ', f.cargo_fijo, ' Fixed Charge') SEPARATOR '<br>') AS detalles_rangos
+    FROM store
+    JOIN sucursal ON store.id_store = sucursal.id_store
+    LEFT JOIN fee_config_sucursal f ON sucursal.id_sucursal = f.id_sucursal
+    WHERE 1=1
+";
 
-        // Filtro por nombre de tienda (store_name)
+        // Filtro por nombre de tienda
         if (!empty($_GET['store_name'])) {
-            $nombre_store = ($_GET['store_name']);
+            $nombre_store = $mysqli->real_escape_string($_GET['store_name']);
             $queryBase .= " AND store.store_name LIKE '%$nombre_store%'";
         }
 
-        // Filtro por código de sucursal (code_sucursal en tabla sucursal)
+        // Filtro por código de sucursal
         if (!empty($_GET['code_sucursal'])) {
             $code_sucursal = $mysqli->real_escape_string($_GET['code_sucursal']);
             $queryBase .= " AND sucursal.code_sucursal LIKE '%$code_sucursal%'";
         }
 
-        // Ordenar por nombre de tienda
-        $queryBase .= " ORDER BY store.store_name ASC";
-
+        // Agrupar por sucursal para que funcione el GROUP_CONCAT
+        $queryBase .= "
+            GROUP BY sucursal.id_sucursal
+            ORDER BY store.store_name ASC
+        ";
         // Conteo de registros
         $countQuery = "SELECT COUNT(DISTINCT sucursal.id_sucursal) as total 
         FROM store 
@@ -442,8 +451,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             echo '<th>No.</th>';
             echo '<th>STORE NAME</th>';
             echo '<th>REFERENCE CODE</th>';
-            echo '<th>FEE</th>';
-            echo '<th>FIXED CHARGE</th>';
+            echo '<th>RANGES</th>';
             echo '<th>ACTIONS</th>';
             echo '</tr>';
             echo '</thead>';
@@ -452,29 +460,24 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             $i = 1;
             while ($row = mysqli_fetch_array($result)) {
                 echo '<tr>';
-                echo '<td>' . $row['id_sucursal'] . '</td>';
+                echo '<td>' . $i++ . '</td>';
                 echo '<td>' . htmlspecialchars($row['store_name']) . '</td>';
                 echo '<td>' . htmlspecialchars($row['code_sucursal']) . '</td>';
-                echo '<td>' . htmlspecialchars($row['comision_sucursal']) . '</td>';
-                echo '<td>' . htmlspecialchars($row['cargo_fijo']) . '</td>';
+                echo '<td>' . ($row['detalles_rangos'] ? $row['detalles_rangos'] : '<em>No config</em>') . '</td>';
                 echo '<td class="action-buttons">';
                 echo '<button type="button" class="btn-action btn-edit" 
-                        data-bs-toggle="modal" data-bs-target="#modalEdicion"
-                        data-id="' . $row['id_store'] . '"
-                        data-id_sucursal="' . $row['id_sucursal'] . '"
-                        data-name="' . htmlspecialchars($row['store_name']) . '"
-                        data-code_sucursal="' . htmlspecialchars($row['code_sucursal']) . '"
-                        data-comision_sucursal="' . htmlspecialchars($row['comision_sucursal']) . '"
-                        data-cargo_fijo="' . htmlspecialchars($row['cargo_fijo']) . '">
-                        <i class="fas fa-edit"></i>
-                    </button>';
+                    data-bs-toggle="modal" data-bs-target="#modalEdicionUnico"
+                    data-id_sucursal="' . $row['id_sucursal'] . '"
+                    data-id_store="' . htmlspecialchars($row['id_store']) . '"
+                    data-code_sucursal="' . htmlspecialchars($row['code_sucursal']) . '">
+                    <i class="fas fa-edit"></i>
+                </button>';
                 echo '<a href="?delete=' . $row['id_sucursal'] . '" onclick="return confirm(\'¿Are you sure to Delete this sucursal?\');" class="btn-action btn-delete">
-                        <i class="fas fa-trash-alt"></i>
-                    </a>';
+            <i class="fas fa-trash-alt"></i>
+          </a>';
                 echo '</td>';
                 echo '</tr>';
             }
-
             echo '</tbody>';
             echo '</table>';
             echo '</div>';
@@ -488,50 +491,107 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
     </div>
 
     <!-- Modal Edicion -->
-    <div class="modal fade" id="modalEdicion" tabindex="-1" aria-labelledby="modalEdicionLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    <div class="modal fade" id="modalEdicionUnico" tabindex="-1" aria-labelledby="modalEdicionUnicoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
+
+                <!-- Header (lo dejamos igual como quieres) -->
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Sucursal Info</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="modalEdicionUnicoLabel">Edit Sucursal and Ranges</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
 
-                <form action="editSucursal.php" method="POST">
-                    <div class="modal-body">
-                        <input type="hidden" id="id_sucursal" name="id_sucursal">
+                <form id="formEdicionUnico" action="editSucursal.php" method="POST" class="p-4">
+                    <input type="hidden" id="id_sucursal" name="id_sucursal">
 
-                        <div class="mb-3">
-                            <label for="edit-name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="edit-name" name="name" readonly>
+                    <!-- Datos sucursal -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit-name" class="form-label fw-semibold">Store</label>
+                            <select name="store" id="store_id_edit" class="form-control">
+                                <option value=""></option>
+                                <?php foreach ($stores as $store) { ?>
+                                    <option value="<?= $store['id_store'] ?>"><?= htmlspecialchars($store['store_name']) ?></option>
+                                <?php } ?>
+                            </select>
+
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_code_sucursal" class="form-label fw-semibold">Reference Code</label>
+                            <input type="text" class="form-control" id="edit_code_sucursal" name="code_sucursal" placeholder="Código de la sucursal">
+                        </div>
+                    </div>
+                    <hr>
+                    <!-- Rangos -->
+                    <div id="rangos-container">
+                        <!-- Rango 1 -->
+                        <div class="row rango-item align-items-end mb-4">
+                            <input type="hidden" id="rango_id_1" name="rango_id[]">
+                            <div class="col-md-4">
+                                <label for="sales_less_than_1" class="form-label fw-semibold">Sales Less Than:</label>
+                                <input type="number" id="sales_less_than_1" name="sales_less_than[]" class="form-control" >
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fee_1" class="form-label fw-semibold">Fee:</label>
+                                <input type="text" id="fee_1" name="fee[]" class="form-control" >
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fixed_charge_1" class="form-label fw-semibold">Fixed Charge:</label>
+                                <input type="text" id="fixed_charge_1" name="fixed_charge[]" class="form-control" >
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="edit_code_sucursal" class="form-label">Code Sucursal</label>
-                            <input type="text" class="form-control" id="edit_code_sucursal" name="code_sucursal">
+                        <!-- Rango 2 -->
+                        <div class="row rango-item align-items-end mb-4">
+                            <input type="hidden" id="rango_id_2" name="rango_id[]">
+                            <div class="col-md-4">
+                                <label for="sales_less_than_2" class="form-label fw-semibold">Sales Less Than:</label>
+                                <input type="number" id="sales_less_than_2" name="sales_less_than[]" class="form-control" >
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fee_2" class="form-label fw-semibold">Fee:</label>
+                                <input type="text" id="fee_2" name="fee[]" class="form-control" >
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fixed_charge_2" class="form-label fw-semibold">Fixed Charge:</label>
+                                <input type="text" id="fixed_charge_2" name="fixed_charge[]" class="form-control" >
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="edit_comision_sucursal" class="form-label">Fee</label>
-                            <input type="text" class="form-control" id="edit_comision_sucursal" name="comision_sucursal">
-                        </div>
-                        <div class="mb-3">
-                            <label for="cargo_fijo" class="form-label">Fixed Charge</label>
-                            <input type="number" step="0.01" min="0" class="form-control" id="edit_cargo_fijo" name="cargo_fijo">
+                        <!-- Rango 3 -->
+                        <div class="row rango-item align-items-end mb-4">
+                            <input type="hidden" id="rango_id_3" name="rango_id[]">
+                            <div class="col-md-4">
+                                <label for="sales_less_than_3" class="form-label fw-semibold">Sales Less Than:</label>
+                                <input type="number" id="sales_less_than_3" name="sales_less_than[]" class="form-control" >
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fee_3" class="form-label fw-semibold">Fee:</label>
+                                <input type="text" id="fee_3" name="fee[]" class="form-control" >
+                            </div>
+                            <div class="col-md-4">
+                                <label for="fixed_charge_3" class="form-label fw-semibold">Fixed Charge:</label>
+                                <input type="text" id="fixed_charge_3" name="fixed_charge[]" class="form-control" >
+                            </div>
                         </div>
                     </div>
 
-                    <div class="modal-footer">
+                    <!-- Footer botones -->
+                    <div class="modal-footer px-0 pt-3">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
 
+
+
     <!-- Modal Add Sucursal -->
     <div class="modal fade" id="modalAddSucursal" tabindex="-1" aria-labelledby="modalAddSucursalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form action="addSucursal.php" method="POST">
                     <div class="modal-header">
@@ -540,6 +600,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                     </div>
 
                     <div class="modal-body">
+                        <!-- STORE -->
                         <div class="mb-3">
                             <label for="id_store" class="form-label">Select Store</label>
                             <select name="id_store" class="form-control" id="id_store" required>
@@ -548,17 +609,29 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                 <?php } ?>
                             </select>
                         </div>
+
+                        <!-- CODE -->
                         <div class="mb-3">
                             <label for="code_sucursal" class="form-label">Sucursal Code</label>
                             <input type="text" class="form-control" id="code_sucursal" name="code_sucursal" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="comision_sucursal" class="form-label">Fee</label>
-                            <input type="number" step="0.01" min="0" class="form-control" id="comision_sucursal" name="comision_sucursal">
+
+                        <!-- RANGOS -->
+                        <label class="form-label">Fee and Fixed Charge by Sales Range</label>
+                        <div class="row g-2 border p-2 mb-2">
+                            <div class="col-3"><input type="number" name="rango_1" class="form-control" placeholder="Sales less than" required></div>
+                            <div class="col-3"><input type="number" step="0.01" name="comision_1" class="form-control" placeholder="Fee" required></div>
+                            <div class="col-3"><input type="number" step="0.01" name="cargo_fijo_1" class="form-control" placeholder="Fixed charge" required></div>
                         </div>
-                        <div class="mb-3">
-                            <label for="cargo_fijo" class="form-label">Fixed Charge</label>
-                            <input type="number" step="0.01" min="0" class="form-control" id="cargo_fijo1" name="cargo_fijo">
+                        <div class="row g-2 border p-2 mb-2">
+                            <div class="col-3"><input type="number" name="rango_2" class="form-control" placeholder="Sales less than"></div>
+                            <div class="col-3"><input type="number" step="0.01" name="comision_2" class="form-control" placeholder="Fee"></div>
+                            <div class="col-3"><input type="number" step="0.01" name="cargo_fijo_2" class="form-control" placeholder="Fixed charge"></div>
+                        </div>
+                        <div class="row g-2 border p-2 mb-2">
+                            <div class="col-3"><input type="number" name="rango_3" class="form-control" placeholder="Sales less than"></div>
+                            <div class="col-3"><input type="number" step="0.01" name="comision_3" class="form-control" placeholder="Fee"></div>
+                            <div class="col-3"><input type="number" step="0.01" name="cargo_fijo_3" class="form-control" placeholder="Fixed charge"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -570,17 +643,54 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
         </div>
     </div>
 
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            let modalEdicion = document.getElementById("modalEdicion");
+            let modal = document.getElementById("modalEdicionUnico");
 
-            modalEdicion.addEventListener("show.bs.modal", function(event) {
+            modal.addEventListener("show.bs.modal", function(event) {
                 let button = event.relatedTarget;
+
+                // Campos fijos
                 document.getElementById("id_sucursal").value = button.getAttribute("data-id_sucursal");
-                document.getElementById("edit-name").value = button.getAttribute("data-name");
                 document.getElementById("edit_code_sucursal").value = button.getAttribute("data-code_sucursal");
-                document.getElementById("edit_comision_sucursal").value = button.getAttribute("data-comision_sucursal");
-                document.getElementById("edit_cargo_fijo").value = button.getAttribute("data-cargo_fijo");
+
+                // NUEVO: Seleccionar store en el select según data-id_store
+                let id_store = button.getAttribute("data-id_store");
+                let selectStore = document.getElementById("store_id_edit");
+                if (selectStore && id_store) {
+                    selectStore.value = id_store.toString().trim();
+                    selectStore.dispatchEvent(new Event('change')); // opcional
+                }
+
+
+                let id_sucursal = button.getAttribute("data-id_sucursal");
+
+                // Limpiar inputs de rangos
+                for (let i = 1; i <= 3; i++) {
+                    document.getElementById(`rango_id_${i}`).value = "";
+                    document.getElementById(`sales_less_than_${i}`).value = "";
+                    document.getElementById(`fee_${i}`).value = "";
+                    document.getElementById(`fixed_charge_${i}`).value = "";
+                }
+
+                fetch("get_rangos.php?id_sucursal=" + id_sucursal)
+                    .then(res => res.json())
+                    .then(rangos => {
+                        console.log("rangos JSON:", JSON.stringify(rangos, null, 2));
+
+                        rangos.forEach((rango, index) => {
+                            if (index < 3) { // para no sobrepasar los inputs
+                                document.getElementById(`rango_id_${index + 1}`).value = rango.id;
+                                document.getElementById(`sales_less_than_${index + 1}`).value = rango.sales_less_than;
+                                document.getElementById(`fee_${index + 1}`).value = rango.comision;
+                                document.getElementById(`fixed_charge_${index + 1}`).value = rango.cargo_fijo;
+                            }
+                        });
+                    })
+                    .catch(() => {
+                        console.error("Error cargando rangos");
+                    });
             });
         });
     </script>

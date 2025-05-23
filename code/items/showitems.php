@@ -468,7 +468,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                         <i class="fas fa-edit"></i>
                                     </button>     
                                 </td>
-                                <td>
+                                <td ">
                                     <a href="?delete=' . $row['id_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');" class="btn-action btn-delete">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>

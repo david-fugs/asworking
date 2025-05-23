@@ -550,8 +550,6 @@ $total_reportes = $row_reportes['total_reportes'];
           <ul class="menu_items submenu">
             <a href="code/items/additems.php" class="nav_link sublink">Add Items</a>
             <a href="code/items/showitems.php" class="nav_link sublink">Show Items</a>
-            <a href="code/items/addrecord.php" class="nav_link sublink">Record</a>
-            <a href="code/items/showrecord.php" class="nav_link sublink">Show Record</a>
           </ul>
         </li>
 
@@ -609,7 +607,7 @@ $total_reportes = $row_reportes['total_reportes'];
           </div>
           <ul class="menu_items submenu">
             <a href="code/sells/sell.php" class="nav_link sublink">Sales</a>
-            <a href="code/sells/seesells.php" class="nav_link sublink">See Sales</a>
+            <a href="code/sells/seeSells.php" class="nav_link sublink">See Sales</a>
           </ul>
         </li>
 

@@ -281,6 +281,9 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
         border-right: none;
     }
 
+
+
+    
     tbody tr:last-child td {
         border-bottom: none;
     }
@@ -365,25 +368,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
         background-color: rgba(248, 240, 255, 0.8);
     }
     
-    tbody tr:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(99, 43, 139, 0.15);
-        background-color: white;
-        z-index: 2;
-    }
-    
-    tbody tr::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 3px;
-        height: 100%;
-        background: linear-gradient(to bottom, #632b8b, #dac7e5);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-    
+ 
     tbody tr:hover::before {
         opacity: 1;
     }
