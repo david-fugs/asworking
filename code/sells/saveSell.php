@@ -6,7 +6,7 @@ header("Content-Type: application/json");
 
 // Obtener datos JSON desde fetch
 $data = json_decode(file_get_contents("php://input"), true);
-
+$sell_order = $data['sell_order'];
 
 // Validación básica
 if (!isset($data['ventas']) || !is_array($data['ventas']) || count($data['ventas']) === 0) {
@@ -15,29 +15,32 @@ if (!isset($data['ventas']) || !is_array($data['ventas']) || count($data['ventas
   exit();
 }
 
-// Obtener el siguiente valor de sell_order
-$result = $mysqli->query("SELECT MAX(sell_order) AS max_order FROM sell");
-$row = $result->fetch_assoc();
-$sell_order = $row['max_order'] ? $row['max_order'] + 1 : 1;
-
 // Fecha actual
 $sell_date = date("Y-m-d");
 
 // Preparar consulta
 $sql = "INSERT INTO sell (
   sell_order, 
-  upc_item, 
+  upc_item,
+  sku_item, 
   quantity, 
   received_shipping, 
-  payed_shipping, 
+  tax,
   id_store, 
   id_sucursal, 
   comision_item,
   cargo_fijo,
   item_price,  
   total_item, 
-  date
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  incentives,
+  international_fee,
+  ad_fee,
+  other_fee,
+  date,
+  item_profit,
+  markup,
+  profit_margin
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ? ,? ,?, ?)";
 
 
 $stmt = $mysqli->prepare($sql);
@@ -50,42 +53,56 @@ if (!$stmt) {
 
 // Insertar cada venta
 foreach ($data['ventas'] as $venta) {
-
   $upc_item = $venta['upc_item'];
+  $sku_item = isset($venta['sku']) ? $venta['sku'] : '';
   $quantity = (int) $venta['quantity'];
   $received_shipping = isset($venta['received_shipping']) ? (float) $venta['received_shipping'] : 0;
-  $payed_shipping = isset($venta['payed_shipping']) ? (int) $venta['payed_shipping'] : 0;
+  $tax = isset($venta['tax']) ? (float) $venta['tax'] : 0;
   $id_store = isset($venta['id_store']) ? (int) $venta['id_store'] : 0;
   $id_sucursal = isset($venta['id_sucursal']) ? (int) $venta['id_sucursal'] : 0;
   $comision_item = isset($venta['comision']) ? (float) $venta['comision'] : 0;
   $cargo_fijo = isset($venta['cargo_fijo']) ? (float) $venta['cargo_fijo'] : 0;
+  $incentives_value = isset($venta['incentives_value']) ? (float) $venta['incentives_value'] : 0;
+  $international_fee_value = isset($venta['international_fee_value']) ? (float) $venta['international_fee_value'] : 0;
+  $ad_fee_value = isset($venta['ad_fee_value']) ? (float) $venta['ad_fee_value'] : 0;
+  $other_fee_value = isset($venta['other_fee_value']) ? (float) $venta['other_fee_value'] : 0;
   $item_price = isset($venta['item_price']) ? (float) $venta['item_price'] : 0;
   $total_item = isset($venta['total_item']) ? (float) $venta['total_item'] : 0;
-
-
+  $item_profit = isset($venta['item_profit']) ? (float) $venta['item_profit'] : 0;
+  $markup = isset($venta['markup']) ? (float) $venta['markup'] : 0;
+  $profit_margin = isset($venta['profit_margin']) ? (float) $venta['profit_margin'] : 0;
   // Ahora, vincula los parámetros y ejecuta la consulta
   $stmt->bind_param(
-    "isidiiidddds",
+    "sssidiiiddddddddsddd",
     $sell_order,
     $upc_item,
+    $sku_item,
     $quantity,
     $received_shipping,
-    $payed_shipping,
+    $tax,
     $id_store,
     $id_sucursal,
     $comision_item,
     $cargo_fijo,
     $item_price,
     $total_item,
-    $sell_date
+    $incentives_value,
+    $international_fee_value,
+    $ad_fee_value,
+    $other_fee_value,
+    $sell_date,
+    $item_profit,
+    $markup,
+    $profit_margin
   );
+
 
   if (!$stmt->execute()) {
     http_response_code(500);
     echo json_encode(["success" => false, "message" => "Error al guardar venta: " . $stmt->error]);
     exit();
   }
-  
+
   //  UPDATE de inventario restando la cantidad vendida
   $updateQuery = "UPDATE inventory SET quantity_inventory = quantity_inventory - $quantity WHERE upc_inventory = '$upc_item'";
   if (!$mysqli->query($updateQuery)) {

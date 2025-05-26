@@ -13,7 +13,6 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
 
 $queryTiendas = "SELECT id_store, store_name FROM store ORDER BY store_name ASC";
 $resultTiendas = $mysqli->query($queryTiendas);
-
 ?>
 
 <!DOCTYPE html>
@@ -335,11 +334,21 @@ $resultTiendas = $mysqli->query($queryTiendas);
                 <label for="upc" class="form-label">UPC</label>
                 <input name="upc" type="text" id="upc" class="form-control">
               </div>
+              <div class="col-md-3">
+                <label for="sku" class="form-label">SKU</label>
+                <input name="sku" type="text" id="sku" class="form-control">
+              </div>
 
               <div class="col-md-3">
                 <label for="item_name" class="form-label">Item Name</label>
                 <input name="item_name" id="item_name" type="text" class="form-control">
               </div>
+              <?php if ($_SESSION['tipo_usuario'] == 2): ?>
+                <div class="col-md-3">
+                  <label for="itemCost" class="form-label">Item Cost</label>
+                  <input name="itemCost" type="text" id="itemCost" class="form-control">
+                </div>
+              <?php endif; ?>
 
               <div class="col-md-3">
                 <label for="priceItem" class="form-label">Price Item</label>
@@ -355,14 +364,20 @@ $resultTiendas = $mysqli->query($queryTiendas);
                 <label for="receivedShipping" class="form-label">Received Shipping</label>
                 <input type="number" name="receivedShipping" id="receivedShipping" class="form-control">
               </div>
-
+              <!-- campo de Tax -->
               <div class="col-md-3">
-                <label for="payedShipping" class="form-label">Paid Shipping</label>
-                <input type="number" name="payedShipping" id="payedShipping" class="form-control">
+                <label for="tax" class="form-label">Tax</label>
+                <input type="number" name="tax" id="taxItem" class="form-control">
               </div>
 
+              <!-- <div class="col-md-3">
+                <label for="payedShipping" class="form-label">Paid Shipping</label>
+                <input type="number" name="payedShipping" id="payedShipping" class="form-control">
+              </div> -->
+
               <div class="col-md-3">
-                <label for="tienda" class="form-label">Store</label>
+                <!-- era stor pero cliente pide cambio de nombr epor marketplace -->
+                <label for="tienda" class="form-label">Marketplace</label>
                 <select id="tienda" name="id_store" class="form-select">
                   <option value="">--Select a store--</option>
                   <?php
@@ -375,31 +390,59 @@ $resultTiendas = $mysqli->query($queryTiendas);
               </div>
 
               <div class="col-md-3">
-                <label for="sucursal" class="form-label">Sucursal</label>
+                <!-- se cambia nombre stor cod, pero era sucursal en codigo -->
+                <label for="sucursal" class="form-label">Store Cod</label>
                 <select name="sucursal" id="sucursal" class="form-select">
                   <option value="">--First select a store--</option>
                 </select>
               </div>
 
               <div class="col-md-3">
-                <label for="comisionItem" class="form-label">Commission Shipping</label>
+                <label for="comisionItem" class="form-label">Final Fee</label>
                 <input type="number" name="comisionItem" id="comisionItem" step="0.01" min="0" class="form-control">
               </div>
               <div class="col-md-3">
                 <label for="cargo_fijo" class="form-label">Fixed Charge</label>
                 <input type="number" name="cargo_fijo" id="cargo_fijo" step="0.01" min="0" class="form-control">
               </div>
-
+              <div class="col-md-3">
+                <label for="" class="form-label">Incentives offered </label>
+                <input type="number" name="incentives" id="incentives" step="0.01" min="0" class="form-control">
+              </div>
+              <div class="col-md-3">
+                <label for="" class="form-label">International Fee</label>
+                <input type="number" name="international_fee" id="international_fee" step="0.01" min="0" class="form-control">
+              </div>
+              <div class="col-md-3">
+                <label for="ad_fee" class="form-label">Advertising Fee</label>
+                <input type="number" name="ad_fee" id="ad_fee" step="0.01" min="0" class="form-control">
+              </div>
+              <div class="col-md-3">
+                <label for="other_fee" class="form-label">others Fees</label>
+                <input type="number" name="other_fee" id="other_fee" step="0.01" min="0" class="form-control">
+              </div>
               <div class="col-md-3">
                 <label for="quantitySell" class="form-label">Quantity</label>
                 <input type="number" name="quantitySell" id="quantitySell" step="0.01" min="0" class="form-control">
               </div>
-
-              <div class="col-md-3">
-                <label for="UnitTotal" class="form-label">Total Item</label>
-                <input name="ref" type="text" id="UnitTotal" readonly class="form-control">
-              </div>
-
+              <?php if ($_SESSION['tipo_usuario'] == 2) : ?>
+                <div class="col-md-3">
+                  <label for="UnitTotal" class="form-label">Total Order</label>
+                  <input name="ref" type="text" id="UnitTotal" readonly class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label for="" class="form-label"> Item Profit </label>
+                  <input name="profit" type="text" id="itemProfit" readonly class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label for="" class="form-label"> Markup </label>
+                  <input name="ref" type="text" id="markup" readonly class="form-control">
+                </div>
+                <div class="col-md-3">
+                  <label for="" class="form-label"> Profit Margin </label>
+                  <input name="ref" type="text" id="profitMargin" readonly class="form-control">
+                </div>
+              <?php endif; ?>
               <div class="col-12 text-end mt-3">
                 <button type="submit" id="validateButton" class="btn btn-success">
                   <i class="fas fa-check"></i> Validate
@@ -414,17 +457,18 @@ $resultTiendas = $mysqli->query($queryTiendas);
         <table id="tableItems" class="">
           <thead>
             <tr>
-              <th>Item</th>
+              <!-- <th>Item</th> -->
               <th>UPC</th>
               <th>Quantity</th>
-              <th>Store</th>
-              <th>Sucursal Code</th>
-              <th>Brand</th>
-              <th>Comision</th>
+              <th>Marketplace</th>
+              <th>Store Cod</th>
+              <!-- <th>Brand</th> -->
+              <th>Final Fee</th>
               <th>Fixed Charge</th>
-              <th>Date</th>
-              <th>Received Shipping</th>
-              <th>Paid Shipping</th>
+              <!-- <th>Date</th> -->
+              <th>Shipping Received</th>
+              <th>Tax</th>
+              <!-- <th>Paid Shipping</th> -->
               <th>Price Item</th>
               <th>Total Item</th>
               <th>Delete</th>

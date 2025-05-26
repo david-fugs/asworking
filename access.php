@@ -602,14 +602,17 @@ $total_reportes = $row_reportes['total_reportes'];
             <span class="navlink_icon">
               <i class="fa-regular fa-money-bill-1"></i>
             </span>
-            <span class="navlink">SALES</span>
+            <span class="navlink">TRANSACTIONS</span>
             <i class="bx bx-chevron-right arrow-left"></i>
           </div>
           <ul class="menu_items submenu">
             <a href="code/sells/sell.php" class="nav_link sublink">Sales</a>
             <a href="code/sells/seeSells.php" class="nav_link sublink">See Sales</a>
+            <a href="code/shipping/shipping.php" class="nav_link sublink">Shipping</a>
           </ul>
         </li>
+        <!-- shipping -->
+      
 
         <!-- DEVOLUTIONS -->
         <li class="item">
