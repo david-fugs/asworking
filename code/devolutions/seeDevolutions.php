@@ -399,7 +399,7 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
   </div>
 
   <div class="container">
-    <h1 class="page-title text-center"><i class="fa-solid fa-file-alt"></i> DEVOLUTIONS</h1>
+    <h1 class="page-title text-center"><i class="fa-solid fa-file-alt"></i> RETURNS</h1>
 
     <!-- Search Form -->
     <div class="flex">

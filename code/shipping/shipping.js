@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch((error) => {
           console.error("Error cargando ventas:", error);
-          document.getElementById("ventasTableContainer").innerHTML = "<p class='text-danger'>Error al cargar las ventas.</p>";
+          document.getElementById("ventasTableContainer").innerHTML = "<p class='text-danger'>Error .</p>";
         });
     });
   });

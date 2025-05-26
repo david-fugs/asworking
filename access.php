@@ -609,24 +609,15 @@ $total_reportes = $row_reportes['total_reportes'];
             <a href="code/sells/sell.php" class="nav_link sublink">Sales</a>
             <a href="code/sells/seeSells.php" class="nav_link sublink">See Sales</a>
             <a href="code/shipping/shipping.php" class="nav_link sublink">Shipping</a>
+            <a href="code/devolutions/seeDevolutions.php" class="nav_link sublink">Returns</a>
+
           </ul>
         </li>
         <!-- shipping -->
       
 
         <!-- DEVOLUTIONS -->
-        <li class="item">
-          <div href="#" class="nav_link submenu_item">
-            <span class="navlink_icon">
-              <i class="fa-solid fa-arrows-rotate"></i>
-            </span>
-            <span class="navlink">DEVOLUTIONS</span>
-            <i class="bx bx-chevron-right arrow-left"></i>
-          </div>
-          <ul class="menu_items submenu">
-            <a href="code/devolutions/seeDevolutions.php" class="nav_link sublink">See Devolutions</a>
-          </ul>
-        </li>
+       
 
         <!-- INFORMS -->
         <li class="item">

@@ -41,7 +41,7 @@ $data = [];
 
 if ($result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
-    echo "<tr>";
+    echo "<tr class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>";
     echo "<td><input type='checkbox' class='select-sell' value='" . $row['id_sell'] . "'></td>";
     echo "<td>" . $row['sell_order'] . "</td>";
     echo "<td>" . $row['date'] . "</td>";

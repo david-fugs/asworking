@@ -16,7 +16,15 @@ if (isset($_GET['date_devolution']) && $_GET['date_devolution'] !== '') {
 
 // Construye la consulta base
 $query = "
-SELECT DISTINCT sell_order, date FROM sell
+SELECT DISTINCT 
+    s.sell_order, 
+    s.date, 
+    sh.shipping_paid, 
+    sh.shipping_other_carrier, 
+    sh.shipping_adjust
+FROM sell AS s
+LEFT JOIN shipping AS sh ON s.sell_order = sh.sell_order;
+
 ";
 
 // Si existen filtros, agregamos la cláusula WHERE
@@ -32,8 +40,11 @@ if ($result->num_rows > 0) {
         echo "<tr>";
         echo "<td>" . $row['sell_order'] . "</td>";
         echo "<td>" . $row['date'] . "</td>";
+        echo "<td>" . $row['shipping_paid'] . "</td>";
+        echo "<td>" . $row['shipping_other_carrier'] . "</td>";
+        echo "<td>" . $row['shipping_adjust'] . "</td>";
         echo "<td>";
-        echo "<button class='btn btn-primary btn-sm open-modal' data-sellorder='" . $row['sell_order'] . "' data-bs-toggle='modal' data-bs-target='#ventasModal'>Ver ventas</button>";
+        echo "<button class='btn btn-action-icon btn-edit btn-sm open-modal' data-sellorder='" . $row['sell_order'] . "' data-bs-toggle='modal' data-bs-target='#ventasModal'><i class='fas fa-edit'></i></button>";
         echo "</td>";
     }
 } else {

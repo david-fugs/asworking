@@ -318,12 +318,6 @@ $resultTiendas = $mysqli->query($queryTiendas);
             </div>
         </form>
     </div>
-    <!--  para botonees de devolverse a otras paginas lo voy adejar aqui comentado
-  <div class="text-center">
-    <button id="bulkReturnBtn" class="btn btn-success btn-action">
-      <i class="fas fa-exchange-alt"></i> Make Devolutions
-    </button>
-  </div> -->
 
     <!-- Tabla de Ventas -->
     <div class="table-container">
@@ -333,6 +327,9 @@ $resultTiendas = $mysqli->query($queryTiendas);
                 <tr>
                     <th>Sell Order</th>
                     <th>Date</th>
+                    <th>Shipping Paid</th>
+                    <th>Shipping Other Carriers</th>
+                    <th>Shipping Label Adjustment</th>
                     <th>Add Shipping</th>
                 </tr>
             </thead>
@@ -348,7 +345,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
         <div class="modal-dialog modal-xl"> <!-- modal-xl para tamaño grande -->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="ventasModalLabel">Ventas del pedido</h5>
+                    <h5 class="modal-title" id="ventasModalLabel">Sells by Sell Order</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
