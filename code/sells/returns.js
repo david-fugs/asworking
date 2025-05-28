@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
       fetch(`getSellToReturn.php?id_sell=${encodeURIComponent(id_sell)}`)
         .then((response) => response.json())
         .then((data) => {
-            console.log(data);
+          console.log(data);
           if (data.error) {
             document.getElementById(
               "ventasTableContainer"
@@ -58,34 +58,64 @@ document.addEventListener("DOMContentLoaded", function () {
       </tbody>
     </table>
 
-    <form method='post' action='saveShipping.php' class='mt-4'>
+<form method='post' action='saveReturn.php' class='mt-4' id='returnForm'>
+    <div class='row mb-3'>
+    <div class='col-md-4'>
+            <label for='shipping_paid' class='form-label'>Quantity</label>
+            <input type='number' step='0.01' name='quantity' ' id='quantity' class='form-control'>
+        </div>
+        <div class='col-md-4'>
+            <label for='shipping_paid' class='form-label'>Product Charge</label>
+            <input type='number' step='0.01' name='product_charge' ' id='product_charge' class='form-control'>
+        </div>
+        <div class='col-md-4'>
+            <label for='shipping_other' class='form-label'>Shipping Paid</label>
+            <input type='number' step='0.01' name='shipping_paid'  id='shipping_paid' class='form-control' >
+        </div>
+        
+    </div>
+    <div class='row mb-3'>
+    <div class='col-md-4'>
+            <label for='tax_return' class='form-label'>Tax Return</label>
+            <input type='number' step='0.01' name='tax_return'   id='tax_return' class='form-control' >
+        </div>
+        <div class='col-md-4'>
+            <label for='selling_fee_refund' class='form-label'>Selling Fee Refund</label>
+            <input type='number' step='0.01' name='selling_fee_refund' id='selling_fee_refund' class='form-control' >
+        </div>
+        <div class='col-md-4'>
+            <label for='refund_administration_fee' class='form-label'>Refund Aministration Fee</label>
+            <input type='number' step='0.01'  name='refund_administration_fee'  id='refund_administration_fee' class='form-control' >
+        </div>
+        
+    </div>
     <div class='row mb-3'>
         <div class='col-md-4'>
-            <label for='shipping_paid' class='form-label'>Shipping Paid</label>
-            <input type='number' step='0.01' name='shipping_paid' value='" . (isset($shipping['shipping_paid']) ? htmlspecialchars($shipping['shipping_paid']) : '') . "' id='shipping_paid' class='form-control'>
+            <label for='return_cost' class='form-label'>Return Cost</label>
+            <input type='number' step='0.01' name='return_cost'   id='return_cost' class='form-control'>
         </div>
         <div class='col-md-4'>
-            <label for='shipping_other' class='form-label'>Shipping Other Carriers</label>
-            <input type='number' step='0.01' name='shipping_other_carrier' value='" . (isset($shipping['shipping_other_carrier']) ? htmlspecialchars($shipping['shipping_other_carrier']) : '') . "' id='shipping_other' class='form-control' required>
+            <label for='buyer_comments' class='form-label'>Buyer Comments</label>
+            <input type='text' name='buyer_comments'   id='buyer_comments' class='form-control'>
         </div>
         <div class='col-md-4'>
-            <label for='shipping_adjust' class='form-label'>Shipping Label Adjustment</label>
-            <input type='number' step='0.01' name='shipping_adjust' value='" . (isset($shipping['shipping_adjust']) ? htmlspecialchars($shipping['shipping_adjust']) : '') . "' id='shipping_adjust' class='form-control' required>
+            <label for='other_refund_fee' class='form-label'>Other Refund Fee</label>
+            <input type='text' name='other_refund_fee' id='other_refund_fee' class='form-control'>
         </div>
-    </div>
-    <input type='hidden' name='sell_order' value='" . htmlspecialchars($sell_order) . "'>
+        </div>
+    <input type='hidden' name='sell_order' value='${items[0].sell_order }'> 
+    <input type='hidden' name='id_sell' value='${items[0].id_sell }'>
+    <input type='hidden' name='upc_item' value='${items[0].upc_item }'>
+    <input type='hidden' name='sku_item' value='${items[0].sku_item }'>
+    
     <div class='text-end'>
         <button type='submit' class='btn' style='background-color: #632b8b; color: #fff; border-color: #632b8b;'>
         Save
         </button>    
     </div>
-
 </form>
-    
     `;
-
-        document.getElementById("ventasTableContainer").innerHTML = tableHTML;
-
+          document.getElementById("ventasTableContainer").innerHTML = tableHTML;
           const modal = new bootstrap.Modal(
             document.getElementById("returnModal")
           );
