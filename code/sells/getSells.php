@@ -41,19 +41,18 @@ $data = [];
 
 if ($result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
-    echo "<tr class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>";
-    echo "<td><input type='checkbox' class='select-sell' value='" . $row['id_sell'] . "'></td>";
-    echo "<td>" . $row['sell_order'] . "</td>";
-    echo "<td>" . $row['date'] . "</td>";
-    echo "<td>" . $row['upc_item'] . "</td>";
-    echo "<td>" . $row['received_shipping'] . "</td>";
-    echo "<td>" . $row['payed_shipping'] . "</td>";
-    echo "<td>" . $row['store_name'] . "</td>";
-    echo "<td>" . $row['code_sucursal'] . "</td>";
-    echo "<td>" . $row['comision_item'] . "</td>";
-    echo "<td>" . $row['quantity'] . "</td>";
-    echo "<td>" . $row['item_price'] . "</td>";
-    echo "<td>" . $row['total_item'] . "</td>";
+    echo "<tr>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['sell_order'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['date'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['upc_item'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['received_shipping'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "' >" . $row['payed_shipping'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['store_name'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['code_sucursal'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['comision_item'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['quantity'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['item_price'] . "</td>";
+    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['total_item'] . "</td>";
     echo "<td>
       <button class='btn-action-icon btn-edit'
         data-id='" . $row['id_sell'] . "'

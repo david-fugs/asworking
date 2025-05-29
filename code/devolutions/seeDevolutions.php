@@ -15,22 +15,22 @@ $queryTiendas = "SELECT id_store, store_name FROM store ORDER BY store_name ASC"
 $resultTiendas = $mysqli->query($queryTiendas);
 
 if (isset($_GET['delete'])) {
-  $id_devolution = $_GET['delete'];
-  deleteMember($id_devolution);
+  $id_return = $_GET['delete'];
+  deleteReturn($id_return);
 }
-function deleteMember($id_devolution)
+function deleteReturn($id_return)
 {
   global $mysqli; // Asegurar acceso a la conexión global
 
-  $query = "DELETE FROM devolutions WHERE id_devolution  = ?";
+  $query = "DELETE FROM returns WHERE id_return  = ?";
   $stmt = $mysqli->prepare($query);
-  $stmt->bind_param("s", $id_devolution);
+  $stmt->bind_param("s", $id_return);
 
   if ($stmt->execute()) {
-    echo "<script>alert('devolution deleted correctly');
+    echo "<script>alert('return deleted correctly');
       window.location = 'seeDevolutions.php';</script>";
   } else {
-    echo "<script>alert('Error deleting the devolution');
+    echo "<script>alert('Error deleting the return');
       window.location = 'seeDevolutions.php';</script>";
   }
 
@@ -421,16 +421,18 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
             <th>Sell Number</th>
             <th>Date</th>
             <th>UPC</th>
-            <th>Received Shipping</th>
-            <th>Payeed Shipping</th>
-            <th>Store</th>
-            <th>Sucursal</th>
-            <th>Comision</th>
+            <th>Sku</th>
             <th>Quantity</th>
-            <th>Item Price</th>
-            <th>Total Item</th>
-            <th>Devolution Date</th>
-            <th>Delete Sell</th>
+            <th>Product Charge</th>
+            <th>Shipping Paid</th>
+            <th>Tax Return</th>
+            <th>Selling Fee Refund</th>
+            <th>Refund Administration Fee</th>
+            <th>Other Refund Fee</th>
+            <th>Return Cost</th>
+            <th>Buyer Comments</th>
+            <th>Sucursal</th>
+            <th>Delete</th>
           </tr>
         </thead>
         <tbody>

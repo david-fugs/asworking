@@ -609,16 +609,11 @@ $total_reportes = $row_reportes['total_reportes'];
             <a href="code/sells/sell.php" class="nav_link sublink">Sales</a>
             <a href="code/sells/seeSells.php" class="nav_link sublink">See Sales</a>
             <a href="code/shipping/shipping.php" class="nav_link sublink">Shipping</a>
+            <a href="code/shippingReturn/shippingReturn.php" class="nav_link sublink">Shipping Return</a>
+            <a href="code/discount/discount.php" class="nav_link sublink">Discounts</a>
             <a href="code/devolutions/seeDevolutions.php" class="nav_link sublink">Returns</a>
-
           </ul>
         </li>
-        <!-- shipping -->
-      
-
-        <!-- DEVOLUTIONS -->
-       
-
         <!-- INFORMS -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">

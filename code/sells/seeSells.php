@@ -331,7 +331,6 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <table class="" id="salesTable">
       <thead>
         <tr>
-          <th></th>
           <th>Sell Number</th>
           <th>Date</th>
           <th>UPC</th>

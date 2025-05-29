@@ -1,58 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   agregarEventosEliminar();
   agregarEventosEditar();
-
-  document
-    .getElementById("bulkReturnBtn")
-    .addEventListener("click", function () {
-      const selectedCheckboxes = document.querySelectorAll(
-        ".select-sell:checked"
-      );
-      const ids = Array.from(selectedCheckboxes).map((cb) => cb.value);
-
-      if (ids.length === 0) {
-        Swal.fire("Nothing selected", "Select at leat 1 record", "info");
-        return;
-      }
-      Swal.fire({
-        title: "¿Are you sure to do this devolutions?",
-        text: "The records will be send to the devolution menu.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Sí, enviar",
-        cancelButtonText: "Cancelar",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          fetch("devolution.php", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: "id_sell[]=" + ids.join("&id_sell[]="),
-          })
-            .then((response) => response.text())
-            .then((data) => {
-              if (data.trim() === "success") {
-                Swal.fire(
-                  "¡Sent!",
-                  "Records are now on Devolutions.",
-                  "success"
-                );
-                selectedCheckboxes.forEach((cb) => cb.closest("tr").remove());
-              } else {
-                Swal.fire("Error", data);
-              }
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-              Swal.fire("Error", "error.");
-            });
-        }
-      });
-    });
-
   function agregarEventosEliminar() {
     const deleteButtons = document.querySelectorAll(".delete-btn");
 
@@ -102,8 +50,58 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  document.getElementById("bulkReturnBtn")
+    .addEventListener("click", function () {
+      const selectedCheckboxes = document.querySelectorAll(
+        ".select-sell:checked"
+      );
+      const ids = Array.from(selectedCheckboxes).map((cb) => cb.value);
+
+      if (ids.length === 0) {
+        Swal.fire("Nothing selected", "Select at leat 1 record", "info");
+        return;
+      }
+      Swal.fire({
+        title: "¿Are you sure to do this devolutions?",
+        text: "The records will be send to the devolution menu.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, enviar",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch("devolution.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: "id_sell[]=" + ids.join("&id_sell[]="),
+          })
+            .then((response) => response.text())
+            .then((data) => {
+              if (data.trim() === "success") {
+                Swal.fire(
+                  "¡Sent!",
+                  "Records are now on Devolutions.",
+                  "success"
+                );
+                selectedCheckboxes.forEach((cb) => cb.closest("tr").remove());
+              } else {
+                Swal.fire("Error", data);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              Swal.fire("Error", "error.");
+            });
+        }
+      });
+    });
+
   function agregarEventosEditar() {
-    const editButtons = document.querySelectorAll(".edit-btn");
+    const editButtons = document.querySelectorAll(".btn-edit");
     const editModal = new bootstrap.Modal(document.getElementById("editModal"));
 
     editButtons.forEach((button) => {
@@ -203,6 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((data) => {
         if (data.success) {
           alert("Venta actualizada con éxito.");
+          window.location.reload(); // Recargar la página para ver los cambios
           // Aquí puedes cerrar el modal si todo fue exitoso
           $("#editModal").modal("hide");
           // Puedes actualizar la tabla de ventas con los nuevos datos si es necesario
@@ -262,8 +261,7 @@ document.addEventListener("DOMContentLoaded", function () {
     cargarSucursalesEdit(nuevoStoreId);
   });
 
-  document
-    .getElementById("edit-sucursal")
+  document.getElementById("edit-sucursal")
     .addEventListener("change", function () {
       const selectedOption = this.options[this.selectedIndex];
       const comision = parseFloat(selectedOption.dataset.comision) || 0;
@@ -293,26 +291,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Listeners
-  document
-    .getElementById("edit-quantity")
+  document.getElementById("edit-quantity")
     .addEventListener("input", actualizarTotal);
-  document
-    .getElementById("edit-item_price")
+  document.getElementById("edit-item_price")
     .addEventListener("input", actualizarTotal);
-  document
-    .getElementById("edit-item_price")
+  document.getElementById("edit-item_price")
     .addEventListener("change", function () {
       console.log("Cambio en el precio");
       actualizarTotal();
     });
 
-  document
-    .getElementById("edit-comision")
+  document.getElementById("edit-comision")
     .addEventListener("input", actualizarTotal);
 
   // Función para filtrar ventas
-  document
-    .getElementById("filterForm")
+  document.getElementById("filterForm")
     .addEventListener("submit", function (e) {
       e.preventDefault(); // Prevenir el envío del formulario
 
@@ -367,7 +360,7 @@ document.addEventListener("DOMContentLoaded", function () {
               <td>${venta.item_price}</td>
               <td>${venta.total_item}</td>
               <td>
-                <button class="edit-btn" data-id="${venta.id_sell}" data-sell_order="${venta.sell_order}" data-date="${venta.date}" data-upc="${venta.upc_item}" data-received_shipping="${venta.received_shipping}" data-payed_shipping="${venta.payed_shipping}" data-store-name="${venta.store_name}" data-store-id="${venta.id_store}" data-sucursal-code="${venta.code_sucursal}" data-sucursal-id="${venta.id_sucursal}" data-comision="${venta.comision_item}" data-quantity="${venta.quantity}" data-item_price="${venta.item_price}" data-total="${venta.total_item}">
+                <button class="btn-edit" data-id="${venta.id_sell}" data-sell_order="${venta.sell_order}" data-date="${venta.date}" data-upc="${venta.upc_item}" data-received_shipping="${venta.received_shipping}" data-payed_shipping="${venta.payed_shipping}" data-store-name="${venta.store_name}" data-store-id="${venta.id_store}" data-sucursal-code="${venta.code_sucursal}" data-sucursal-id="${venta.id_sucursal}" data-comision="${venta.comision_item}" data-quantity="${venta.quantity}" data-item_price="${venta.item_price}" data-total="${venta.total_item}">
                   <img src='../../img/editar.png' width='28' height='28' alt='Editar'>
                 </button>
               </td>
@@ -391,7 +384,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
   function conectarBotones() {
-    document.querySelectorAll(".edit-btn").forEach((btn) => {
+    document.querySelectorAll(".btn-edit").forEach((btn) => {
       btn.addEventListener("click", function () {
         const id = this.getAttribute("data-id");
         // Aquí pones tu función para abrir el modal de editar con ese ID
