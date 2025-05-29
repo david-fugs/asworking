@@ -342,7 +342,6 @@ $resultTiendas = $mysqli->query($queryTiendas);
           <th>Quantity</th>
           <th>Item Price</th>
           <th>Total Item</th>
-          <th>Edit Sell</th>
           <th>Delete Sell</th>
         </tr>
       </thead>

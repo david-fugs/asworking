@@ -53,25 +53,25 @@ if ($result->num_rows > 0) {
     echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['quantity'] . "</td>";
     echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['item_price'] . "</td>";
     echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['total_item'] . "</td>";
-    echo "<td>
-      <button class='btn-action-icon btn-edit'
-        data-id='" . $row['id_sell'] . "'
-        data-sell_order='" . $row['sell_order'] . "'
-        data-date='" . $row['date'] . "'
-        data-upc='" . $row['upc_item'] . "'
-        data-received_shipping='" . $row['received_shipping'] . "'
-        data-payed_shipping='" . $row['payed_shipping'] . "'
-        data-store-name='" . $row['store_name'] . "'
-        data-store-id='" . $row['id_store'] . "'     
-        data-sucursal-code='" . $row['code_sucursal'] . "'
-        data-sucursal-id='" . $row['id_sucursal'] . "' 
-        data-comision='" . $row['comision_item'] . "'
-        data-quantity='" . $row['quantity'] . "'
-        data-item_price='" . $row['item_price'] . "'
-        data-total='" . $row['total_item'] . "'>
-         <i class='fas fa-edit'></i>
-      </button>
-    </td>";
+    // echo "<td>
+    //   <button class='btn-action-icon btn-edit'
+    //     data-id='" . $row['id_sell'] . "'
+    //     data-sell_order='" . $row['sell_order'] . "'
+    //     data-date='" . $row['date'] . "'
+    //     data-upc='" . $row['upc_item'] . "'
+    //     data-received_shipping='" . $row['received_shipping'] . "'
+    //     data-payed_shipping='" . $row['payed_shipping'] . "'
+    //     data-store-name='" . $row['store_name'] . "'
+    //     data-store-id='" . $row['id_store'] . "'     
+    //     data-sucursal-code='" . $row['code_sucursal'] . "'
+    //     data-sucursal-id='" . $row['id_sucursal'] . "' 
+    //     data-comision='" . $row['comision_item'] . "'
+    //     data-quantity='" . $row['quantity'] . "'
+    //     data-item_price='" . $row['item_price'] . "'
+    //     data-total='" . $row['total_item'] . "'>
+    //      <i class='fas fa-edit'></i>
+    //   </button>
+    // </td>";
     echo "<td>
     <button class='btn-action-icon btn-delete' data-id='" . $row['id_sell'] . "'><i class='fas fa-trash-alt'></i></button> </td>";
     echo "</tr>";

@@ -1,54 +1,101 @@
 document.addEventListener("DOMContentLoaded", function () {
-  agregarEventosEliminar();
-  agregarEventosEditar();
-  function agregarEventosEliminar() {
-    const deleteButtons = document.querySelectorAll(".delete-btn");
 
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", function () {
-        const id_sell = this.getAttribute("data-id");
-        const row = this.closest("tr");
+//eliminar
+ document.querySelectorAll(".btn-delete").forEach(function (button) {
+    button.addEventListener("click", function () {
+      const id = this.getAttribute("data-id");
 
-        Swal.fire({
-          title: "¿Are you sure?",
-          text: "¡This action can not be undone!",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonColor: "#d33",
-          cancelButtonColor: "#3085d6",
-          confirmButtonText: "Yes, Delete it",
-          cancelButtonText: "Cancel",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            fetch("deleteSell.php", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-              },
-              body: "id_sell=" + encodeURIComponent(id_sell),
-            })
-              .then((response) => response.text())
-              .then((data) => {
-                if (data.trim() === "success") {
-                  Swal.fire(
-                    "¡Eliminated!",
-                    "The record has been deleted.",
-                    "success"
-                  );
-                  row.remove();
-                } else {
-                  Swal.fire("Error", "Error deleting the record.", "error");
-                }
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-                Swal.fire("Error", "Error conecting to the server.", "error");
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Send AJAX request
+          fetch('deleteSell.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `id_sell=${id}`
+          })
+          .then(response => response.text())
+          .then(data => {
+            if (data.trim() === 'success') {
+              Swal.fire(
+                'Deleted!',
+                'The record has been deleted.',
+                'success'
+              ).then(() => {
+                // Optionally remove the row from the table
+                const row = button.closest("tr");
+                if (row) row.remove();
               });
-          }
-        });
+            } else {
+              Swal.fire('Error', 'There was a problem deleting the record.', 'error');
+            }
+          });
+        }
       });
     });
-  }
+  });
+  //end eliminar
+
+
+  // agregarEventosEditar();
+  // function agregarEventosEliminar() {
+  //   const deleteButtons = document.querySelectorAll(".delete-btn");
+
+  //   deleteButtons.forEach((button) => {
+  //     button.addEventListener("click", function () {
+  //       const id_sell = this.getAttribute("data-id");
+  //       const row = this.closest("tr");
+
+  //       Swal.fire({
+  //         title: "¿Are you sure?",
+  //         text: "¡This action can not be undone!",
+  //         icon: "warning",
+  //         showCancelButton: true,
+  //         confirmButtonColor: "#d33",
+  //         cancelButtonColor: "#3085d6",
+  //         confirmButtonText: "Yes, Delete it",
+  //         cancelButtonText: "Cancel",
+  //       }).then((result) => {
+  //         if (result.isConfirmed) {
+  //           fetch("deleteSell.php", {
+  //             method: "POST",
+  //             headers: {
+  //               "Content-Type": "application/x-www-form-urlencoded",
+  //             },
+  //             body: "id_sell=" + encodeURIComponent(id_sell),
+  //           })
+  //             .then((response) => response.text())
+  //             .then((data) => {
+  //               if (data.trim() === "success") {
+  //                 Swal.fire(
+  //                   "¡Eliminated!",
+  //                   "The record has been deleted.",
+  //                   "success"
+  //                 );
+  //                 row.remove();
+  //               } else {
+  //                 Swal.fire("Error", "Error deleting the record.", "error");
+  //               }
+  //             })
+  //             .catch((error) => {
+  //               console.error("Error:", error);
+  //               Swal.fire("Error", "Error conecting to the server.", "error");
+  //             });
+  //         }
+  //       });
+  //     });
+  //   });
+  // }
 
   document.getElementById("bulkReturnBtn")
     .addEventListener("click", function () {
@@ -99,7 +146,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
     });
-
   function agregarEventosEditar() {
     const editButtons = document.querySelectorAll(".btn-edit");
     const editModal = new bootstrap.Modal(document.getElementById("editModal"));
