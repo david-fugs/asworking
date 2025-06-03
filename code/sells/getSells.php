@@ -42,17 +42,17 @@ $data = [];
 if ($result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
     echo "<tr>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['sell_order'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['date'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['upc_item'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['received_shipping'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "' >" . $row['payed_shipping'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['store_name'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['code_sucursal'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['comision_item'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['quantity'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['item_price'] . "</td>";
-    echo "<td  class='clickable-row' data-id_sell='" . $row['id_sell'] . "'>" . $row['total_item'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['sell_order'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['date'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['upc_item'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['received_shipping'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['payed_shipping'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['store_name'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['code_sucursal'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['comision_item'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['quantity'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['item_price'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['total_item'] . "</td>";
     // echo "<td>
     //   <button class='btn-action-icon btn-edit'
     //     data-id='" . $row['id_sell'] . "'

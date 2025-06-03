@@ -2,8 +2,10 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".clickable-row").forEach(function (row) {
     row.addEventListener("click", function () {
       const id_sell = this.dataset.id_sell;
+      const sell_order = this.dataset.sell_order;
+      console.log("Selected Sell Order:", sell_order);
       console.log("sell order:", id_sell);
-      fetch(`getSellToReturn.php?id_sell=${encodeURIComponent(id_sell)}`)
+      fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}`)
         .then((response) => response.json())
         .then((data) => {
           console.log(data);
