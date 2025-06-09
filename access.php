@@ -64,6 +64,58 @@ if (!$result_reportes) {
 }
 $row_reportes = mysqli_fetch_assoc($result_reportes);
 $total_reportes = $row_reportes['total_reportes'];
+
+// Enhanced KPIs for better dashboard insights
+// Monthly sales trend (current vs previous month)
+$monthly_sales = "SELECT 
+    SUM(CASE WHEN MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE()) THEN total_item ELSE 0 END) as current_month_sales,
+    SUM(CASE WHEN MONTH(date) = MONTH(CURDATE() - INTERVAL 1 MONTH) AND YEAR(date) = YEAR(CURDATE() - INTERVAL 1 MONTH) THEN total_item ELSE 0 END) as previous_month_sales,
+    COUNT(CASE WHEN MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE()) THEN 1 END) as current_month_orders
+    FROM sell WHERE estado_sell = 1";
+$result_monthly = mysqli_query($mysqli, $monthly_sales);
+$row_monthly = mysqli_fetch_assoc($result_monthly);
+$current_month_sales = $row_monthly['current_month_sales'] ?? 0;
+$previous_month_sales = $row_monthly['previous_month_sales'] ?? 0;
+$current_month_orders = $row_monthly['current_month_orders'] ?? 0;
+
+// Calculate sales growth percentage
+$sales_growth = 0;
+if ($previous_month_sales > 0) {
+    $sales_growth = (($current_month_sales - $previous_month_sales) / $previous_month_sales) * 100;
+}
+
+// Low stock items (items with less than 10 units)
+$low_stock = "SELECT COUNT(*) as low_stock_items FROM inventory WHERE quantity_inventory > 0 AND quantity_inventory < 10";
+$result_low_stock = mysqli_query($mysqli, $low_stock);
+$row_low_stock = mysqli_fetch_assoc($result_low_stock);
+$low_stock_items = $row_low_stock['low_stock_items'];
+
+// Top performing store this month
+$top_store = "SELECT s.store_name, SUM(sell.total_item) as store_sales 
+              FROM sell 
+              JOIN store s ON sell.id_store = s.id_store 
+              WHERE MONTH(sell.date) = MONTH(CURDATE()) AND YEAR(sell.date) = YEAR(CURDATE()) AND sell.estado_sell = 1
+              GROUP BY sell.id_store, s.store_name 
+              ORDER BY store_sales DESC 
+              LIMIT 1";
+$result_top_store = mysqli_query($mysqli, $top_store);
+$row_top_store = mysqli_fetch_assoc($result_top_store);
+$top_store_name = $row_top_store['store_name'] ?? 'N/A';
+$top_store_sales = $row_top_store['store_sales'] ?? 0;
+
+// Average order value this month
+$avg_order = "SELECT AVG(total_item) as avg_order_value 
+              FROM sell 
+              WHERE MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE()) AND estado_sell = 1";
+$result_avg_order = mysqli_query($mysqli, $avg_order);
+$row_avg_order = mysqli_fetch_assoc($result_avg_order);
+$avg_order_value = $row_avg_order['avg_order_value'] ?? 0;
+
+// Return rate calculation
+$return_rate = 0;
+if ($current_month_orders > 0) {
+    $return_rate = ($total_devoluciones_count / $current_month_orders) * 100;
+}
 ?>
 
 <!DOCTYPE html>
@@ -319,14 +371,25 @@ $total_reportes = $row_reportes['total_reportes'];
 
     .main-content.active {
       margin-left: 270px;
-    }
-
-    /* Dashboard Cards */
+    }    /* Dashboard Cards */
     .dashboard-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
       margin-bottom: 30px;
+    }
+
+    @media (min-width: 1200px) {
+      .dashboard-cards {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-cards {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+      }
     }
 
     .card {
@@ -360,9 +423,7 @@ $total_reportes = $row_reportes['total_reportes'];
       justify-content: center;
       color: var(--primary);
       font-size: 1.5rem;
-    }
-
-    .card-title {
+    }    .card-title {
       font-size: 0.9rem;
       color: var(--secondary);
       font-weight: 600;
@@ -373,6 +434,12 @@ $total_reportes = $row_reportes['total_reportes'];
       font-weight: 700;
       color: var(--primary);
       margin-bottom: 5px;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: var(--secondary);
+      font-weight: 500;
     }
 
     .card-footer {
@@ -579,9 +646,7 @@ $total_reportes = $row_reportes['total_reportes'];
           <ul class="menu_items submenu">
             <a href="code/stores/seeSucursal.php" class="nav_link sublink">See Sucursal</a>
           </ul>
-        </li>
-
-        <!-- DAILY REPORT -->
+        </li>        <!-- DAILY REPORT -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
             <span class="navlink_icon">
@@ -593,6 +658,7 @@ $total_reportes = $row_reportes['total_reportes'];
           <ul class="menu_items submenu">
             <a href="code/report/addReport.php" class="nav_link sublink">Daily Report</a>
             <a href="code/report/seeReport.php" class="nav_link sublink">See Report</a>
+            <a href="code/report/editLocationFolder.php" class="nav_link sublink">Edit Location & Folder</a>
           </ul>
         </li>
 
@@ -609,11 +675,25 @@ $total_reportes = $row_reportes['total_reportes'];
             <a href="code/sells/sell.php" class="nav_link sublink">Sales</a>
             <a href="code/sells/seeSells.php" class="nav_link sublink">See Sales</a>
             <a href="code/shipping/shipping.php" class="nav_link sublink">Shipping</a>
-            <a href="code/shippingReturn/shippingReturn.php" class="nav_link sublink">Shipping Return</a>
-            <a href="code/discount/discount.php" class="nav_link sublink">Discounts</a>
+            <a href="code/shippingReturn/shippingReturn.php" class="nav_link sublink">Shipping Return</a>            <a href="code/discount/seeDiscount.php" class="nav_link sublink">Discounts</a>
+            <a href="code/safetclaim/seeSafetClaim.php" class="nav_link sublink">Safe T-Claim/Label Avoid </a>
+            <a href="code/cancellations/seeCancellations.php" class="nav_link sublink">Cancellations</a>
+
             <a href="code/devolutions/seeDevolutions.php" class="nav_link sublink">Returns</a>
+          </ul>        </li>        <!-- ANALYTICS -->
+        <li class="item">
+          <div href="#" class="nav_link submenu_item">
+            <span class="navlink_icon">
+              <i class="fas fa-chart-bar"></i>
+            </span>
+            <span class="navlink">ANALYTICS</span>
+            <i class="bx bx-chevron-right arrow-left"></i>
+          </div>
+          <ul class="menu_items submenu">
+            <a href="code/analytics/seeAnalytics.php" class="nav_link sublink">See Analytics</a>
           </ul>
         </li>
+
         <!-- INFORMS -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
@@ -626,9 +706,7 @@ $total_reportes = $row_reportes['total_reportes'];
           <ul class="menu_items submenu">
             <a href="code/informs/generateInforms.php" class="nav_link sublink">Generate Informs</a>
           </ul>
-        </li>
-
-        <!-- USER -->
+        </li>        <!-- USER -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
             <span class="navlink_icon">
@@ -670,28 +748,40 @@ $total_reportes = $row_reportes['total_reportes'];
       </div>
     </div>
   </nav>
-
   <!-- Main Content -->
   <div class="main-content">
     <!-- Dashboard Cards -->
     <div class="dashboard-cards">
+      <!-- Monthly Sales with Growth Indicator -->
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="card-title">Total Items</div>
-            <div class="card-value"><?= $total_items; ?></div>
+            <div class="card-title">Monthly Sales</div>
+            <div class="card-value">$<?= number_format($current_month_sales, 2) ?></div>
+            <div class="card-subtitle">
+              <?php if ($sales_growth > 0): ?>
+                <span style="color: var(--success);"><i class="fas fa-arrow-up"></i> +<?= number_format($sales_growth, 1) ?>%</span>
+              <?php elseif ($sales_growth < 0): ?>
+                <span style="color: var(--danger);"><i class="fas fa-arrow-down"></i> <?= number_format($sales_growth, 1) ?>%</span>
+              <?php else: ?>
+                <span style="color: #666;"><i class="fas fa-minus"></i> 0%</span>
+              <?php endif; ?>
+              vs last month
+            </div>
           </div>
           <div class="card-icon">
-            <i class="fa-solid fa-shirt"></i>
+            <i class="fa-solid fa-chart-line"></i>
           </div>
         </div>
       </div>
 
+      <!-- Today's Sales -->
       <div class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Today's Sales</div>
-            <div class="card-value"> $ <?= $total_vendido_hoy ?></div>
+            <div class="card-value">$<?= number_format($total_vendido_hoy ?? 0, 2) ?></div>
+            <div class="card-subtitle"><?= $current_month_orders ?> orders this month</div>
           </div>
           <div class="card-icon">
             <i class="fa-solid fa-dollar-sign"></i>
@@ -699,23 +789,73 @@ $total_reportes = $row_reportes['total_reportes'];
         </div>
       </div>
 
+      <!-- Inventory Status -->
       <div class="card">
         <div class="card-header">
           <div>
-            <div class="card-title">Devolutions This Month</div>
-            <div class="card-value"> <?= $total_devoluciones_count ?></div>
+            <div class="card-title">Inventory Status</div>
+            <div class="card-value"><?= number_format($total_items) ?></div>
+            <div class="card-subtitle">
+              <span style="color: <?= $low_stock_items > 0 ? 'var(--warning)' : 'var(--success)' ?>;">
+                <?= $low_stock_items ?> low stock items
+              </span>
+            </div>
           </div>
           <div class="card-icon">
-            <i class="fa-solid fa-file-lines"></i>
+            <i class="fa-solid fa-boxes-stacked"></i>
           </div>
         </div>
       </div>
 
+      <!-- Return Rate -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Return Rate</div>
+            <div class="card-value"><?= number_format($return_rate, 1) ?>%</div>
+            <div class="card-subtitle"><?= $total_devoluciones_count ?> returns this month</div>
+          </div>
+          <div class="card-icon">
+            <i class="fa-solid fa-rotate-left"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Average Order Value -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Avg Order Value</div>
+            <div class="card-value">$<?= number_format($avg_order_value, 2) ?></div>
+            <div class="card-subtitle">Current month average</div>
+          </div>
+          <div class="card-icon">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Performing Store -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Top Store</div>
+            <div class="card-value" style="font-size: 1.2rem;"><?= $top_store_name ?></div>
+            <div class="card-subtitle">$<?= number_format($top_store_sales, 2) ?> this month</div>
+          </div>
+          <div class="card-icon">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Reports -->
       <div class="card">
         <div class="card-header">
           <div>
             <div class="card-title">Pending Reports</div>
             <div class="card-value"><?= $total_reportes ?></div>
+            <div class="card-subtitle">Require processing</div>
           </div>
           <div class="card-icon">
             <i class="fa-solid fa-file-lines"></i>
@@ -723,39 +863,98 @@ $total_reportes = $row_reportes['total_reportes'];
         </div>
       </div>
 
-    </div>
+      <!-- Monthly Revenue Loss (Devolutions) -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Revenue Loss</div>
+            <div class="card-value">$<?= number_format($total_devoluciones ?? 0, 2) ?></div>
+            <div class="card-subtitle">Devolutions this month</div>
+          </div>
+          <div class="card-icon">
+            <i class="fa-solid fa-chart-line-down"></i>
+          </div>
+        </div>
+      </div>
 
-    <!-- Recent Activity -->
+    </div>    <!-- Recent Activity & Key Insights -->
     <div class="recent-activity">
-      <h3 class="section-title">Recent Activity</h3>
+      <h3 class="section-title">Key Business Insights</h3>
       <ul class="activity-list">
         <li class="activity-item">
           <div class="activity-icon">
-            <i class="fa-solid fa-dollar-sign"></i>
+            <i class="fa-solid fa-chart-line"></i>
           </div>
           <div class="activity-content">
-            <div class="activity-title">Devolutions This Month </div>
-            <div class="activity-time"> $ <?= $total_devoluciones ?></div>
+            <div class="activity-title">Monthly Sales Performance</div>
+            <div class="activity-time">
+              <?php if ($sales_growth > 0): ?>
+                Sales are up <?= number_format($sales_growth, 1) ?>% compared to last month
+              <?php elseif ($sales_growth < 0): ?>
+                Sales are down <?= abs(number_format($sales_growth, 1)) ?>% compared to last month
+              <?php else: ?>
+                Sales remain steady compared to last month
+              <?php endif; ?>
+            </div>
           </div>
         </li>
+        
         <li class="activity-item">
           <div class="activity-icon">
-            <i class="fa-solid fa-file-lines"></i>
+            <i class="fa-solid fa-exclamation-triangle"></i>
           </div>
           <div class="activity-content">
-            <div class="activity-title">Latest Devolution </div>
-            <div class="activity-time"><?= $ultima_devolucion ?></div>
+            <div class="activity-title">Inventory Alert</div>
+            <div class="activity-time">
+              <?php if ($low_stock_items > 0): ?>
+                <?= $low_stock_items ?> items are running low on stock (< 10 units)
+              <?php else: ?>
+                All items have adequate stock levels
+              <?php endif; ?>
+            </div>
           </div>
         </li>
+
         <li class="activity-item">
           <div class="activity-icon">
-            <i class="fa-solid fa-arrows-rotate"></i>
+            <i class="fa-solid fa-trophy"></i>
           </div>
           <div class="activity-content">
-            <div class="activity-title">Latest Sell</div>
-            <div class="activity-time"><?= $ultima_fecha_venta ?> </div>
+            <div class="activity-title">Top Performing Store</div>
+            <div class="activity-time"><?= $top_store_name ?> leads with $<?= number_format($top_store_sales, 2) ?> this month</div>
           </div>
         </li>
+
+        <li class="activity-item">
+          <div class="activity-icon">
+            <i class="fa-solid fa-rotate-left"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Return Rate Status</div>
+            <div class="activity-time">
+              Current return rate is <?= number_format($return_rate, 1) ?>%
+              <?php if ($return_rate > 10): ?>
+                <span style="color: var(--danger);"> - Requires attention</span>
+              <?php elseif ($return_rate > 5): ?>
+                <span style="color: var(--warning);"> - Monitor closely</span>
+              <?php else: ?>
+                <span style="color: var(--success);"> - Within acceptable range</span>
+              <?php endif; ?>
+            </div>
+          </div>
+        </li>
+
+        <?php if ($total_reportes > 0): ?>
+        <li class="activity-item">
+          <div class="activity-icon">
+            <i class="fa-solid fa-clipboard-list"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Pending Tasks</div>
+            <div class="activity-time"><?= $total_reportes ?> daily reports require processing</div>
+          </div>
+        </li>
+        <?php endif; ?>
       </ul>
     </div>
   </div>

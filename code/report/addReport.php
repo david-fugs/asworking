@@ -90,21 +90,10 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                 <i class="fas fa-file-alt"></i> See Daily Report
             </a>
         </div>
-    </div>
-    <?php
+    </div>    <?php
     date_default_timezone_set("America/Bogota");
     include("../../conexion.php");
     require_once("../../zebra.php");
-    //traigo las tiendas para el select del modal
-    $sql_store = "SELECT * FROM store 
-    JOIN sucursal ON store.id_store = sucursal.id_store 
-    ORDER BY store_name ASC";
-    $result_store = $mysqli->query($sql_store);
-    if (!$result_store) {
-        die("Error en la consulta: " . $mysqli->error);
-    }
-    $stores = $result_store->fetch_all(MYSQLI_ASSOC);
-
     ?>
     <div class="container mt-5">
         <div class="row justify-content-center">
@@ -180,21 +169,9 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                         <div class="col-md-6 form-group">
                             <label for="weight_report" class="form-label">Weight</label>
                             <input type="text" step="0.01" class="form-control form-control-sm" id="weight_report" name="weight_report">
-                        </div>
-
-                        <div class="col-md-6 form-group">
+                        </div>                        <div class="col-md-6 form-group">
                             <label for="inventory_report" class="form-label">Inventory</label>
                             <input type="text" class="form-control form-control-sm" id="inventory_report" name="inventory_report">
-                        </div>
-
-                        <div class="col-md-6 form-group mt-4">
-                            <label for="sucursal_report" class="form-label">Sucursal</label>
-                            <select class="form-select form-select-sm" id="sucursal_report" name="sucursal_report" required>
-                                <option value="">Select Sucursal</option>
-                                <?php foreach ($stores as $store) : ?>
-                                    <option value="<?= $store['id_sucursal'] ?>"><?= $store['code_sucursal'] ?></option>
-                                <?php endforeach; ?>
-                            </select>
                         </div>
 
                         <div class="col-12">

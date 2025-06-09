@@ -16,24 +16,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $item = $mysqli->real_escape_string($_POST['item_report']);
     $vendor = $mysqli->real_escape_string($_POST['vendor_report']);
     $color = $mysqli->real_escape_string($_POST['color_report']);
-    $size = $mysqli->real_escape_string($_POST['size_report']);
-    $category = $mysqli->real_escape_string($_POST['category_report']);
+    $size = $mysqli->real_escape_string($_POST['size_report']);    $category = $mysqli->real_escape_string($_POST['category_report']);
     $weight = $mysqli->real_escape_string($_POST['weight_report']);
     $inventory = $mysqli->real_escape_string($_POST['inventory_report']);
-    $sucursal = $mysqli->real_escape_string($_POST['sucursal_report']);
-    $observacion = $mysqli->real_escape_string($_POST['observacion_report']);
-    // Actualizar la tabla items (sin cambiar quantity_inventory)
+    $observacion = $mysqli->real_escape_string($_POST['observacion_report']);    // Insertar nuevo reporte con estado_reporte = 1 para que aparezca en seeReport
     $query = "INSERT INTO daily_report (
         upc_asignado_report, upc_final_report, cons_report, folder_report, 
         loc_report, quantity_report, sku_report, brand_report, item_report, 
         vendor_report, color_report, size_report, category_report, 
-        weight_report, inventory_report, sucursal_report, observacion_report
+        weight_report, inventory_report, observacion_report, estado_reporte
     ) VALUES (
         '$upc_asignado', '$upc_final', '$cons', '$folder',
         '$loc', '$quantity', '$sku', '$brand', '$item',
         '$vendor', '$color', '$size', '$category',
-        '$weight', '$inventory', '$sucursal', '$observacion'
-    )";    // Ejecutar consulta
+        '$weight', '$inventory', '$observacion', 1
+    )";// Ejecutar consulta
     if ($mysqli->query($query)) {
         echo "<script>
             alert('Insert successful');

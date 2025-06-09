@@ -9,34 +9,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
 
     foreach ($seleccionados as $index) {
         // Aseguramos que sea un número
-        $i = intval($index);
-
-        // Obtenemos los datos de ese índice específico
-        $id_report = $_POST['id_report'][$i];
-        $fecha = $_POST['fecha_alta_reporte'][$i];
-        $upcAsignado = $_POST['upc_asignado_report'][$i];
-        $upcFinal = $_POST['upc_final_report'][$i];
-        $cons = $_POST['cons_report'][$i];
-        $folder = $_POST['folder_report'][$i];
-        $loc = $_POST['loc_report'][$i];
-        $quantity = $_POST['quantity_report'][$i];
-        $sku = $_POST['sku_report'][$i];
-        $brand = $_POST['brand_report'][$i];
-        $item = $_POST['item_report'][$i];
-        $vendor = $_POST['vendor_report'][$i];
-        $color = $_POST['color_report'][$i];
-        $size = $_POST['size_report'][$i];
+        $i = intval($index);        // Obtenemos los datos de ese índice específico y los escapamos para prevenir inyección SQL
+        $id_report = intval($_POST['id_report'][$i]);
+        $fecha = $mysqli->real_escape_string($_POST['fecha_alta_reporte'][$i]);
+        $upcAsignado = $mysqli->real_escape_string($_POST['upc_asignado_report'][$i]);
+        $upcFinal = $mysqli->real_escape_string($_POST['upc_final_report'][$i]);
+        $cons = $mysqli->real_escape_string($_POST['cons_report'][$i]);
+        $folder = $mysqli->real_escape_string($_POST['folder_report'][$i]);
+        $loc = $mysqli->real_escape_string($_POST['loc_report'][$i]);
+        $quantity = intval($_POST['quantity_report'][$i]);
+        $sku = $mysqli->real_escape_string($_POST['sku_report'][$i]);
+        $brand = $mysqli->real_escape_string($_POST['brand_report'][$i]);
+        $item = $mysqli->real_escape_string($_POST['item_report'][$i]);
+        $vendor = $mysqli->real_escape_string($_POST['vendor_report'][$i]);
+        $color = $mysqli->real_escape_string($_POST['color_report'][$i]);
+        $size = $mysqli->real_escape_string($_POST['size_report'][$i]);
         $cost = floatval($_POST['cost_report'][$i] ?? 0.0);
-        $category = $_POST['category_report'][$i];
-        $weight = $_POST['weight_report'][$i];
-        $inventory = $_POST['inventory_report'][$i];
-        $sucursal = $_POST['sucursal_report'][$i];
-        $observacion = $_POST['observacion_report'][$i];
-
-        $sql_insert = "INSERT INTO items (
+        $category = $mysqli->real_escape_string($_POST['category_report'][$i]);
+        $weight = $mysqli->real_escape_string($_POST['weight_report'][$i]);
+        $inventory = $mysqli->real_escape_string($_POST['inventory_report'][$i]);
+        $observacion = $mysqli->real_escape_string($_POST['observacion_report'][$i]);$sql_insert = "INSERT INTO items (
             sku_item,  upc_item, date_item , brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item,id_usu
         ) VALUES (
-            '$sku', '$upcFinal', '$fecha', '$brand', '$item', '$cons', '$color', '$size', '$category', '$cost', '$weight', '$inventory','$id_usu'
+            '$sku', '$upcFinal', '$fecha', '$brand', '$item', '$cons', '$color', '$size', '$category', '$cost', '$weight', '$loc','$id_usu'
         ) ON DUPLICATE KEY UPDATE
             sku_item = '$sku',
             upc_item = '$upcFinal',
@@ -49,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
             category_item = '$category',
             cost_item = '$cost',
             weight_item = '$weight',
-            inventory_item = '$inventory', 
+            inventory_item = '$loc', 
             id_usu = '$id_usu'
 
             ";
@@ -59,14 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
         } else {
             echo "<script>alert('Error " . $mysqli->error . "');             window.location.href = 'seeReport.php';
 </script>";
-        }
-
-        // Insertar la tabla items
-        $sql_insert_inventory = "INSERT INTO inventory (upc_inventory, sku_inventory, quantity_inventory, sucursal_inventory) VALUES ('$upcFinal','$sku', '$quantity', '$sucursal') ON DUPLICATE KEY UPDATE quantity_inventory = '$quantity'";
+        }        // Insertar/actualizar la tabla inventory (sin ubicación)
+        $sql_insert_inventory = "INSERT INTO inventory (upc_inventory, sku_inventory, quantity_inventory) VALUES ('$upcFinal','$sku', '$quantity') ON DUPLICATE KEY UPDATE quantity_inventory = '$quantity'";
 
         // Ejecutar consulta
         if ($mysqli->query($sql_insert_inventory)) {
-            echo "<script>alert('Insert Inventory successful');</script>";
+            echo "<script>alert('Insert/Update Inventory successful');</script>";
         } else {
             echo "<script>alert('Error " . $mysqli->error . "');            window.location.href = 'seeReport.php';
 </script>";

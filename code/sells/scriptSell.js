@@ -163,32 +163,21 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch((error) => {
         console.error("Error al buscar item por UPC:", error);
       });
-  }
-  function mostrarOpcionesProducto(items) {
-    const unicos = [];
-
-    // Evitar duplicados exactos por upc + item
-    const yaVistos = new Set();
-    items.forEach((item) => {
-      const clave = item.item + item.brand + item.cost;
-      if (!yaVistos.has(clave)) {
-        unicos.push(item);
-        yaVistos.add(clave);
-      }
-    });
+  }  function mostrarOpcionesProducto(items) {
+    // Los items ya vienen filtrados y con stock acumulado por SKU desde el backend
+    // Solo necesitamos mostrarlos sin filtrado adicional
+    const unicos = items;
 
     let html = `
   <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-`;
-
-    unicos.forEach((item, index) => {
+`;    unicos.forEach((item, index) => {
       html += `
     <div onclick="seleccionarProducto(${index})"
       style="
         border: 1px solid #ddd;
         border-radius: 10px;
         padding: 15px;
-        width: 220px;
+        width: 240px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         cursor: pointer;
         background-color: #f9f9f9;
@@ -198,11 +187,11 @@ document.addEventListener("DOMContentLoaded", function () {
       data-index="${index}"
       onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.2)'"
       onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 6px rgba(0, 0, 0, 0.1)'"
-    >
-      <strong style="font-size: 16px; color: #333;">${item.item}</strong><br>
+    >      <strong style="font-size: 16px; color: #333;">${item.item}</strong><br>
       <span style="color: #777;">Brand:</span> ${item.brand || "N/A"}<br>
-      <span style="color: #777;">Cost:</span> <strong>$${item.cost}</strong><br>
-      <span style="color: #777;">Stock:</span> <strong>${item.quantity}</strong>
+      <span style="color: #777;">SKU:</span> ${item.sku || "N/A"}<br>
+      <span style="color: #777;">Cost:</span> <strong>$${parseFloat(item.cost).toFixed(2)}</strong><br>
+      <span style="color: #777;">Ref Item:</span> <strong>${item.ref_item || "N/A"}</strong><br>
     </div>
   `;
     });
