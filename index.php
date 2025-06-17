@@ -14,23 +14,22 @@ if($_POST){
         $row = $resultado->fetch_assoc();
         $password_bd = $row['password'];
         $pass_c = sha1($password);
-        
-        if($password_bd == $pass_c){
+          if($password_bd == $pass_c){
             $_SESSION['id'] = $row['id'];
             $_SESSION['nombre'] = $row['nombre'];
             $_SESSION['tipo_usuario'] = $row['tipo_usuario'];
             header("Location: access.php");
         } else {
-            $error = "La contraseña no coincide";
+            $error = "Password does not match";
         }
     } else {
-        $error = "No existe usuario";
+        $error = "User does not exist";
     }
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -197,18 +196,17 @@ if($_POST){
     </style>
 </head>
 <body>
-    <div class="container login-container d-flex">
-        <div class="row w-100">
-            <!-- Columna de la imagen -->
+    <div class="container login-container d-flex">        <div class="row w-100">
+            <!-- Image column -->
             <div class="col-md-6 d-none d-md-flex align-items-center justify-content-center p-5 login-image">
-                <!-- Imagen de fondo aplicada via CSS -->
+                <!-- Background image applied via CSS -->
             </div>
             
-            <!-- Columna del formulario -->
+            <!-- Form column -->
             <div class="col-md-6 p-0">
                 <div class="login-form">
                     <img src="img/logo.png" class="logo-login mx-auto" alt="ASWWORKING Logo">
-                    <h2 class="login-title">Bienvenid@</h2>
+                    <h2 class="login-title">Welcome</h2>
                     
                     <?php if(isset($error)): ?>
                         <div class="error-message">
@@ -216,23 +214,21 @@ if($_POST){
                         </div>
                     <?php endif; ?>
                     
-                    <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                        <div class="form-group">
+                    <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">                        <div class="form-group">
                             <i class="fas fa-user input-icon"></i>
-                            <input type="text" class="form-control" name="usuario" placeholder="Usuario" required>
+                            <input type="text" class="form-control" name="usuario" placeholder="Username" required>
                         </div>
                         
                         <div class="form-group">
                             <i class="fas fa-lock input-icon"></i>
-                            <input type="password" class="form-control" name="password" placeholder="Contraseña" required>
+                            <input type="password" class="form-control" name="password" placeholder="Password" required>
                         </div>
-                        
-                        <button type="submit" class="btn btn-login">
-                            <i class="fas fa-sign-in-alt"></i> Acceder
+                          <button type="submit" class="btn btn-login">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
                         </button>
                         
                         <a href="register.php" class="register-link">
-                            <i class="fas fa-user-plus"></i> Crear cuenta
+                            <i class="fas fa-user-plus"></i> Create Account
                         </a>
                     </form>
                 </div>
@@ -245,11 +241,10 @@ if($_POST){
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <?php if(isset($error)): ?>
-    <script>
-        $(document).ready(function() {
+    <script>        $(document).ready(function() {
             Swal.fire({
                 icon: 'error',
-                title: 'Error de acceso',
+                title: 'Access Error',
                 text: '<?php echo $error; ?>',
                 confirmButtonColor: 'var(--danger)'
             });

@@ -21,18 +21,52 @@ document.addEventListener("DOMContentLoaded", function () {
   const international_fee = document.getElementById("international_fee");
   const ad_fee = document.getElementById("ad_fee");
   const other_fee = document.getElementById("other_fee");
-  const itemProfit = document.getElementById("itemProfit");
-  const markup = document.getElementById("markup");
+  const itemProfit = document.getElementById("itemProfit");  const markup = document.getElementById("markup");
   const profitMargin = document.getElementById("profitMargin");
   const itemCost = document.getElementById("itemCost");
   const skuItem = document.getElementById("sku");
   sellDateInput.value = today;
 
-  // Cargar sucursales al cambiar la tienda
+  // Asegurar que los campos Final Fee y Fixed Charge siempre sean editables
+  function ensureFieldsEditable() {
+    const comisionField = document.getElementById("comisionItem");
+    const cargoFijoField = document.getElementById("cargo_fijo");
+    
+    if (comisionField) {
+      comisionField.readOnly = false;
+      comisionField.disabled = false;
+      comisionField.removeAttribute('readonly');
+      comisionField.removeAttribute('disabled');
+    }
+    
+    if (cargoFijoField) {
+      cargoFijoField.readOnly = false;
+      cargoFijoField.disabled = false;
+      cargoFijoField.removeAttribute('readonly');
+      cargoFijoField.removeAttribute('disabled');
+    }
+  }
+  // Ejecutar al cargar la página
+  ensureFieldsEditable();
+// Cargar sucursales al cambiar la tienda
   tiendaSelect.addEventListener("change", function () {
     const id_store = this.value;
     sucursalSelect.innerHTML = '<option value="">Cargando...</option>';
-    document.getElementById("comisionItem").value = ""; // Reiniciar comisión
+    
+    // Reiniciar y asegurar que los campos sean editables
+    const comisionField = document.getElementById("comisionItem");
+    const cargoFijoField = document.getElementById("cargo_fijo");
+    
+    comisionField.value = "";    cargoFijoField.value = "";
+    
+    // Asegurar que los campos siempre sean editables
+    comisionField.readOnly = false;
+    comisionField.disabled = false;
+    cargoFijoField.readOnly = false;
+    cargoFijoField.disabled = false;
+    
+    // Llamar función adicional para asegurar editabilidad
+    ensureFieldsEditable();
 
     fetch("getSucursales.php", {
       method: "POST",
@@ -49,26 +83,46 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Error cargando sucursales:", error);
       });
   });
-
   // Actualizar comisión al cambiar sucursal
   sucursalSelect.addEventListener("change", function () {
     const selectedOption = this.options[this.selectedIndex];
-    const configsJson = selectedOption.getAttribute("data-configs");
-
-    if (configsJson) {
+    const configsJson = selectedOption.getAttribute("data-configs");    if (configsJson) {
       const configs = JSON.parse(configsJson);
       if (configs.length > 0) {
         const primeraConfig = configs[0];
-        document.getElementById("comisionItem").value = primeraConfig.comision;
-        document.getElementById("cargo_fijo").value = primeraConfig.cargo_fijo;
+        
+        // Solo actualizar si los campos están vacíos, permitiendo modificación manual
+        const comisionField = document.getElementById("comisionItem");
+        const cargoFijoField = document.getElementById("cargo_fijo");
+          // Asegurar que los campos siempre sean editables
+        comisionField.readOnly = false;
+        comisionField.disabled = false;
+        cargoFijoField.readOnly = false;
+        cargoFijoField.disabled = false;        // Llamar función adicional para asegurar editabilidad
+        ensureFieldsEditable();
+        
+        // Siempre actualizar con los valores de la configuración cuando se cambia Store Cod
+        comisionField.value = primeraConfig.comision;
+        cargoFijoField.value = primeraConfig.cargo_fijo;
+        
         console.log("sales less than:", primeraConfig.sales_less_than);
         console.log("Primera configuración aplicada:");
         console.log("Comisión:", primeraConfig.comision);
         console.log("Cargo fijo:", primeraConfig.cargo_fijo);
       } else {
-        // Por si acaso está vacío el array
-        document.getElementById("comisionItem").value = 0;
-        document.getElementById("cargo_fijo").value = 0;
+        // Por si acaso está vacío el array - solo si los campos están vacíos
+        const comisionField = document.getElementById("comisionItem");
+        const cargoFijoField = document.getElementById("cargo_fijo");
+          // Asegurar que los campos siempre sean editables
+        comisionField.readOnly = false;
+        comisionField.disabled = false;
+        cargoFijoField.readOnly = false;
+        cargoFijoField.disabled = false;
+        
+        // Llamar función adicional para asegurar editabilidad
+        ensureFieldsEditable();
+          // Por si acaso está vacío el array        comisionField.value = 0;
+        cargoFijoField.value = 0;
       }
     }
   });
@@ -261,9 +315,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Buscar la primera configuración donde ventaTotal < sales_less_than
       const configAplicada =
         configs.find((c) => ventaTotal < c.sales_less_than) ||
-        configs[configs.length - 1];
-
-      const comision = parseFloat(configAplicada.comision) || 0;
+        configs[configs.length - 1];      const comision = parseFloat(configAplicada.comision) || 0;
       const cargo_fijo = parseFloat(configAplicada.cargo_fijo) || 0;
       const incentives_value = parseFloat(incentivesInput.value) || 0;
       const international_fee_value = parseFloat(international_fee.value) || 0;
@@ -341,8 +393,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const quantity = parseFloat(quantityInput.value) || 0;
     const tienda = tiendaSelect.options[tiendaSelect.selectedIndex]?.text || "";
     const sucursal =
-      sucursalSelect.options[sucursalSelect.selectedIndex]?.text || "";
-    const precioUnitario = parseFloat(priceInput.value.replace("$", "")) || 0;
+      sucursalSelect.options[sucursalSelect.selectedIndex]?.text || "";    const precioUnitario = parseFloat(priceInput.value.replace("$", "")) || 0;
     const brand = brandItem.value.trim();
     const comision =
       parseFloat(document.getElementById("comisionItem").value) || 0;
