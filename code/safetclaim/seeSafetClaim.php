@@ -289,9 +289,36 @@ $resultTiendas = $mysqli->query($queryTiendas);
       max-width: 200px;
     }
   }
-
   .clickable-row {
     cursor: pointer;
+  }
+
+  /* Estilos para el mensaje inicial */
+  .alert-info {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border: 1px solid #2196f3;
+    color: #1976d2;
+    border-radius: 10px;
+  }
+
+  .alert-info i {
+    color: #1976d2;
+  }
+
+  /* Estilos para el spinner de carga */
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  /* Estilos mejorados para los resultados */
+  #searchResults .table {
+    margin-bottom: 0;
+  }
+
+  #searchResults .alert {
+    border-radius: 8px;
+    margin-bottom: 0;
   }
 </style>
 
@@ -300,17 +327,13 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <img src='../../img/logo.png' class="logo" alt="ASWWORKING Logo">
     <h1 class="page-title"><i class="fa-solid fa-shield-check"></i> SAFE T-CLAIM</h1>
   </div>
-
   <div class="search-form">
     <form id="filterForm" class="row g-3 align-items-center justify-content-center">
-      <div class="col-md-3">
-        <input name="upc_item" type="text" placeholder="UPC" id="upc" class="form-control">
+      <div class="col-md-4">
+        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control" required>
       </div>
       <div class="col-md-3">
-        <input name="item" type="text" placeholder="#Order" id="sell_order" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <input type="date" name="sellDate" id="date" class="form-control">
+        <input name="item" type="text" placeholder="#Order (Optional)" id="sell_order" class="form-control">
       </div>
       <div class="col-md-2">
         <input value="Search" type="submit" class="btn btn-primary">
@@ -318,34 +341,21 @@ $resultTiendas = $mysqli->query($queryTiendas);
     </form>
   </div>
 
+  <!-- Mensaje inicial -->
+  <div id="initialMessage" class="table-container text-center">
+    <div class="alert alert-info">
+      <i class="fas fa-search fa-2x mb-3"></i>
+      <h4>Search for Safe T-Claims</h4>
+      <p>Enter a UPC code above to search for Safe T-Claim records</p>
+    </div>
+  </div>
 
-  <!-- Tabla de Ventas -->
-  <div class="table-container">
-    <h2 class="text-center mb-4">Registered Sales</h2>
-    <table class="" id="salesTable">
-      <thead>
-        <tr>
-          <th>Sell Number</th>
-          <th>Date</th>
-          <th>UPC</th>
-          <th>Brand</th>
-          <th>Item</th>
-          <th>Color</th>
-          <th>Reference</th>
-          <th>Store</th>
-          <th>Sucursal</th>
-          <th>Safe-T Reimbursement</th>
-          <th>Shipping Reimbursement</th>
-          <th>Tax Reimbursement</th>
-          <th>Label Avoid</th>
-          <th>Other Fee Reimbursement</th>
-          <th>Delete Sell</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php include "getSells.php"; ?>
-      </tbody>
-    </table>
+  <!-- Tabla de Ventas (inicialmente oculta) -->
+  <div class="table-container" id="resultsContainer" style="display: none;">
+    <h2 class="text-center mb-4">Search Results</h2>
+    <div id="searchResults">
+      <!-- Los resultados se cargarán aquí -->
+    </div>
   </div>
 
   <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
@@ -365,9 +375,252 @@ $resultTiendas = $mysqli->query($queryTiendas);
       </div>
     </div>
   </div>
-
   <script src="returns.js"></script>
   <script src="scriptSeeSells.js"></script>
+  
+  <script>
+    // Función para calcular Net Reimbursement
+    function calculateNetReimbursement() {
+      const safetReimbursement = parseFloat(document.getElementById('safet_reimbursement')?.value) || 0;
+      const shippingReimbursement = parseFloat(document.getElementById('shipping_reimbursement')?.value) || 0;
+      const labelAvoid = parseFloat(document.getElementById('label_avoid')?.value) || 0;
+      const otherFeeReimbursement = parseFloat(document.getElementById('other_fee_reimbursement')?.value) || 0;
+      
+      // Formula: Safe-T Reimbursement + Shipping Reimbursement + Label Avoid + Other Fee Reimbursement
+      const netReimbursement = safetReimbursement + shippingReimbursement + labelAvoid + otherFeeReimbursement;
+      
+      const netReimbursementField = document.getElementById('net_reimbursement');
+      if (netReimbursementField) {
+        netReimbursementField.value = netReimbursement.toFixed(2);
+      }
+    }
+
+    // Función para inicializar los event listeners de las filas clickeables
+    function initializeClickableRows() {
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        // Remover event listeners previos para evitar duplicados
+        const newRow = row.cloneNode(true);
+        row.parentNode.replaceChild(newRow, row);
+      });
+      
+      // Reinicializar los event listeners usando la misma lógica que returns.js
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        row.addEventListener("click", function () {
+          const sell_order = this.dataset.sell_order;
+          console.log("Selected Sell Order:", sell_order);
+          
+          fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}`)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              if (data.error) {
+                document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${data.error}</p>`;
+                return;
+              }
+              
+              const items = data.items;
+              const safetclaim = data.safetclaim;
+
+              // Crear la tabla (adaptada para Safe T-Claim)
+              let tableHTML = `
+                <h4>Sell Order: ${items[0].sell_order}</h4>
+                <table class="table table-bordered table-sm mt-3">
+                  <thead>
+                    <tr>
+                      <th>UPC</th>
+                      <th>SKU</th>
+                      <th>Quantity</th>
+                      <th>Final Fee</th>
+                      <th>Fixed Charge</th>
+                      <th>Item Profit</th>
+                      <th>Total Item</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+              `;
+
+              let totalGeneral = 0;
+              items.forEach((item) => {
+                const quantity = item.quantity || 0;
+                const comision_item = parseFloat(item.comision_item) || 0;
+                const cargo_fijo = parseFloat(item.cargo_fijo) || 0;
+                const item_profit = parseFloat(item.item_profit) || 0;
+                const total_item = parseFloat(item.total_item) || 0;
+                
+                tableHTML += `
+                  <tr>
+                    <td>${item.upc_item}</td>
+                    <td>${item.sku_item || "-"}</td>
+                    <td>${quantity}</td>
+                    <td>$${comision_item.toFixed(2)}</td>
+                    <td>$${cargo_fijo.toFixed(2)}</td>
+                    <td>$${item_profit.toFixed(2)}</td>
+                    <td>$${total_item.toFixed(2)}</td>
+                  </tr>
+                `;
+                totalGeneral += total_item;
+              });
+
+              tableHTML += `
+                  <tr>
+                    <td colspan="6" class="text-end"><strong>Total General</strong></td>
+                    <td><strong>$${totalGeneral.toFixed(2)}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <form method='post' action='saveSafetClaim.php' class='mt-4' id='safetClaimForm'>
+                <div class='row mb-3'>
+                  <div class='col-md-6'>
+                    <label for='safet_reimbursement' class='form-label'>Safe-T Reimbursement</label>
+                    <input type='number' step='0.01' name='safet_reimbursement' id='safet_reimbursement' class='form-control' value='${safetclaim ? (safetclaim.safet_reimbursement || '') : ''}' onchange='calculateNetReimbursement()'>
+                  </div>
+                  <div class='col-md-6'>
+                    <label for='shipping_reimbursement' class='form-label'>Shipping Reimbursement</label>
+                    <input type='number' step='0.01' name='shipping_reimbursement' id='shipping_reimbursement' class='form-control' value='${safetclaim ? (safetclaim.shipping_reimbursement || '') : ''}' onchange='calculateNetReimbursement()'>
+                  </div>
+                </div>
+                <div class='row mb-3'>
+                  <div class='col-md-6'>
+                    <label for='tax_reimbursement' class='form-label'>Tax Reimbursement</label>
+                    <input type='number' step='0.01' name='tax_reimbursement' id='tax_reimbursement' class='form-control' value='${safetclaim ? (safetclaim.tax_reimbursement || '') : ''}'>
+                  </div>
+                  <div class='col-md-6'>
+                    <label for='label_avoid' class='form-label'>Label Avoid</label>
+                    <input type='number' step='0.01' name='label_avoid' id='label_avoid' class='form-control' value='${safetclaim ? (safetclaim.label_avoid || '') : ''}' onchange='calculateNetReimbursement()'>
+                  </div>
+                </div>
+                <div class='row mb-3'>
+                  <div class='col-md-6'>
+                    <label for='other_fee_reimbursement' class='form-label'>Other Fee Reimbursement</label>
+                    <input type='number' step='0.01' name='other_fee_reimbursement' id='other_fee_reimbursement' class='form-control' value='${safetclaim ? (safetclaim.other_fee_reimbursement || '') : ''}' onchange='calculateNetReimbursement()'>
+                  </div>
+                  <div class='col-md-6'>
+                    <label for='net_reimbursement' class='form-label'><strong>Net Reimbursement</strong></label>
+                    <input type='number' step='0.01' name='net_reimbursement' id='net_reimbursement' class='form-control bg-light' value='${safetclaim ? (safetclaim.net_reimbursement || '') : ''}' readonly>
+                  </div>
+                </div>
+                <input type='hidden' name='sell_order' value='${items[0].sell_order}'>
+                <input type='hidden' name='id_sell' value='${items[0].id_sell}'>
+                <div class='text-end'>
+                  <button type='submit' class='btn' style='background-color: #632b8b; color: #fff; border-color: #632b8b;'>Save</button>
+                </div>
+              </form>
+              `;
+
+              document.getElementById("ventasTableContainer").innerHTML = tableHTML;
+              
+              // Add form submission handler
+              const form = document.getElementById('safetClaimForm');
+              if (form) {
+                form.addEventListener('submit', function(e) {
+                  e.preventDefault();
+                  
+                  const formData = new FormData(form);
+                  
+                  fetch('saveSafetClaim.php', {
+                    method: 'POST',
+                    body: formData
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message
+                      }).then(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('safetClaimModal'));
+                        modal.hide();
+                        // Recargar los resultados de búsqueda en lugar de toda la página
+                        document.getElementById('filterForm').dispatchEvent(new Event('submit'));
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                      });
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: 'An error occurred while saving the Safe T-Claim information.'
+                    });
+                  });
+                });
+              }
+              
+              // Calculate initial Net Reimbursement
+              setTimeout(() => {
+                calculateNetReimbursement();
+              }, 100);
+              
+              const modal = new bootstrap.Modal(document.getElementById("safetClaimModal"));
+              modal.show();
+            })
+            .catch((err) => {
+              document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${err.message}</p>`;
+            });
+        });
+      });
+    }
+
+    // Manejar el formulario de búsqueda
+    document.getElementById('filterForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const upc = document.getElementById('upc').value.trim();
+      const sellOrder = document.getElementById('sell_order').value.trim();
+      
+      if (!upc) {
+        alert('Please enter a UPC code to search');
+        return;
+      }
+      
+      // Mostrar loading
+      document.getElementById('initialMessage').style.display = 'none';
+      document.getElementById('resultsContainer').style.display = 'block';
+      document.getElementById('searchResults').innerHTML = `
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Searching...</span>
+          </div>
+          <p class="mt-2">Searching for Safe T-Claims...</p>
+        </div>
+      `;
+      
+      // Realizar búsqueda AJAX
+      const formData = new FormData();
+      formData.append('upc_item', upc);
+      formData.append('sell_order', sellOrder);
+      
+      fetch('searchSafetClaims.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('searchResults').innerHTML = data;
+        
+        // Reinicializar los event listeners para las filas clickeables
+        initializeClickableRows();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('searchResults').innerHTML = `
+          <div class="alert alert-danger text-center">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h5>Error</h5>
+            <p>An error occurred while searching. Please try again.</p>
+          </div>
+        `;
+      });
+    });
+  </script>
 </body>
 
 </html>

@@ -22,10 +22,9 @@ $resultTiendas = $mysqli->query($queryTiendas);
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>ASWWORKING | SOFT</title>
-  <link rel="stylesheet" type="text/css" href="../items/css/styles.css">
+  <title>ASWWORKING | SOFT</title>  <link rel="stylesheet" type="text/css" href="../items/css/styles.css">
   <link rel="stylesheet" type="text/css" href="../items/css/estilos2024.css">
-  <link rel="stylesheet" href="styleSell.css">
+  <!-- <link rel="stylesheet" href="styleSell.css"> --> <!-- Archivo no encontrado, comentado -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -319,9 +318,36 @@ $resultTiendas = $mysqli->query($queryTiendas);
   .clickable-row {
     cursor: pointer;
   }
-
   .clickable-row:hover {
     background-color: rgba(99, 43, 139, 0.1) !important;
+  }
+
+  /* Estilos para el mensaje inicial */
+  .alert-info {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border: 1px solid #2196f3;
+    color: #1976d2;
+    border-radius: 10px;
+  }
+
+  .alert-info i {
+    color: #1976d2;
+  }
+
+  /* Estilos para el spinner de carga */
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  /* Estilos mejorados para los resultados */
+  #searchResults .table {
+    margin-bottom: 0;
+  }
+
+  #searchResults .alert {
+    border-radius: 8px;
+    margin-bottom: 0;
   }
 
   /* Toast notifications */
@@ -375,50 +401,35 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <h1 class="page-title"><i class="fa-solid fa-ban"></i> CANCELLATIONS</h1>
   </div>
 
-
   <div class="search-form">
     <form id="filterForm" class="row g-3 align-items-center justify-content-center">
-      <div class="col-md-3">
-        <input name="upc_item" type="text" placeholder="UPC" id="upc" class="form-control">
+      <div class="col-md-4">
+        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control" required>
       </div>
       <div class="col-md-3">
-        <input name="item" type="text" placeholder="#Order" id="sell_order" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <input type="date" name="sellDate" id="date" class="form-control">
+        <input name="item" type="text" placeholder="#Order (Optional)" id="sell_order" class="form-control">
       </div>
       <div class="col-md-2">
         <input value="Search" type="submit" class="btn btn-primary">
       </div>
     </form>
   </div>
-  <!-- Tabla de Ventas -->
-  <div class="table-container">
-    <h2 class="text-center mb-4">Registered Sales</h2>
-    <table class="" id="salesTable">
-      <thead>
-        <tr>
-          <th>Sell Number</th>
-          <th>Date</th>
-          <th>UPC</th>
-          <th>Brand</th>
-          <th>Item</th>
-          <th>Color</th>
-          <th>Reference</th>
-          <th>Store</th>
-          <th>Sucursal</th>
-          <th>Refund Amount</th>
-          <th>Shipping Refund</th>
-          <th>Tax Refund</th>
-          <th>Final Fee Refund</th>
-          <th>Fixed Charge Refund</th>
-          <th>Other Fee Refund</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php include "getSells.php"; ?>
-      </tbody>
-    </table>
+
+  <!-- Mensaje inicial -->
+  <div id="initialMessage" class="table-container text-center">
+    <div class="alert alert-info">
+      <i class="fas fa-search fa-2x mb-3"></i>
+      <h4>Search for Cancellations</h4>
+      <p>Enter a UPC code above to search for cancellation records</p>
+    </div>
+  </div>
+
+  <!-- Tabla de Ventas (inicialmente oculta) -->
+  <div class="table-container" id="resultsContainer" style="display: none;">
+    <h2 class="text-center mb-4">Search Results</h2>
+    <div id="searchResults">
+      <!-- Los resultados se cargarán aquí -->
+    </div>
   </div>
 
   <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
@@ -440,11 +451,292 @@ $resultTiendas = $mysqli->query($queryTiendas);
     </div>
   </div>
 
+  <!-- Comentamos returns.js para evitar conflictos con la nueva lógica AJAX -->
+  <!-- <script src="returns.js"></script> -->
+  <!-- Comentamos scriptSeeSells.js para evitar conflictos con la nueva lógica AJAX -->
+  <!-- <script src="scriptSeeSells.js"></script> -->
+    <script>    document.addEventListener('DOMContentLoaded', function() {      // Función para calcular Net Cancellation
+      function calculateNetCancellation() {
+        const refundAmount = parseFloat(document.getElementById('refund_amount')?.value) || 0;
+        const shippingRefund = parseFloat(document.getElementById('shipping_refund')?.value) || 0;
+        const taxRefund = parseFloat(document.getElementById('tax_refund')?.value) || 0;
+        const finalFeeRefund = parseFloat(document.getElementById('final_fee_refund')?.value) || 0;
+        const fixedChargeRefund = parseFloat(document.getElementById('fixed_charge_refund')?.value) || 0;
+        const otherFeeRefund = parseFloat(document.getElementById('other_fee_refund')?.value) || 0;
+        
+        // Formula: Refund amount + Shipping Refund + Tax Refund - Final Fee Refund - Fixed Charge Refund - Other Fee Refund
+        const netCancellation = refundAmount + shippingRefund + taxRefund - finalFeeRefund - fixedChargeRefund - otherFeeRefund;
+        
+        const netCancellationField = document.getElementById('net_cancellation');
+        if (netCancellationField) {
+          // Agregar efecto visual de actualización
+          netCancellationField.style.backgroundColor = '#e8f5e8';
+          netCancellationField.value = netCancellation.toFixed(2);
+          
+          // Remover el efecto después de un momento
+          setTimeout(() => {
+            netCancellationField.style.backgroundColor = '';
+          }, 300);
+        }
+      }
 
+      // Función para agregar eventos de cálculo a todos los campos
+      function setupCalculationEvents() {
+        const fields = ['refund_amount', 'shipping_refund', 'tax_refund', 'final_fee_refund', 'fixed_charge_refund', 'other_fee_refund'];
+        
+        fields.forEach(fieldId => {
+          const field = document.getElementById(fieldId);
+          if (field) {
+            // Agregar múltiples eventos para máxima responsividad
+            field.addEventListener('input', calculateNetCancellation);
+            field.addEventListener('change', calculateNetCancellation);
+            field.addEventListener('keyup', calculateNetCancellation);
+            field.addEventListener('paste', () => {
+              // Pequeño delay para que el valor se procese después del paste
+              setTimeout(calculateNetCancellation, 10);
+            });
+          }
+        });
+      }
 
+    // Función para inicializar los event listeners de las filas clickeables
+    function initializeClickableRows() {
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        // Remover event listeners previos para evitar duplicados
+        const newRow = row.cloneNode(true);
+        row.parentNode.replaceChild(newRow, row);
+      });
+      
+      // Reinicializar los event listeners
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        row.addEventListener("click", function () {
+          const sell_order = this.dataset.sell_order;
+          console.log("Selected Sell Order:", sell_order);
+          
+          fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}`)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              if (data.error) {
+                document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${data.error}</p>`;
+                return;
+              }
+              
+              const items = data.items;
+              const cancellation = data.cancellation;
 
-  <script src="returns.js"></script>
-  <script src="scriptSeeSells.js"></script>
+              // Crear la tabla (adaptada para Cancellations)
+              let tableHTML = `
+                <h4>Sell Order: ${items[0].sell_order}</h4>
+                <table class="table table-bordered table-sm mt-3">
+                  <thead>
+                    <tr>
+                      <th>UPC</th>
+                      <th>SKU</th>
+                      <th>Quantity</th>
+                      <th>Final Fee</th>
+                      <th>Fixed Charge</th>
+                      <th>Item Profit</th>
+                      <th>Total Item</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+              `;
+
+              let totalGeneral = 0;
+              items.forEach((item) => {
+                const quantity = item.quantity || 0;
+                const comision_item = parseFloat(item.comision_item) || 0;
+                const cargo_fijo = parseFloat(item.cargo_fijo) || 0;
+                const item_profit = parseFloat(item.item_profit) || 0;
+                const total_item = parseFloat(item.total_item) || 0;
+                
+                tableHTML += `
+                  <tr>
+                    <td>${item.upc_item}</td>
+                    <td>${item.sku_item || "-"}</td>
+                    <td>${quantity}</td>
+                    <td>$${comision_item.toFixed(2)}</td>
+                    <td>$${cargo_fijo.toFixed(2)}</td>
+                    <td>$${item_profit.toFixed(2)}</td>
+                    <td>$${total_item.toFixed(2)}</td>
+                  </tr>
+                `;
+                totalGeneral += total_item;
+              });
+
+              tableHTML += `
+                  <tr>
+                    <td colspan="6" class="text-end"><strong>Total General</strong></td>
+                    <td><strong>$${totalGeneral.toFixed(2)}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <form method='post' action='saveCancellations.php' class='mt-4' id='cancellationForm'>
+                <div class='row mb-3'>                  <div class='col-md-6'>
+                    <label for='refund_amount' class='form-label'>Refund Amount</label>
+                    <input type='number' step='0.01' name='refund_amount' id='refund_amount' class='form-control' value='${cancellation ? (cancellation.refund_amount || '') : ''}'>
+                  </div>
+                  <div class='col-md-6'>
+                    <label for='shipping_refund' class='form-label'>Shipping Refund</label>
+                    <input type='number' step='0.01' name='shipping_refund' id='shipping_refund' class='form-control' value='${cancellation ? (cancellation.shipping_refund || '') : ''}'>
+                  </div>
+                </div>
+                <div class='row mb-3'>
+                  <div class='col-md-6'>
+                    <label for='tax_refund' class='form-label'>Tax Refund</label>
+                    <input type='number' step='0.01' name='tax_refund' id='tax_refund' class='form-control' value='${cancellation ? (cancellation.tax_refund || '') : ''}'>
+                  </div>
+                  <div class='col-md-6'>
+                    <label for='final_fee_refund' class='form-label'>Final Fee Refund</label>
+                    <input type='number' step='0.01' name='final_fee_refund' id='final_fee_refund' class='form-control' value='${cancellation ? (cancellation.final_fee_refund || '') : ''}'>
+                  </div>
+                </div>
+                <div class='row mb-3'>
+                  <div class='col-md-6'>
+                    <label for='fixed_charge_refund' class='form-label'>Fixed Charge Refund</label>
+                    <input type='number' step='0.01' name='fixed_charge_refund' id='fixed_charge_refund' class='form-control' value='${cancellation ? (cancellation.fixed_charge_refund || '') : ''}'>
+                  </div>
+                  <div class='col-md-6'>
+                    <label for='other_fee_refund' class='form-label'>Other Fee Refund</label>
+                    <input type='number' step='0.01' name='other_fee_refund' id='other_fee_refund' class='form-control' value='${cancellation ? (cancellation.other_fee_refund || '') : ''}'>
+                  </div>
+                </div>                <div class='row mb-3'>
+                  <div class='col-md-12'>
+                    <label for='net_cancellation' class='form-label'><strong>Net Cancellation</strong></label>
+                    <input type='number' step='0.01' name='net_cancellation' id='net_cancellation' class='form-control bg-light' value='${cancellation ? (cancellation.net_cancellation || '') : ''}' readonly>
+                  </div>
+                </div>
+                <input type='hidden' name='sell_order' value='${items[0].sell_order}'>
+                <input type='hidden' name='id_sell' value='${items[0].id_sell}'>
+                <div class='text-end'>
+                  <button type='submit' class='btn' style='background-color: #632b8b; color: #fff; border-color: #632b8b;'>Save</button>
+                </div>
+              </form>
+              `;
+
+              document.getElementById("ventasTableContainer").innerHTML = tableHTML;
+              
+              // Add form submission handler
+              const form = document.getElementById('cancellationForm');
+              if (form) {
+                form.addEventListener('submit', function(e) {
+                  e.preventDefault();
+                  
+                  const formData = new FormData(form);
+                  
+                  fetch('saveCancellations.php', {
+                    method: 'POST',
+                    body: formData
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message
+                      }).then(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('returnModal'));
+                        modal.hide();
+                        // Recargar los resultados de búsqueda en lugar de toda la página
+                        document.getElementById('filterForm').dispatchEvent(new Event('submit'));
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                      });
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: 'An error occurred while saving the cancellation information.'
+                    });
+                  });
+                });
+              }              // Calculate initial Net Cancellation
+              const modal = new bootstrap.Modal(document.getElementById("returnModal"));
+              
+              // Ejecutar cálculo cuando el modal se muestre completamente
+              document.getElementById("returnModal").addEventListener('shown.bs.modal', function () {
+                console.log('Modal shown, setting up calculation events...');
+                // Configurar eventos de cálculo en tiempo real
+                setupCalculationEvents();
+                // Calcular valor inicial
+                setTimeout(() => {
+                  calculateNetCancellation();
+                }, 200);
+              }, { once: true });
+              
+              modal.show();
+            })
+            .catch((err) => {
+              document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${err.message}</p>`;
+            });
+        });
+      });
+    }    // Manejar el formulario de búsqueda
+    document.getElementById('filterForm').addEventListener('submit', function(e) {
+      console.log('Form submit event triggered');
+      e.preventDefault();
+      console.log('Default prevented');
+      
+      const upc = document.getElementById('upc').value.trim();
+      const sellOrder = document.getElementById('sell_order').value.trim();
+      
+      console.log('UPC:', upc, 'Sell Order:', sellOrder);
+      
+      if (!upc) {
+        alert('Please enter a UPC code to search');
+        return;
+      }
+      
+      // Mostrar loading
+      document.getElementById('initialMessage').style.display = 'none';
+      document.getElementById('resultsContainer').style.display = 'block';
+      document.getElementById('searchResults').innerHTML = `
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Searching...</span>
+          </div>
+          <p class="mt-2">Searching for Cancellations...</p>
+        </div>
+      `;
+      
+      // Realizar búsqueda AJAX
+      const formData = new FormData();
+      formData.append('upc_item', upc);
+      formData.append('sell_order', sellOrder);
+      
+      fetch('searchCancellations.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('searchResults').innerHTML = data;
+        
+        // Reinicializar los event listeners para las filas clickeables
+        initializeClickableRows();
+      })
+      .catch(error => {
+        console.error('Error:', error);        document.getElementById('searchResults').innerHTML = `
+          <div class="alert alert-danger text-center">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h5>Error</h5>
+            <p>An error occurred while searching. Please try again.</p>
+          </div>
+        `;
+      });
+    }); // Cerrar event listener del formulario
+    }); // Cerrar DOMContentLoaded
+  </script>
 </body>
 
 </html>

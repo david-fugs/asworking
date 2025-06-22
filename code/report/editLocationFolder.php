@@ -152,15 +152,14 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
             max-width: 100%;
             width: 100%;
         }
-        
-        .table-content {
-            min-width: 1600px;
+          .table-content {
+            min-width: 1200px;
             width: 100%;
         }
 
         table {
             width: 100%;
-            min-width: 1600px;
+            min-width: 1200px;
             border-collapse: separate;
             border-spacing: 0;
             font-family: 'Montserrat', sans-serif;
@@ -308,11 +307,90 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-save:hover {
+        }        .btn-save:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        /* Estilos para el buscador UPC */
+        .search-container {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .search-input {
+            border: 2px solid #632b8b;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            width: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 43, 139, 0.2);
+            border-color: #5d337a;
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #632b8b, #5d337a);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(99, 43, 139, 0.3);
+        }
+
+        /* Estilos para el modal */
+        .modal-content {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #632b8b, #5d337a);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .item-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-left: 4px solid #632b8b;
+        }
+
+        .item-detail {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .item-label {
+            font-weight: 600;
+            color: #632b8b;
+        }
+
+        .item-value {
+            color: #495057;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -325,9 +403,7 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
             </div>
             <h1 class="title"><i class="fa-solid fa-edit"></i> EDIT PRODUCT DETAILS</h1>
         </div>
-    </div>
-
-    <div class="top-bar">
+    </div>    <div class="top-bar">
         <div></div>
         <div class="center">
             <a href="../../access.php" class="back-btn" title="Go Back">
@@ -339,7 +415,31 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                 <i class="fas fa-file-alt"></i> Back to Reports
             </a>
         </div>
-    </div>    <div class="container-fluid mt-5">
+    </div>
+
+    <!-- Buscador de UPC -->
+    <div class="container-fluid">
+        <div class="search-container">
+            <div class="row justify-content-center">                <div class="col-md-8 text-center">
+                    <h4 style="color: #632b8b; margin-bottom: 20px;">
+                        <i class="fas fa-search"></i> Search Product Information by UPC
+                    </h4>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <input type="text" 
+                               id="upcSearch" 
+                               class="search-input" 
+                               placeholder="Enter UPC code..." 
+                               maxlength="20">
+                        <button type="button" 
+                                class="search-btn" 
+                                onclick="searchUPC()">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><div class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-md-12">
                 <?php                // Show success/error messages
@@ -380,33 +480,28 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                     <div class="col-md-12">
                                         <h6><i class="fas fa-info-circle"></i> <strong>Instructions:</strong></h6>
                                         <ul class="mb-0">
+                                            <li>Use the UPC search above to query product information</li>
                                             <li>Select the reports you want to update by checking the checkbox</li>
-                                            <li>Modify the product fields as needed</li>
-                                            <li>Editable fields: Item, Brand, Vendor, Color, Size, Folder, Location</li>
+                                            <li>You can only modify: <strong>Folder</strong> and <strong>Location</strong></li>
+                                            <li>Other fields are in read-only mode</li>
                                             <li>Click "Update Selected Items" to save changes</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="table-content">
-                                <table>
+                            <div class="table-content">                                <table>
                                 <thead>
                                     <tr>
                                         <th>Select</th>
                                         <th>Date</th>
                                         <th>UPC Final</th>
                                         <th>SKU</th>
-                                        <th>Current Item</th>
-                                        <th>New Item</th>
-                                        <th>Current Brand</th>
-                                        <th>New Brand</th>
-                                        <th>Current Vendor</th>
-                                        <th>New Vendor</th>
-                                        <th>Current Color</th>
-                                        <th>New Color</th>
-                                        <th>Current Size</th>
-                                        <th>New Size</th>
+                                        <th>Item</th>
+                                        <th>Brand</th>
+                                        <th>Vendor</th>
+                                        <th>Color</th>
+                                        <th>Size</th>
                                         <th>Current Folder</th>
                                         <th>New Folder</th>
                                         <th>Current Location</th>
@@ -421,77 +516,39 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                             <td><?= htmlspecialchars($report['fecha_alta_reporte']) ?></td>
                                             <td><?= htmlspecialchars($report['upc_final_report']) ?></td>
                                             <td><?= htmlspecialchars($report['sku_report']) ?></td>
-                                              <!-- Current Item -->
+                                            
+                                            <!-- Item (solo lectura) -->
                                             <td style="max-width: 250px;">
                                                 <span class="badge bg-secondary" title="<?= htmlspecialchars($report['item_report']) ?>" style="max-width: 100%; white-space: normal; font-size: 0.75rem;">
                                                     <?= htmlspecialchars(substr($report['item_report'], 0, 40)) ?><?= strlen($report['item_report']) > 40 ? '...' : '' ?>
                                                 </span>
-                                            </td>                                            <!-- New Item -->
-                                            <td>
-                                                <input style="width: 150px;" type="text" 
-                                                       name="new_item[<?= $report['id_report'] ?>]" 
-                                                       class="form-control form-control-sm" 
-                                                       value="<?= htmlspecialchars($report['item_report']) ?>"
-                                                       placeholder="New item">
                                             </td>
                                             
-                                            <!-- Current Brand -->
+                                            <!-- Brand (solo lectura) -->
                                             <td>
                                                 <span class="badge bg-secondary"><?= htmlspecialchars($report['brand_report']) ?></span>
                                             </td>
-                                            <!-- New Brand -->
-                                            <td>
-                                                <input style="width: 120px;" type="text" 
-                                                       name="new_brand[<?= $report['id_report'] ?>]" 
-                                                       class="form-control form-control-sm" 
-                                                       value="<?= htmlspecialchars($report['brand_report']) ?>"
-                                                       placeholder="New brand">
-                                            </td>
                                             
-                                            <!-- Current Vendor -->
+                                            <!-- Vendor (solo lectura) -->
                                             <td>
                                                 <span class="badge bg-secondary"><?= htmlspecialchars($report['vendor_report']) ?></span>
                                             </td>
-                                            <!-- New Vendor -->
-                                            <td>
-                                                <input style="width: 120px;" type="text" 
-                                                       name="new_vendor[<?= $report['id_report'] ?>]" 
-                                                       class="form-control form-control-sm" 
-                                                       value="<?= htmlspecialchars($report['vendor_report']) ?>"
-                                                       placeholder="New vendor">
-                                            </td>
                                             
-                                            <!-- Current Color -->
+                                            <!-- Color (solo lectura) -->
                                             <td>
                                                 <span class="badge bg-secondary"><?= htmlspecialchars($report['color_report']) ?></span>
                                             </td>
-                                            <!-- New Color -->
-                                            <td>
-                                                <input style="width: 100px;" type="text" 
-                                                       name="new_color[<?= $report['id_report'] ?>]" 
-                                                       class="form-control form-control-sm" 
-                                                       value="<?= htmlspecialchars($report['color_report']) ?>"
-                                                       placeholder="New color">
-                                            </td>
                                             
-                                            <!-- Current Size -->
+                                            <!-- Size (solo lectura) -->
                                             <td>
                                                 <span class="badge bg-secondary"><?= htmlspecialchars($report['size_report']) ?></span>
-                                            </td>
-                                            <!-- New Size -->
-                                            <td>
-                                                <input style="width: 80px;" type="text" 
-                                                       name="new_size[<?= $report['id_report'] ?>]" 
-                                                       class="form-control form-control-sm" 
-                                                       value="<?= htmlspecialchars($report['size_report']) ?>"
-                                                       placeholder="New size">
                                             </td>
                                             
                                             <!-- Current Folder -->
                                             <td>
                                                 <span class="badge bg-secondary"><?= htmlspecialchars($report['folder_report']) ?></span>
                                             </td>
-                                            <!-- New Folder -->
+                                            <!-- New Folder (editable) -->
                                             <td>
                                                 <input style="width: 120px;" type="text" 
                                                        name="new_folder[<?= $report['id_report'] ?>]" 
@@ -504,7 +561,7 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                             <td>
                                                 <span class="badge bg-secondary"><?= htmlspecialchars($report['loc_report']) ?></span>
                                             </td>
-                                            <!-- New Location -->
+                                            <!-- New Location (editable) -->
                                             <td>
                                                 <input style="width: 120px;" type="text" 
                                                        name="new_location[<?= $report['id_report'] ?>]" 
@@ -513,7 +570,8 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                                        placeholder="New location">
                                             </td>
                                         </tr>
-                                    <?php endforeach; ?>                                </tbody>
+                                    <?php endforeach; ?>
+                                </tbody>
                             </table>
                             </div>
                             
@@ -527,15 +585,156 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                 <?php endif; ?>
             </div>
         </div>
-    </div>
-
-    <center>
+    </div>    <center>
         <a href="../../access.php" class="back-btn" title="Go Back">
             <i class="fas fa-arrow-circle-left fa-xl"></i>
         </a>
     </center>
 
-    <script>
+    <!-- Modal para mostrar información del UPC -->
+    <div class="modal fade" id="upcModal" tabindex="-1" aria-labelledby="upcModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">                <div class="modal-header">
+                    <h5 class="modal-title" id="upcModalLabel">
+                        <i class="fas fa-info-circle"></i> Product Information
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="upcModalBody">
+                    <!-- Content will be loaded here dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>    <script>
+        // Function to search UPC
+        function searchUPC() {
+            const upc = document.getElementById('upcSearch').value.trim();
+            
+            if (upc === '') {
+                alert('Please enter a UPC code');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('upcModalBody').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Searching...</span>
+                    </div>
+                    <p class="mt-2">Searching for UPC information...</p>
+                </div>
+            `;
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('upcModal'));
+            modal.show();
+
+            // Perform AJAX search
+            fetch('searchUPC.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'upc=' + encodeURIComponent(upc)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayItemInfo(data.item);
+                } else {
+                    displayError(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayError('Error searching UPC. Please try again.');
+            });
+        }
+
+        // Function to display item information
+        function displayItemInfo(item) {
+            const modalBody = document.getElementById('upcModalBody');
+            modalBody.innerHTML = `
+                <div class="item-card">
+                    <h6 style="color: #632b8b; margin-bottom: 15px;">
+                        <i class="fas fa-barcode"></i> Product Details
+                    </h6>
+                    <div class="item-detail">
+                        <span class="item-label">ID:</span>
+                        <span class="item-value">${item.id || 'N/A'}</span>
+                    </div>
+                    <div class="item-detail">
+                        <span class="item-label">UPC:</span>
+                        <span class="item-value">${item.upc || 'N/A'}</span>
+                    </div>
+                    <div class="item-detail">
+                        <span class="item-label">SKU:</span>
+                        <span class="item-value">${item.sku || 'N/A'}</span>
+                    </div>
+                    <div class="item-detail">
+                        <span class="item-label">Item:</span>
+                        <span class="item-value">${item.item || 'N/A'}</span>
+                    </div>
+                    <div class="item-detail">
+                        <span class="item-label">Brand:</span>
+                        <span class="item-value">${item.brand || 'N/A'}</span>
+                    </div>
+                    <div class="item-detail">
+                        <span class="item-label">Reference:</span>
+                        <span class="item-value">${item.ref || 'N/A'}</span>
+                    </div>
+                    <div class="item-detail">
+                        <span class="item-label">Color:</span>
+                        <span class="item-value">${item.color || 'N/A'}</span>
+                    </div>
+                    <div class="item-detail">
+                        <span class="item-label">Size:</span>
+                        <span class="item-value">${item.size || 'N/A'}</span>
+                    </div>                    <div class="item-detail">
+                        <span class="item-label">Category:</span>
+                        <span class="item-value">${item.category || 'N/A'}</span>
+                    </div>                    <div class="item-detail">
+                        <span class="item-label">Weight:</span>
+                        <span class="item-value">${item.weight || 'N/A'}</span>
+                    </div>
+                    <div class="item-detail">
+                        <span class="item-label">Inventory:</span>
+                        <span class="item-value">${item.inventory || '0'}</span>
+                    </div>
+                    <div class="item-detail">
+                        <span class="item-label">Status:</span>
+                        <span class="item-value">
+                            <span class="badge ${item.status == 1 ? 'bg-success' : 'bg-danger'}">
+                                ${item.status == 1 ? 'Active' : 'Inactive'}
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Function to display error
+        function displayError(message) {
+            const modalBody = document.getElementById('upcModalBody');
+            modalBody.innerHTML = `
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h6>Product not found</h6>
+                    <p class="mb-0">${message}</p>
+                </div>
+            `;
+        }
+
+        // Allow search with Enter key
+        document.getElementById('upcSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchUPC();
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"][name="selected_reports[]"]');
 
@@ -550,7 +749,9 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                         row.style.border = '';
                     }
                 });
-            });            // Form validation
+            });
+
+            // Form validation
             const form = document.querySelector('form');
             form.addEventListener('submit', function(e) {
                 const selectedCheckboxes = document.querySelectorAll('input[name="selected_reports[]"]:checked');

@@ -185,12 +185,11 @@ if ($current_month_orders > 0) {
     .logo_item img {
       height: 40px;
       filter: brightness(0) invert(1);
-    }
-
-    #sidebarOpen {
+    }    #sidebarOpen {
       font-size: 1.5rem;
       cursor: pointer;
       transition: var(--transition);
+      display: none; /* Ocultar el botón hamburguesa */
     }
 
     #sidebarOpen:hover {
@@ -227,16 +226,14 @@ if ($current_month_orders > 0) {
     .profile:hover {
       transform: scale(1.1);
       border-color: white;
-    }
-
-    /* Sidebar */
+    }    /* Sidebar */
     .sidebar {
       background: white;
       width: 270px;
       height: 100vh;
       position: fixed;
       top: 70px;
-      left: -270px;
+      left: 0;
       box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
       transition: var(--transition);
       z-index: 999;
@@ -358,12 +355,10 @@ if ($current_month_orders > 0) {
 
     .collapse_sidebar {
       display: none;
-    }
-
-    /* Main Content */
+    }    /* Main Content */
     .main-content {
       margin-top: 70px;
-      margin-left: 0;
+      margin-left: 270px;
       padding: 25px;
       min-height: calc(100vh - 70px);
       transition: var(--transition);
@@ -371,7 +366,7 @@ if ($current_month_orders > 0) {
 
     .main-content.active {
       margin-left: 270px;
-    }    /* Dashboard Cards */
+    }/* Dashboard Cards */
     .dashboard-cards {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -603,7 +598,7 @@ if ($current_month_orders > 0) {
   <nav class="sidebar">
     <div class="menu_content">
       <ul class="menu_items">
-        <div class="menu_title menu_dahsboard">MENÚ PRINCIPAL</div>
+        <div class="menu_title menu_dahsboard">MAIN MENU</div>
 
         <!-- ITEMS -->
         <li class="item">
@@ -959,21 +954,17 @@ if ($current_month_orders > 0) {
     </div>
   </div>
 
-  <!-- JavaScript -->
-  <script>
-    // Sidebar Toggle
+  <!-- JavaScript -->  <script>
+    // Sidebar siempre visible - sin toggle
     const sidebar = document.querySelector('.sidebar');
-    const sidebarOpen = document.querySelector('#sidebarOpen');
     const mainContent = document.querySelector('.main-content');
     const submenuItems = document.querySelectorAll('.submenu_item');
-    const expandSidebar = document.querySelector('.expand_sidebar');
-    const collapseSidebar = document.querySelector('.collapse_sidebar');
+    
+    // Asegurar que el sidebar y main-content estén siempre activos
+    sidebar.classList.add('active');
+    mainContent.classList.add('active');
 
-    sidebarOpen.addEventListener('click', () => {
-      sidebar.classList.toggle('active');
-      mainContent.classList.toggle('active');
-    });
-
+    // Funcionalidad de submenús
     submenuItems.forEach(item => {
       item.addEventListener('click', () => {
         const submenu = item.nextElementSibling;
@@ -982,20 +973,6 @@ if ($current_month_orders > 0) {
         submenu.classList.toggle('active');
         arrow.classList.toggle('rotate');
       });
-    });
-
-    expandSidebar.addEventListener('click', () => {
-      sidebar.classList.add('active');
-      mainContent.classList.add('active');
-      expandSidebar.style.display = 'none';
-      collapseSidebar.style.display = 'flex';
-    });
-
-    collapseSidebar.addEventListener('click', () => {
-      sidebar.classList.remove('active');
-      mainContent.classList.remove('active');
-      expandSidebar.style.display = 'flex';
-      collapseSidebar.style.display = 'none';
     });
 
     // Dark/Light Mode Toggle

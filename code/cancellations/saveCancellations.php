@@ -20,8 +20,7 @@ foreach ($required_fields as $field) {
     }
 }
 
-try {
-    // Extract and sanitize data
+try {    // Extract and sanitize data
     $id_sell = intval($data['id_sell']);
     $sell_order = $mysqli->real_escape_string($data['sell_order']);
     $refund_amount = isset($data['refund_amount']) ? floatval($data['refund_amount']) : 0.00;
@@ -30,6 +29,10 @@ try {
     $final_fee_refund = isset($data['final_fee_refund']) ? floatval($data['final_fee_refund']) : 0.00;
     $fixed_charge_refund = isset($data['fixed_charge_refund']) ? floatval($data['fixed_charge_refund']) : 0.00;
     $other_fee_refund = isset($data['other_fee_refund']) ? floatval($data['other_fee_refund']) : 0.00;
+    
+    // Calculate Net Cancellation
+    // Formula: Refund amount + Shipping Refund + Tax Refund - Final Fee Refund - Fixed Charge Refund - Other Fee Refund
+    $net_cancellation = $refund_amount + $shipping_refund + $tax_refund - $final_fee_refund - $fixed_charge_refund - $other_fee_refund;
 
     // Check if cancellation record already exists for this sell
     $check_sql = "SELECT id FROM cancellations WHERE order_id = ?";
@@ -38,20 +41,20 @@ try {
     $check_stmt->execute();
     $check_result = $check_stmt->get_result();
 
-    if ($check_result->num_rows > 0) {
-        // Update existing record
+    if ($check_result->num_rows > 0) {        // Update existing record
         $update_sql = "UPDATE cancellations SET 
                        refund_amount = ?, 
                        shipping_refund = ?, 
                        tax_refund = ?, 
                        final_fee_refund = ?, 
                        fixed_charge_refund = ?, 
-                       other_fee_refund = ?, 
+                       other_fee_refund = ?,
+                       net_cancellation = ?, 
                        updated_at = NOW() 
                        WHERE order_id = ?";
         
         $update_stmt = $mysqli->prepare($update_sql);
-        $update_stmt->bind_param("dddddds", $refund_amount, $shipping_refund, $tax_refund, $final_fee_refund, $fixed_charge_refund, $other_fee_refund, $sell_order);
+        $update_stmt->bind_param("ddddddds", $refund_amount, $shipping_refund, $tax_refund, $final_fee_refund, $fixed_charge_refund, $other_fee_refund, $net_cancellation, $sell_order);
         
         if ($update_stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Cancellation information updated successfully', 'action' => 'updated']);
@@ -59,13 +62,12 @@ try {
             echo json_encode(['success' => false, 'message' => 'Failed to update cancellation information: ' . $mysqli->error]);
         }
         $update_stmt->close();
-    } else {
-        // Insert new record
-        $insert_sql = "INSERT INTO cancellations (order_id, refund_amount, shipping_refund, tax_refund, final_fee_refund, fixed_charge_refund, other_fee_refund, created_at, updated_at) 
-                       VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+    } else {        // Insert new record
+        $insert_sql = "INSERT INTO cancellations (order_id, refund_amount, shipping_refund, tax_refund, final_fee_refund, fixed_charge_refund, other_fee_refund, net_cancellation, created_at, updated_at) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
         
         $insert_stmt = $mysqli->prepare($insert_sql);
-        $insert_stmt->bind_param("sdddddd", $sell_order, $refund_amount, $shipping_refund, $tax_refund, $final_fee_refund, $fixed_charge_refund, $other_fee_refund);
+        $insert_stmt->bind_param("sddddddd", $sell_order, $refund_amount, $shipping_refund, $tax_refund, $final_fee_refund, $fixed_charge_refund, $other_fee_refund, $net_cancellation);
         
         if ($insert_stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Cancellation information saved successfully', 'action' => 'created', 'id' => $mysqli->insert_id]);

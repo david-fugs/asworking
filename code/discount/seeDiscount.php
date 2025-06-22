@@ -289,9 +289,36 @@ $resultTiendas = $mysqli->query($queryTiendas);
       max-width: 200px;
     }
   }
-
   .clickable-row {
     cursor: pointer;
+  }
+
+  /* Estilos para el mensaje inicial */
+  .alert-info {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border: 1px solid #2196f3;
+    color: #1976d2;
+    border-radius: 10px;
+  }
+
+  .alert-info i {
+    color: #1976d2;
+  }
+
+  /* Estilos para el spinner de carga */
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  /* Estilos mejorados para los resultados */
+  #searchResults .table {
+    margin-bottom: 0;
+  }
+
+  #searchResults .alert {
+    border-radius: 8px;
+    margin-bottom: 0;
   }
 </style>
 
@@ -301,46 +328,33 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <h1 class="page-title"><i class="fa-solid fa-file-signature"></i> DISCOUNTS</h1>
   </div>
 
-
   <div class="search-form">
     <form id="filterForm" class="row g-3 align-items-center justify-content-center">
-      <div class="col-md-3">
-        <input name="upc_item" type="text" placeholder="UPC" id="upc" class="form-control">
+      <div class="col-md-4">
+        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control" required>
       </div>
       <div class="col-md-3">
-        <input name="item" type="text" placeholder="#Order" id="sell_order" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <input type="date" name="sellDate" id="date" class="form-control">
+        <input name="item" type="text" placeholder="#Order (Optional)" id="sell_order" class="form-control">
       </div>
       <div class="col-md-2">
         <input value="Search" type="submit" class="btn btn-primary">
       </div>
     </form>
+  </div>  <!-- Mensaje inicial -->
+  <div id="initialMessage" class="table-container text-center">
+    <div class="alert alert-info">
+      <i class="fas fa-search fa-2x mb-3"></i>
+      <h4>Search for Discounts</h4>
+      <p>Enter a UPC code above to search for discount records</p>
+    </div>
   </div>
-  <!-- Tabla de Ventas -->
-  <div class="table-container">
-    <h2 class="text-center mb-4">Registered Sales</h2>    <table class="" id="salesTable">      <thead>
-        <tr>
-          <th>Sell Number</th>
-          <th>Date</th>
-          <th>UPC</th>
-          <th>Brand</th>
-          <th>Item</th>
-          <th>Color</th>
-          <th>Reference</th>
-          <th>Store</th>
-          <th>Sucursal</th>
-          <th>Price Discount</th>
-          <th>Shipping Discount</th>
-          <th>Fee Credit</th>
-          <th>Tax Return</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php include "getSells.php"; ?>
-      </tbody>
-    </table>
+
+  <!-- Tabla de Ventas (inicialmente oculta) -->
+  <div class="table-container" id="resultsContainer" style="display: none;">
+    <h2 class="text-center mb-4">Search Results</h2>
+    <div id="searchResults">
+      <!-- Los resultados se cargarán aquí -->
+    </div>
   </div>
 
   <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
@@ -364,9 +378,243 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
 
 
-
   <script src="returns.js"></script>
-  <script src="scriptSeeSells.js"></script>
+  <script src="scriptSeeSells.js"></script>  <script>
+    // Función para calcular Net Markdown
+    function calculateNetMarkdown() {
+      const priceDiscount = parseFloat(document.getElementById('price_discount')?.value) || 0;
+      const shippingDiscount = parseFloat(document.getElementById('shipping_discount')?.value) || 0;
+      const feeCredit = parseFloat(document.getElementById('fee_credit')?.value) || 0;
+      
+      // Formula: Price Discount + Shipping Discount - Fee Credit
+      const netMarkdown = priceDiscount + shippingDiscount - feeCredit;
+      
+      const netMarkdownField = document.getElementById('net_markdown');
+      if (netMarkdownField) {
+        netMarkdownField.value = netMarkdown.toFixed(2);
+      }
+    }
+
+    // Función para inicializar los event listeners de las filas clickeables
+    function initializeClickableRows() {
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        // Remover event listeners previos para evitar duplicados
+        const newRow = row.cloneNode(true);
+        row.parentNode.replaceChild(newRow, row);
+      });
+      
+      // Reinicializar los event listeners usando la misma lógica que returns.js
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        row.addEventListener("click", function () {
+          const sell_order = this.dataset.sell_order;
+          console.log("Selected Sell Order:", sell_order);
+          
+          fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}`)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              if (data.error) {
+                document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${data.error}</p>`;
+                return;
+              }
+              
+              const items = data.items;
+              const discount = data.discount;
+
+              // Crear la tabla (mismo código que en returns.js)
+              let tableHTML = `
+                <h4>Sell Order: ${items[0].sell_order}</h4>
+                <table class="table table-bordered table-sm mt-3">
+                  <thead>
+                    <tr>
+                      <th>UPC</th>
+                      <th>SKU</th>
+                      <th>Quantity</th>
+                      <th>Final Fee</th>
+                      <th>Fixed Charge</th>
+                      <th>Item Profit</th>
+                      <th>Total Item</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+              `;
+
+              let totalGeneral = 0;
+              items.forEach((item) => {
+                const quantity = item.quantity || 0;
+                const comision_item = parseFloat(item.comision_item) || 0;
+                const cargo_fijo = parseFloat(item.cargo_fijo) || 0;
+                const item_profit = parseFloat(item.item_profit) || 0;
+                const total_item = parseFloat(item.total_item) || 0;
+                
+                tableHTML += `
+                  <tr>
+                    <td>${item.upc_item}</td>
+                    <td>${item.sku_item || "-"}</td>
+                    <td>${quantity}</td>
+                    <td>$${comision_item.toFixed(2)}</td>
+                    <td>$${cargo_fijo.toFixed(2)}</td>
+                    <td>$${item_profit.toFixed(2)}</td>
+                    <td>$${total_item.toFixed(2)}</td>
+                  </tr>
+                `;
+                totalGeneral += total_item;
+              });
+
+              tableHTML += `
+                  <tr>
+                    <td colspan="6" class="text-end"><strong>Total General</strong></td>
+                    <td><strong>$${totalGeneral.toFixed(2)}</strong></td>
+                  </tr>
+                </tbody>
+              </table>              <form method='post' action='saveDiscount.php' class='mt-4' id='discountForm'>
+                <div class='row mb-3'>
+                  <div class='col-md-6'>
+                    <label for='price_discount' class='form-label'>Price Discount</label>
+                    <input type='number' step='0.01' name='price_discount' id='price_discount' class='form-control' value='${discount ? (discount.price_discount || '') : ''}' onchange='calculateNetMarkdown()'>
+                  </div>
+                  <div class='col-md-6'>
+                    <label for='shipping_discount' class='form-label'>Shipping Discount</label>
+                    <input type='number' step='0.01' name='shipping_discount' id='shipping_discount' class='form-control' value='${discount ? (discount.shipping_discount || '') : ''}' onchange='calculateNetMarkdown()'>
+                  </div>
+                </div>
+                <div class='row mb-3'>
+                  <div class='col-md-6'>
+                    <label for='fee_credit' class='form-label'>Fee Credit</label>
+                    <input type='number' step='0.01' name='fee_credit' id='fee_credit' class='form-control' value='${discount ? (discount.fee_credit || '') : ''}' onchange='calculateNetMarkdown()'>
+                  </div>
+                  <div class='col-md-6'>
+                    <label for='tax_return' class='form-label'>Tax Return</label>
+                    <input type='number' step='0.01' name='tax_return' id='tax_return' class='form-control' value='${discount ? (discount.tax_return || '') : ''}'>
+                  </div>
+                </div>
+                <div class='row mb-3'>
+                  <div class='col-md-6'>
+                    <label for='net_markdown' class='form-label'><strong>Net Markdown</strong></label>
+                    <input type='number' step='0.01' name='net_markdown' id='net_markdown' class='form-control bg-light' value='${discount ? (discount.net_markdown || '') : ''}' readonly>
+                    <small class='text-muted'>Formula: Price Discount + Shipping Discount - Fee Credit</small>
+                  </div>
+                </div>
+                <input type='hidden' name='sell_order' value='${items[0].sell_order}'>
+                <input type='hidden' name='id_sell' value='${items[0].id_sell}'>
+                <div class='text-end'>
+                  <button type='submit' class='btn' style='background-color: #632b8b; color: #fff; border-color: #632b8b;'>Save</button>
+                </div>
+              </form>
+              `;
+
+              document.getElementById("ventasTableContainer").innerHTML = tableHTML;
+              
+              // Add form submission handler
+              const form = document.getElementById('discountForm');
+              if (form) {
+                form.addEventListener('submit', function(e) {
+                  e.preventDefault();
+                  
+                  const formData = new FormData(form);
+                  
+                  fetch('saveDiscount.php', {
+                    method: 'POST',
+                    body: formData
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message
+                      }).then(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('returnModal'));
+                        modal.hide();
+                        // Recargar los resultados de búsqueda en lugar de toda la página
+                        document.getElementById('filterForm').dispatchEvent(new Event('submit'));
+                      });
+                    } else {
+                      Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message
+                      });
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error',
+                      text: 'An error occurred while saving the discount information.'
+                    });
+                  });
+                });
+              }              
+              // Calculate initial Net Markdown
+              setTimeout(() => {
+                calculateNetMarkdown();
+              }, 100);
+              
+              const modal = new bootstrap.Modal(document.getElementById("returnModal"));
+              modal.show();
+            })
+            .catch((err) => {
+              document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${err.message}</p>`;
+            });
+        });
+      });
+    }
+
+    // Manejar el formulario de búsqueda
+    document.getElementById('filterForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const upc = document.getElementById('upc').value.trim();
+      const sellOrder = document.getElementById('sell_order').value.trim();
+      
+      if (!upc) {
+        alert('Please enter a UPC code to search');
+        return;
+      }
+      
+      // Mostrar loading
+      document.getElementById('initialMessage').style.display = 'none';
+      document.getElementById('resultsContainer').style.display = 'block';
+      document.getElementById('searchResults').innerHTML = `
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Searching...</span>
+          </div>
+          <p class="mt-2">Searching for discounts...</p>
+        </div>
+      `;
+      
+      // Realizar búsqueda AJAX
+      const formData = new FormData();
+      formData.append('upc_item', upc);
+      formData.append('sell_order', sellOrder);
+      
+      fetch('searchDiscounts.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('searchResults').innerHTML = data;
+        
+        // Reinicializar los event listeners para las filas clickeables
+        initializeClickableRows();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('searchResults').innerHTML = `
+          <div class="alert alert-danger text-center">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h5>Error</h5>
+            <p>An error occurred while searching. Please try again.</p>
+          </div>
+        `;
+      });
+    });
+  </script>
 </body>
 
 </html>
