@@ -51,215 +51,372 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>ASWWORKING | SOFT</title>
-    <script src="js/64d58efce2.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="../items/css/styles.css">
-    <link rel="stylesheet" type="text/css" href="../items/css/estilos2024.css">
-    <link rel="stylesheet" href="../../css/navbar.css">
-    <script src="https://kit.fontawesome.com/fed2435e21.js" crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    <title>ASWWORKING</title>
 </head>
 
 <body>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"></script>
-    <div class="header-container">
-        <div class="header">
-            <div class="logo-container">
-                <img src='../../img/logo.png' class="logo" alt="Logo">
+    <html lang="es">
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>ASWWORKING | SOFT</title>
+        <script src="js/64d58efce2.js"></script>
+        <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="../items/css/styles.css">
+        <link rel="stylesheet" type="text/css" href="../items/css/estilos2024.css">
+        <link rel="stylesheet" href="../../css/navbar.css">
+        <script src="https://kit.fontawesome.com/fed2435e21.js" crossorigin="anonymous"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <style>
+            /* Checkbox styles for stores */
+            .checkbox-group {
+                padding: 15px;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                background-color: #f8f9fa;
+                margin-top: 5px;
+            }
+
+            .form-check-inline {
+                margin-right: 20px;
+                margin-bottom: 10px;
+            }
+
+            .form-check-input {
+                width: 18px;
+                height: 18px;
+                margin-top: 0.125em;
+                border: 2px solid #6c757d;
+                border-radius: 4px;
+            }
+
+            .form-check-input:checked {
+                background-color: #0d6efd;
+                border-color: #0d6efd;
+            }
+
+            .form-check-input:focus {
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+            }
+
+            .form-check-label {
+                font-weight: 600;
+                color: #495057;
+                margin-left: 8px;
+                cursor: pointer;
+            }
+
+            /* Required field indicator */
+            .required-field::after {
+                content: '*';
+                color: #dc3545;
+                margin-left: 4px;
+            }
+
+            /* Readonly fields styling */
+            .form-control[readonly] {
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+                color: #6c757d;
+            }
+        </style>
+
+    </head>
+
+    <body>
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"></script>
+        <div class="header-container">
+            <div class="header">
+                <div class="logo-container">
+                    <img src='../../img/logo.png' class="logo" alt="Logo">
+                </div>
+                <h1 class="title"><i class="fa-solid fa-file-signature"></i> DAILY REPORT</h1>
             </div>
-            <h1 class="title"><i class="fa-solid fa-file-signature"></i> DAILY REPORT</h1>
         </div>
-    </div>
 
-    <div class="top-bar">
-        <div></div>
-        <div class="center">
-            <a href="../../access.php" class="back-btn" title="Go Back">
-                <i class="fas fa-arrow-circle-left fa-xl"></i>
-            </a>
-        </div>
-        <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
-            <a href="seeReport.php" class="btn-add-store">
-                <i class="fas fa-file-alt"></i> See Daily Report
-            </a>
-        </div>
-    </div>    <?php
-    date_default_timezone_set("America/Bogota");
-    include("../../conexion.php");
-    require_once("../../zebra.php");
-    ?>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-10 col-lg-8">
-                <form action="processReport.php" method="POST" class="form-container">
-                    <h5 class="form-title">New Report</h5>
-                    <div class="row g-3">
-                        <div class="col-md-6 form-group">
-                            <label for="upc_asignado_report" class="form-label"> Assigned UPC</label>
-                            <input type="text" class="form-control form-control-sm" id="upc_asignado_report" onblur="buscarUPC() " name="upc_asignado_report">
+        <div class="top-bar">
+            <div></div>
+            <div class="center">
+                <a href="../../access.php" class="back-btn" title="Go Back">
+                    <i class="fas fa-arrow-circle-left fa-xl"></i>
+                </a>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
+                <a href="seeReport.php" class="btn-add-store">
+                    <i class="fas fa-file-alt"></i> See Daily Report
+                </a>
+            </div>
+        </div> <?php
+                date_default_timezone_set("America/Bogota");
+                include("../../conexion.php");
+                require_once("../../zebra.php");
+                ?>
+
+        <!DOCTYPE html>
+        <html lang="es">
+
+        <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="X-UA-Compatible" content="ie=edge">
+            <title>ASWWORKING</title>
+        </head>
+
+        <body>
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-10 col-lg-8">
+                        <form action="processReport.php" method="POST" class="form-container">
+                            <h5 class="form-title">New Report</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6 form-group">
+                                    <label for="upc_asignado_report" class="form-label"> Assigned UPC</label>
+                                    <input type="text" class="form-control form-control-sm" id="upc_asignado_report" onblur="buscarUPC() " name="upc_asignado_report">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="upc_final_report" class="form-label"> Final UPC</label>
+                                    <input type="text" class="form-control form-control-sm" id="upc_final_report" name="upc_final_report" onblur="validarUPCFinal()">
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="cons_report" class="form-label">Cons</label>
+                                    <input type="text" class="form-control form-control-sm" id="cons_report" name="cons_report" required readonly>
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="folder_report" class="form-label">Folder</label>
+                                    <input type="text" class="form-control form-control-sm" id="folder_report" name="folder_report" required onblur="generarCons()">
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="loc_report" class="form-label">Location</label>
+                                    <input type="text" class="form-control form-control-sm" id="loc_report" name="loc_report">
+                                </div>
+
+                                <div class="col-md-6 form-group mt-4">
+                                    <label for="quantity_report" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control form-control-sm" id="quantity_report" name="quantity_report" required>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="sku_report" class="form-label">SKU (Auto-generated)</label>
+                                    <input type="text" class="form-control form-control-sm" id="sku_report" name="sku_report" readonly placeholder="Will be generated automatically">
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="brand_report" class="form-label">Brand</label>
+                                    <input type="text" class="form-control form-control-sm" id="brand_report" name="brand_report">
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="item_report" class="form-label">Item</label>
+                                    <input type="text" class="form-control form-control-sm" id="item_report" name="item_report">
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="vendor_report" class="form-label">Style </label>
+                                    <input type="text" class="form-control form-control-sm" id="vendor_report" name="vendor_report">
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="color_report" class="form-label">Color</label>
+                                    <input type="text" class="form-control form-control-sm" id="color_report" name="color_report">
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="size_report" class="form-label">Size</label>
+                                    <input type="text" class="form-control form-control-sm" id="size_report" name="size_report">
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="category_report" class="form-label">Category</label>
+                                    <input type="text" class="form-control form-control-sm" id="category_report" name="category_report">
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label for="weight_report" class="form-label">Weight</label>
+                                    <input type="text" step="0.01" class="form-control form-control-sm" id="weight_report" name="weight_report">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="inventory_report" class="form-label">Batch</label>
+                                    <input type="text" class="form-control form-control-sm" id="inventory_report" name="inventory_report">
+                                </div>
+
+                                <div class="col-12 form-group">
+                                    <label class="form-label required-field">STORES TO PUBLISH</label>
+                                    <div class="checkbox-group">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" name="stores[]" value="AS001" id="store_AS001_report">
+                                            <label class="form-check-label" for="store_AS001_report">AS001</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" name="stores[]" value="EB001" id="store_EB001_report">
+                                            <label class="form-check-label" for="store_EB001_report">EB001</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" name="stores[]" value="EB002" id="store_EB002_report">
+                                            <label class="form-check-label" for="store_EB002_report">EB002</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" name="stores[]" value="AM002" id="store_AM002_report">
+                                            <label class="form-check-label" for="store_AM002_report">AM002</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" name="stores[]" value="WM001" id="store_WM001_report">
+                                            <label class="form-check-label" for="store_WM001_report">WM001</label>
+                                        </div>
+                                    </div>
+                                    <div id="stores-error-report" class="text-danger mt-1" style="display: none;">
+                                        <small>Please select at least one store.</small>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="observacion_report" class="form-label">Observation</label>
+                                    <textarea class="form-control form-control-sm" id="observacion_report" name="observacion_report" rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class=" mt-4 d-flex justify-content-center " style="margin-left: 90px;">
+                                <button type="submit" class="btn-add-store">Send</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- modal opciones -->
+            <div class="modal fade" id="modalOpcionesUPC" tabindex="-1" aria-labelledby="modalOpcionesUPCLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Select the correct reference</h5>
                         </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="upc_final_report" class="form-label"> Final UPC</label>
-                            <input type="text" class="form-control form-control-sm" id="upc_final_report" name="upc_final_report">
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="cons_report" class="form-label">Cons</label>
-                            <input type="text" class="form-control form-control-sm" id="cons_report" name="cons_report" required>
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="folder_report" class="form-label">Folder</label>
-                            <input type="text" class="form-control form-control-sm" id="folder_report" name="folder_report" required>
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="loc_report" class="form-label">Location</label>
-                            <input type="text" class="form-control form-control-sm" id="loc_report" name="loc_report">
-                        </div>
-
-                        <div class="col-md-6 form-group mt-4">
-                            <label for="quantity_report" class="form-label">Quantity</label>
-                            <input type="number" class="form-control form-control-sm" id="quantity_report" name="quantity_report" required>
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="sku_report" class="form-label">SKU</label>
-                            <input type="text" class="form-control form-control-sm" id="sku_report" name="sku_report">
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="brand_report" class="form-label">Brand</label>
-                            <input type="text" class="form-control form-control-sm" id="brand_report" name="brand_report">
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="item_report" class="form-label">Item</label>
-                            <input type="text" class="form-control form-control-sm" id="item_report" name="item_report">
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="vendor_report" class="form-label">Vendor </label>
-                            <input type="text" class="form-control form-control-sm" id="vendor_report" name="vendor_report">
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="color_report" class="form-label">Color</label>
-                            <input type="text" class="form-control form-control-sm" id="color_report" name="color_report">
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="size_report" class="form-label">Size</label>
-                            <input type="text" class="form-control form-control-sm" id="size_report" name="size_report">
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="category_report" class="form-label">Category</label>
-                            <input type="text" class="form-control form-control-sm" id="category_report" name="category_report">
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label for="weight_report" class="form-label">Weight</label>
-                            <input type="text" step="0.01" class="form-control form-control-sm" id="weight_report" name="weight_report">
-                        </div>                        <div class="col-md-6 form-group">
-                            <label for="inventory_report" class="form-label">Inventory</label>
-                            <input type="text" class="form-control form-control-sm" id="inventory_report" name="inventory_report">
-                        </div>
-
-                        <div class="col-12">
-                            <label for="observacion_report" class="form-label">Observation</label>
-                            <textarea class="form-control form-control-sm" id="observacion_report" name="observacion_report" rows="2"></textarea>
+                        <div class="modal-body" id="contenedorOpcionesUPC">
+                            <!-- Aquí se insertan las opciones -->
                         </div>
                     </div>
-                    <div class=" mt-4 d-flex justify-content-center " style="margin-left: 90px;" >
-                        <button type="submit" class="btn-add-store">Send</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- modal opciones -->
-    <div class="modal fade" id="modalOpcionesUPC" tabindex="-1" aria-labelledby="modalOpcionesUPCLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Select the correct reference</h5>
-                </div>
-                <div class="modal-body" id="contenedorOpcionesUPC">
-                    <!-- Aquí se insertan las opciones -->
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="back">
-        <div></div>
-        <div class="">
-            <a href="../../access.php" class="back-btn" title="Go Back">
-                <i class="fas fa-arrow-circle-left fa-xl"></i>
-            </a>
-        </div>
-    </div>
+            <div class="back">
+                <div></div>
+                <div class="">
+                    <a href="../../access.php" class="back-btn" title="Go Back">
+                        <i class="fas fa-arrow-circle-left fa-xl"></i>
+                    </a>
+                </div>
+            </div>
 
-    <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
-    <script>
-        function buscarUPC() {
-            let upc = $('#upc_asignado_report').val();
+            <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
+            <script>
+                function buscarUPC() {
+                    let upc = $('#upc_asignado_report').val();
 
-            if (upc.trim() === "") return;
+                    if (upc.trim() === "") return;
 
-            $.ajax({
-                url: 'buscar_upc_detalle.php',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    upc: upc
-                },
-                success: function(data) {
-                    if (data.success) {
-                        if (data.multiple) {
-                            mostrarOpcionesUPC(data.data);
-                        } else {
-                            llenarFormulario(data.data[0]);
-                            alert("✅ UPC Found.");
+                    $.ajax({
+                        url: 'buscar_upc_detalle.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            upc: upc
+                        },
+                        success: function(data) {
+                            if (data.success) {
+                                if (data.multiple) {
+                                    mostrarOpcionesUPC(data.data);
+                                } else {
+                                    llenarFormulario(data.data[0]);
+                                    alert("✅ UPC Found.");
+                                }
+                            } else {
+                                limpiarCampos();
+                                alert("❌ UPC not found.");
+                            }
+                        },
+                        error: function() {
+                            alert("⚠️ Error .");
                         }
-                    } else {
-                        limpiarCampos();
-                        alert("❌ UPC not found.");
-                    }
-                },
-                error: function() {
-                    alert("⚠️ Error .");
+                    });
                 }
-            });
-        }
 
-        function llenarFormulario(item) {
-            $('#quantity_report').val(item.quantity_inventory);
-            $('#brand_report').val(item.brand_item);
-            $('#item_report').val(item.item);
-            $('#color_report').val(item.color_item);
-            $('#size_report').val(item.size_item);
-            $('#category_report').val(item.category_item);
-            $('#weight_report').val(item.weight_item);
-            $('#inventory_report').val(item.inventory_item);
-            $('#sku_report').val(item.sku);
-            $('#vendor_report').val(item.ref_item);
-        }
+                // Validar UPC Final
+                function validarUPCFinal() {
+                    let upcFinal = $('#upc_final_report').val().trim();
 
-        function mostrarOpcionesUPC(opciones) {
-            let contenedor = $('#contenedorOpcionesUPC');
-            contenedor.empty();
+                    if (upcFinal === "") return;
 
-            opciones.forEach((item, index) => {
-                contenedor.append(`
+                    $.ajax({
+                        url: 'validar_upc_final.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            upc_final: upcFinal
+                        },
+                        success: function(data) {
+                            if (data.exists) {
+                                alert("⚠️ Warning: This Final UPC already exists in the items table!");
+                                $('#upc_final_report').focus();
+                            }
+                        },
+                        error: function() {
+                            console.log("Error validating Final UPC");
+                        }
+                    });
+                }
+
+                // Generar CONS basado en FOLDER
+                function generarCons() {
+                    let folder = $('#folder_report').val().trim();
+
+                    if (folder === "") {
+                        $('#cons_report').val('');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: 'generar_cons.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            folder: folder
+                        },
+                        success: function(data) {
+                            if (data.success) {
+                                $('#cons_report').val(folder + ' cons ' + data.next_cons);
+                            }
+                        },
+                        error: function() {
+                            console.log("Error generating CONS");
+                        }
+                    });
+                }
+
+                function llenarFormulario(item) {
+                    $('#quantity_report').val(item.quantity_inventory);
+                    $('#brand_report').val(item.brand_item);
+                    $('#item_report').val(item.item);
+                    $('#color_report').val(item.color_item);
+                    $('#size_report').val(item.size_item);
+                    $('#category_report').val(item.category_item);
+                    $('#weight_report').val(item.weight_item);
+                    $('#inventory_report').val(item.inventory_item);
+                    $('#sku_report').val(item.sku);
+                    $('#vendor_report').val(item.ref_item);
+                }
+
+                function mostrarOpcionesUPC(opciones) {
+                    let contenedor = $('#contenedorOpcionesUPC');
+                    contenedor.empty();
+
+                    opciones.forEach((item, index) => {
+                        contenedor.append(`
         <div class="card mb-2 shadow-sm border-0">
             <div class="card-body p-2">
                 <button 
@@ -274,60 +431,87 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             </div>
         </div>
     `);
-            });
+                    });
 
-            $('#modalOpcionesUPC').modal('show');
-        }
+                    $('#modalOpcionesUPC').modal('show');
+                }
 
-        function seleccionarUPC(item) {
-            $('#modalOpcionesUPC').modal('hide');
-            llenarFormulario(item);
-            alert("✅ UPC selected correctly.");
-        }
+                function seleccionarUPC(item) {
+                    $('#modalOpcionesUPC').modal('hide');
+                    llenarFormulario(item);
+                    alert("✅ UPC selected correctly.");
+                }
 
-        function limpiarCampos() {
-            $('#quantity_report').val('');
-            $('#brand_report').val('');
-            $('#item_report').val('');
-            $('#color_report').val('');
-            $('#size_report').val('');
-            $('#category_report').val('');
-            $('#weight_report').val('');
-            $('#inventory_report').val('');
-            $('#sku_report').val('');
-            $('#vendor_report').val('');
-        }
-        document.addEventListener("DOMContentLoaded", function() {
-            let modalEdicion = document.getElementById("modalEdicion");
+                function limpiarCampos() {
+                    $('#quantity_report').val('');
+                    $('#brand_report').val('');
+                    $('#item_report').val('');
+                    $('#color_report').val('');
+                    $('#size_report').val('');
+                    $('#category_report').val('');
+                    $('#weight_report').val('');
+                    $('#inventory_report').val('');
+                    $('#sku_report').val('');
+                    $('#vendor_report').val('');
+                }
 
-            modalEdicion.addEventListener("show.bs.modal", function(event) {
-                let button = event.relatedTarget; // Botón que abrió el modal
-                document.getElementById("id_store").value = button.getAttribute("data-id_store");
-                document.getElementById("edit-name").value = button.getAttribute("data-name");
+                // Validación de checkboxes de tiendas
+                function validateStores() {
+                    var checkedStores = $('input[name="stores[]"]:checked').length;
+                    if (checkedStores === 0) {
+                        $('#stores-error-report').show();
+                        return false;
+                    } else {
+                        $('#stores-error-report').hide();
+                        return true;
+                    }
+                }
 
-            });
+                // Validar al enviar el formulario
+                $('form').on('submit', function(e) {
+                    if (!validateStores()) {
+                        e.preventDefault();
+                        alert('Please select at least one store to publish.');
+                        $('html, body').animate({
+                            scrollTop: $('#stores-error-report').offset().top - 100
+                        }, 500);
+                        return false;
+                    }
+                });
 
-            // Enviar datos al servidor con AJAX al hacer clic en "Guardar cambios"
-            document.getElementById("guardarCambios").addEventListener("click", function() {
-                let formData = new FormData(document.getElementById("formEditar"));
+                // Validar en tiempo real cuando se cambian los checkboxes
+                $('input[name="stores[]"]').on('change', function() {
+                    validateStores();
+                });
 
-                fetch("editItems.php", {
-                        method: "POST",
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert("Registro actualizado correctamente");
-                            window.location.reload(); // Recargar la página para ver los cambios
-                        } else {
-                            alert("Error al actualizar");
-                        }
-                    })
-                    .catch(error => console.error("Error:", error));
-            });
-        });
-    </script>
-</body>
+                document.addEventListener("DOMContentLoaded", function() {
+                    let modalEdicion = document.getElementById("modalEdicion");
 
-</html>
+                    modalEdicion.addEventListener("show.bs.modal", function(event) {
+                        let button = event.relatedTarget; // Botón que abrió el modal
+                        document.getElementById("id_store").value = button.getAttribute("data-id_store");
+                        document.getElementById("edit-name").value = button.getAttribute("data-name");
+
+                    });
+
+                    // Enviar datos al servidor con AJAX al hacer clic en "Guardar cambios"
+                    document.getElementById("guardarCambios").addEventListener("click", function() {
+                        let formData = new FormData(document.getElementById("formEditar"));
+
+                        fetch("editItems.php", {
+                                method: "POST",
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert("Registro actualizado correctamente");
+                                    window.location.reload(); // Recargar la página para ver los cambios
+                                } else {
+                                    alert("Error al actualizar");
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                    });
+                });
+            </script>

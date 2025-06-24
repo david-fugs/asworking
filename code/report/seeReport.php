@@ -96,8 +96,6 @@ function getStatus($estado)
             max-height: 600px;
         }
 
-
-
         .fixed-save-button {
             position: fixed;
             bottom: 20px;
@@ -223,7 +221,9 @@ function getStatus($estado)
 
         .back-btn:hover i {
             transform: scale(1.1);
-        }        /* Estilos generales para la tabla */
+        }
+
+        /* Estilos generales para la tabla */
         .table-container {
             border-radius: 100px;
             overflow-x: auto;
@@ -232,9 +232,9 @@ function getStatus($estado)
             background: white;
             padding: 2px;
         }
-        
+
         .table-content {
-            min-width: 1800px;
+            min-width: 2000px;
         }
 
         table {
@@ -281,9 +281,6 @@ function getStatus($estado)
         tbody td:last-child {
             border-right: none;
         }
-
-
-
 
         tbody tr:last-child td {
             border-bottom: none;
@@ -369,7 +366,6 @@ function getStatus($estado)
         tbody tr:nth-child(even) {
             background-color: rgba(248, 240, 255, 0.8);
         }
-
 
         tbody tr:hover::before {
             opacity: 1;
@@ -526,6 +522,29 @@ function getStatus($estado)
             padding: 0 20px;
         }
 
+        /* Stores column styling */
+        .stores-cell {
+            background-color: rgba(99, 43, 139, 0.1) !important;
+            border-radius: 4px;
+            padding: 8px !important;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stores-text {
+            font-size: 0.85rem;
+            color: #632b8b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stores-not-assigned {
+            color: #6c757d;
+            font-style: italic;
+            font-weight: 400;
+        }
+
         h5::after {
             content: '';
             position: absolute;
@@ -585,10 +604,11 @@ function getStatus($estado)
     <div class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-md-12">
-                <form action="procesar_articulos.php" method="POST">                    <div class="table-container">
+                <form action="procesar_articulos.php" method="POST">
+                    <div class="table-container">
                         <div class="table-content">
                             <h5 class="mb-4 text-center">Daily Reports</h5>
-                            
+
                             <div class="alert alert-info">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -596,6 +616,7 @@ function getStatus($estado)
                                         <ul class="mb-0">
                                             <li>Selecciona los reportes que deseas procesar marcando el checkbox</li>
                                             <li>Modifica los campos necesarios directamente en la tabla</li>
+                                            <li>Las tiendas asignadas se muestran en la columna "Stores"</li>
                                             <li>Haz clic en "Save Selected" para guardar los cambios</li>
                                             <li>Los reportes procesados se moverán al estado "Procesado"</li>
                                         </ul>
@@ -605,80 +626,104 @@ function getStatus($estado)
                                         <ul class="mb-0">
                                             <li>Select the reports you want to process by checking the checkbox</li>
                                             <li>Modify the necessary fields directly in the table</li>
+                                            <li>Assigned stores are displayed in the "Stores" column</li>
                                             <li>Click "Save Selected" to save the changes</li>
                                             <li>Processed reports will move to "Processed" status</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <table class="">
-                            <thead class="">
-                                <tr>
-                                    <th></th>
-                                    <th class="">Date</th>
-                                    <th colspan="2">UPC</th>
-                                    <th colspan="4">Info</th>
-
-                                    <th colspan="4">Product Info</th>
-                                    <th colspan="3">Specs</th>
-
-                                    <th colspan="2">Inventory</th>
-                                    <th></th>
-                                    <th>Observation</th>
-                                </tr>
-                                <tr>
-                                    <th class=""></th>
-                                    <th class=""></th>
-                                    <th>Assigned</th>
-                                    <th>Final</th>
-                                    <th>Cons</th>
-                                    <th>Folder</th>
-                                    <th>Location</th>
-                                    <th>Quantity</th>
-                                    <th class="">SKU</th>
-                                    <th>Brand</th>
-                                    <th class="">Item</th>
-                                    <th>Vendor</th>
-                                    <th>Color</th>
-                                    <th>Size</th>
-                                    <th>Cost</th>
-                                    <th>Category</th>
-                                    <th>Weight</th>
-                                    <th>Inventory</th>
-                                    <th>Observation</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($reports as $index => $report): ?>
+                                <thead class="">
                                     <tr>
-                                        <input type="hidden" name="id_report[]" value="<?= $report['id_report'] ?>">
-                                        <td>
-                                            <input type="checkbox" name="seleccionados[]" value="<?= $index ?>">
-                                        </td>
-                                        <td><input style="width: 120px;" type="text" name="fecha_alta_reporte[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['fecha_alta_reporte']) ?>"></td>
-                                        <td><input style="width: 140px;" type="text" name="upc_asignado_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['upc_asignado_report']) ?>"></td>
-                                        <td><input style="width: 140px;" type="text" name="upc_final_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['upc_final_report']) ?>"></td>
-                                        <td><input style="width: 80px;" type="text" name="cons_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['cons_report']) ?>"></td>
-                                        <td><input style="width: 90px;" type="text" name="folder_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['folder_report']) ?>"></td>
-                                        <td><input type="text" style="width: 90px;" name="loc_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['loc_report']) ?>"></td>
-                                        <td><input style="width: 60px;" type="text" name="quantity_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['quantity_report']) ?>"></td>
-                                        <td><input style="width: 160px;" type="text" name="sku_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['sku_report']) ?>"></td>
-                                        <td><input style="width: 160px;" type="text" name="brand_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['brand_report']) ?>"></td>
-                                        <td><input type="text" style="width: 240px;" name="item_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['item_report']) ?>"></td>
-                                        <td><input style="width: 80px;" type="text" name="vendor_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['vendor_report']) ?>"></td>
-                                        <td><input type="text" style="width: 110px;" name="color_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['color_report']) ?>"></td>
-                                        <td><input style="width: 110px;" type="text" name="size_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['size_report']) ?>"></td>
-                                        <td><input style="width: 110px;" type="text" name="cost_report[]" class="form-control form-control-sm"></td>
-                                        <td><input type="text" style="width: 100px;" name="category_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['category_report']) ?>"></td>
-                                        <td><input type="text" style="width: 140px;" name="weight_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['weight_report']) ?>"></td>
-                                        <td><input style="width: 140px;" type="text" name="inventory_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['inventory_report']) ?>"></td>
-                                        <td><input style="width: 180px;" type="text" name="observacion_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['observacion_report']) ?>"></td>
+                                        <th></th>
+                                        <th class="">Date</th>
+                                        <th colspan="2">UPC</th>
+                                        <th colspan="4">Info</th>
+
+                                        <th colspan="4">Product Info</th>
+                                        <th colspan="3">Specs</th>
+
+                                        <th colspan="2">Inventory</th>
+                                        <th colspan="2">Stores</th>
+                                        <th>Observation</th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>                        </table>                        <div class="text-center mt-3">
-                            <button type="submit" class="btn-add-store" id="saveSelectedBtn">Save Selected</button>
-                        </div>
+                                    <tr>
+                                        <th class=""></th>
+                                        <th class=""></th>
+                                        <th>Assigned</th>
+                                        <th>Final</th>
+                                        <th>Cons</th>
+                                        <th>Folder</th>
+                                        <th>Location</th>
+                                        <th>Quantity</th>
+                                        <th class="">SKU</th>
+                                        <th>Brand</th>
+                                        <th class="">Item</th>
+                                        <th>Vendor</th>
+                                        <th>Color</th>
+                                        <th>Size</th>
+                                        <th>Cost</th>
+                                        <th>Category</th>
+                                        <th>Weight</th>
+                                        <th>Inventory</th>
+                                        <th>Stores</th>
+                                        <th>Observation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($reports as $index => $report): ?>
+                                        <tr>
+                                            <input type="hidden" name="id_report[]" value="<?= $report['id_report'] ?>">
+                                            <td>
+                                                <input type="checkbox" name="seleccionados[]" value="<?= $index ?>">
+                                            </td>
+                                            <td><input style="width: 120px;" type="text" name="fecha_alta_reporte[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['fecha_alta_reporte']) ?>"></td>
+                                            <td><input style="width: 140px;" type="text" name="upc_asignado_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['upc_asignado_report']) ?>"></td>
+                                            <td><input style="width: 140px;" type="text" name="upc_final_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['upc_final_report']) ?>"></td>
+                                            <td><input style="width: 80px;" type="text" name="cons_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['cons_report']) ?>"></td>
+                                            <td><input style="width: 90px;" type="text" name="folder_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['folder_report']) ?>"></td>
+                                            <td><input type="text" style="width: 90px;" name="loc_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['loc_report']) ?>"></td>
+                                            <td><input style="width: 60px;" type="text" name="quantity_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['quantity_report']) ?>"></td>
+                                            <td><input style="width: 160px;" type="text" name="sku_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['sku_report']) ?>"></td>
+                                            <td><input style="width: 160px;" type="text" name="brand_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['brand_report']) ?>"></td>
+                                            <td><input type="text" style="width: 240px;" name="item_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['item_report']) ?>"></td>
+                                            <td><input style="width: 80px;" type="text" name="vendor_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['vendor_report']) ?>"></td>
+                                            <td><input type="text" style="width: 110px;" name="color_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['color_report']) ?>"></td>
+                                            <td><input style="width: 110px;" type="text" name="size_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['size_report']) ?>"></td>
+                                            <td><input style="width: 110px;" type="text" name="cost_report[]" class="form-control form-control-sm"></td>
+                                            <td><input type="text" style="width: 100px;" name="category_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['category_report']) ?>"></td>
+                                            <td><input type="text" style="width: 140px;" name="weight_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['weight_report']) ?>"></td>
+                                            <td><input style="width: 140px;" type="text" name="inventory_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['inventory_report']) ?>"></td>
+                                            <td class="stores-cell">
+                                                <span class="stores-text <?= empty($report['stores_report']) ? 'stores-not-assigned' : '' ?>">
+                                                    <?php
+                                                    // Procesar stores_report para mostrar de manera legible
+                                                    $stores_display = '';
+                                                    if (!empty($report['stores_report'])) {
+                                                        $stores_array = json_decode($report['stores_report'], true);
+                                                        if (is_array($stores_array)) {
+                                                            $stores_display = implode(', ', $stores_array);
+                                                        } else {
+                                                            $stores_display = $report['stores_report'];
+                                                        }
+                                                    } else {
+                                                        $stores_display = 'Not assigned';
+                                                    }
+                                                    echo $stores_display;
+                                                    ?>
+                                                </span>
+                                                <input type="hidden" name="stores_report[]" value="<?= htmlspecialchars($report['stores_report']) ?>">
+                                            </td>
+                                            <td><input style="width: 180px;" type="text" name="observacion_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['observacion_report']) ?>"></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                            <div class="text-center mt-3">
+                                <button type="submit" class="btn-add-store" id="saveSelectedBtn">Save Selected</button>
+                            </div>
                         </div>
                     </div>
                 </form>

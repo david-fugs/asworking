@@ -98,7 +98,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         .page-title {
             color: var(--primary);
             font-weight: 700;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             position: relative;
             padding-bottom: 10px;
@@ -155,13 +155,180 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         }
 
         /* Table styles */
-        
         .table-container {
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
             background: white;
             margin-bottom: 30px;
+            position: relative;
+        }
+
+        /* Scroll hint indicator */
+        .scroll-hint {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(99, 43, 139, 0.1);
+            color: var(--primary);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            z-index: 15;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .scroll-hint {
+                display: none;
+            }
+        }
+
+        /* Top scroll bar */
+        .top-scroll-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 35px;
+            border: 2px solid var(--primary);
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+            border-radius: 8px;
+            position: relative;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-scroll-content {
+            height: 30px;
+            width: 1100px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Force scrollbar to always show */
+        .top-scroll-container {
+            scrollbar-width: auto !important;
+        }
+
+        /* Custom scrollbar for top scroll */
+        .top-scroll-container::-webkit-scrollbar {
+            height: 18px !important;
+            background: #e9ecef;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .top-scroll-container::-webkit-scrollbar-track {
+            background: linear-gradient(to right, #e9ecef, #f8f9fa, #e9ecef);
+            border-radius: 0 0 6px 6px;
+        }
+
+        .top-scroll-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+            border-radius: 6px;
+            min-width: 60px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .top-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, var(--primary-dark), var(--primary));
+            transform: scale(1.05);
+        }
+
+        /* Visual indicators for the scroll bar */
+        .top-scroll-container::before {
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--primary);
+            letter-spacing: 1px;
+            z-index: 10;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1px 8px;
+            border-radius: 3px;
+        }
+
+        .top-scroll-container::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            left: 8px;
+            right: 8px;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), transparent, var(--primary));
+            border-radius: 1px;
+            opacity: 0.6;
+        }
+
+        .table-responsive {
+            border-radius: 10px;
+            overflow-x: auto;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) #f1f1f1;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        .table-responsive::-webkit-scrollbar {
+            height: 12px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+            border: 2px solid #f1f1f1;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Scroll indicator */
+        .table-container::after {
+            content: '← Desliza para ver más columnas →';
+            position: absolute;
+            bottom: 5px;
+            right: 15px;
+            font-size: 0.75rem;
+            color: var(--secondary);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 8px;
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @media (min-width: 1400px) {
+            .table-container::after {
+                display: none;
+            }
         }
 
         table {
@@ -169,25 +336,30 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             border-collapse: separate;
             border-spacing: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-width: 1100px;
+            /* Reduced from 1200px for better fit */
         }
 
         thead {
-            background: var(--primary);
-            color: white;
+            background: var(--primary) !important;
+            color: white !important;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         thead th {
-            padding: 14px 10px;
-            text-align: center;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.82rem;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-            position: relative;
+            padding: 14px 8px !important;
+            text-align: center !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            font-size: 0.75rem !important;
+            letter-spacing: 0.5px !important;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+            position: relative !important;
+            white-space: nowrap !important;
+            background-color: var(--primary) !important;
+            color: white !important;
         }
 
         tbody tr {
@@ -205,11 +377,39 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         }
 
         tbody td {
-            padding: 12px 10px;
-            border-bottom: 1px solid rgba(153, 124, 171, 0.3);
-            color: var(--text-dark);
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
+            padding: 10px 8px !important;
+            border-bottom: 1px solid rgba(153, 124, 171, 0.3) !important;
+            color: var(--text-dark) !important;
+            font-size: 0.85rem !important;
+            transition: all 0.2s ease !important;
+            vertical-align: middle !important;
+            text-align: center !important;
+        }
+
+        /* Specific column styling */
+        tbody td:nth-child(15) {
+            /* STORES column */
+            max-width: 150px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            text-align: left !important;
+        }
+
+        /* Override Bootstrap table styles */
+        .table> :not(caption)>*>* {
+            padding: 10px 8px;
+            background-color: var(--bs-table-bg);
+            border-bottom-width: 1px;
+            box-shadow: inset 0 0 0 9999px var(--bs-table-accent-bg);
+        }
+
+        .table-striped>tbody>tr:nth-of-type(odd)>td {
+            background-color: rgba(248, 240, 255, 0.8) !important;
+        }
+
+        .table-hover>tbody>tr:hover>td {
+            background-color: white !important;
+            box-shadow: 0 4px 12px rgba(99, 43, 139, 0.1) !important;
         }
 
         /* Action buttons */
@@ -245,36 +445,36 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         }
 
         /* Back button */
-      .back-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background-color: transparent;
-        border: none;
-        color: #5d337a; /* Morado oscuro */
-        font-size: 1.8rem;
-        cursor: pointer;
-        padding: 15px;
-        border-radius: 50%;
-        transition: all 0.3s ease;
-        width: 50px;
-        height: 50px;
-    }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+            border: none;
+            color: #5d337a;
+            /* Morado oscuro */
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            width: 50px;
+            height: 50px;
+        }
 
-    .back-btn:hover {
-        background-color: rgba(93, 51, 122, 0.1);
-        color: #632b8b;
-        transform: translateX(-3px);
-    }
+        .back-btn:hover {
+            background-color: rgba(93, 51, 122, 0.1);
+            color: #632b8b;
+            transform: translateX(-3px);
+        }
 
-    .back-btn i {
-        transition: transform 0.3s ease;
-    }
+        .back-btn i {
+            transition: transform 0.3s ease;
+        }
 
-    .back-btn:hover i {
-        transform: scale(1.1);
-    }
-
+        .back-btn:hover i {
+            transform: scale(1.1);
+        }
 
         /* Modal styles */
         .modal-header {
@@ -301,10 +501,49 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             .logo {
                 height: 80px;
             }
-            
+
             .page-title {
                 font-size: 1.8rem;
             }
+        }
+
+        /* Checkbox styles for stores in modal */
+        .checkbox-group {
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            margin-top: 5px;
+        }
+
+        .form-check-inline {
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+
+        .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin-top: 0.125em;
+            border: 2px solid #6c757d;
+            border-radius: 4px;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .form-check-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 43, 139, 0.25);
+        }
+
+        .form-check-label {
+            font-weight: 600;
+            color: #495057;
+            margin-left: 8px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -318,7 +557,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
 
     <div class="container">
         <h1 class="page-title text-center"><i class="fa-solid fa-file-signature"></i> ITEMS</h1>
-        
+
         <!-- Search Form -->
         <div class="search-form">
             <form action="showitems.php" method="get" class="row g-3">
@@ -337,7 +576,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             </form>
         </div>
 
-        <?php 
+        <?php
         date_default_timezone_set("America/Bogota");
         require_once("../../zebra.php");
 
@@ -386,8 +625,8 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         $countRow = $countResult->fetch_assoc();
         $num_registros = $countRow['total'];
 
-        $resul_x_pagina = 50;
-        
+        $resul_x_pagina = 20;
+
         if ($num_registros > 0) {
             // Configuración de Zebra_Pagination
             $paginacion = new Zebra_Pagination();
@@ -402,37 +641,55 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             if (!$result) {
                 die("Error en la consulta: " . $mysqli->error);
             }
-        ?>
-        
-        <div class="table-container">
-            <div class="">
-                <table class="">
-                <thead style="background-color: #632b8b; color: white;">
-                       
-                        <tr>
-                            <th>No.</th>
-                            <th>UPC</th>
-                            <th>SKU</th>
-                            <th>DATE</th>
-                            <th>BRAND</th>
-                            <th>ITEM</th>
-                            <th>REF</th>
-                            <th>COLOR</th>
-                            <th>SIZE</th>
-                            <th>CATEGORY</th>
-                            <th>COST</th>
-                            <th>WEIGHT</th>
-                            <th>STOCK</th>
-                            <th>BATCH</th>
-                            <th>EDIT</th>
-                            <th>DELETE</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $i = 1;
-                        while ($row = mysqli_fetch_array($result)) {
-                            echo '<tr>
+        ?> <div class="table-container">
+
+                <br>
+                <!-- Top scroll bar -->
+                <div class="top-scroll-container" title="Arrastra la barra inferior para hacer scroll horizontal en la tabla">
+                    <div class="top-scroll-content"></div>
+                </div>
+
+                <div class="table-responsive" id="main-table">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 40px; text-align: center;">No.</th>
+                                <th style="min-width: 110px; text-align: center;">UPC</th>
+                                <th style="min-width: 90px; text-align: center;">SKU</th>
+                                <th style="min-width: 90px; text-align: center;">DATE</th>
+                                <th style="min-width: 90px; text-align: center;">BRAND</th>
+                                <th style="min-width: 140px; text-align: center;">ITEM</th>
+                                <th style="min-width: 70px; text-align: center;">REF</th>
+                                <th style="min-width: 70px; text-align: center;">COLOR</th>
+                                <th style="min-width: 70px; text-align: center;">SIZE</th>
+                                <th style="min-width: 90px; text-align: center;">CATEGORY</th>
+                                <th style="min-width: 70px; text-align: center;">COST</th>
+                                <th style="min-width: 70px; text-align: center;">WEIGHT</th>
+                                <th style="min-width: 70px; text-align: center;">STOCK</th>
+                                <th style="min-width: 70px; text-align: center;">BATCH</th>
+                                <th style="min-width: 110px; text-align: center;">STORES</th>
+                                <th style="min-width: 50px; text-align: center;">EDIT</th>
+                                <th style="min-width: 50px; text-align: center;">DELETE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $i = 1;
+                            while ($row = mysqli_fetch_array($result)) {
+                                // Procesar stores_item para mostrar de manera legible
+                                $stores_display = '';
+                                if (!empty($row['stores_item'])) {
+                                    $stores_array = json_decode($row['stores_item'], true);
+                                    if (is_array($stores_array)) {
+                                        $stores_display = implode(', ', $stores_array);
+                                    } else {
+                                        $stores_display = $row['stores_item'];
+                                    }
+                                } else {
+                                    $stores_display = '<span class="text-muted">Not assigned</span>';
+                                }
+
+                                echo '<tr>
                                 <td>' . $i . '</td>
                                 <td>' . $row['upc_item'] . '</td>
                                 <td>' . $row['sku_item'] . '</td>
@@ -447,7 +704,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <td>' . $row['weight_item'] . '</td>
                                 <td>' . $row['quantity_inventory'] . '</td>
                                 <td>' . $row['inventory_item'] . '</td>
-                                <td>
+                                <td>' . $stores_display . '</td>                                <td>
                                     <button type="button" class="btn-action btn-edit" 
                                         data-bs-toggle="modal" data-bs-target="#modalEdicion"
                                         data-upc="' . $row['upc_item'] . '"
@@ -464,23 +721,24 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                         data-id="' . $row['id_item'] . '"
                                         data-estado="' . $row['estado_item'] . '"
                                         data-stock="' . $row['quantity_inventory'] . '"
-                                        data-batch="' . $row['inventory_item'] . '">
+                                        data-batch="' . $row['inventory_item'] . '"
+                                        data-stores=\'' . htmlspecialchars($row['stores_item']) . '\'>
                                         <i class="fas fa-edit"></i>
                                     </button>     
                                 </td>
-                                <td ">
+                                <td>
                                     <a href="?delete=' . $row['id_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');" class="btn-action btn-delete">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
-                                </td>   
+                                </td>
                             </tr>';
-                            $i++;
-                        }
-                        ?>
-                    </tbody>
-                </table>
+                                $i++;
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
         <?php
             // Mostrar paginación
@@ -491,7 +749,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         ?>
 
         <div class="text-center mb-4">
-            <a href="../access.php" class="back-btn">
+            <a href="../../access.php" class="back-btn">
                 <i class="fas fa-arrow-left"></i>
             </a>
         </div>
@@ -604,12 +862,35 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                     <label for="edit-batch">Batch</label>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Fecha -->
+                        </div> <!-- Fecha -->
                         <div class="form-floating mb-3">
                             <input type="date" class="form-control" id="edit-date" name="date">
                             <label for="edit-date">Date</label>
+                        </div>
+
+                        <!-- Sección de Tiendas -->
+                        <h5 class="mb-3">Stores to Publish</h5>
+                        <div class="checkbox-group">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="stores[]" value="AS001" id="edit_store_AS001">
+                                <label class="form-check-label" for="edit_store_AS001">AS001</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="stores[]" value="EB001" id="edit_store_EB001">
+                                <label class="form-check-label" for="edit_store_EB001">EB001</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="stores[]" value="EB002" id="edit_store_EB002">
+                                <label class="form-check-label" for="edit_store_EB002">EB002</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="stores[]" value="AM002" id="edit_store_AM002">
+                                <label class="form-check-label" for="edit_store_AM002">AM002</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="stores[]" value="WM001" id="edit_store_WM001">
+                                <label class="form-check-label" for="edit_store_WM001">WM001</label>
+                            </div>
                         </div>
 
                         <div class="modal-footer">
@@ -621,7 +902,6 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             </div>
         </div>
     </div>
-
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             let modalEdicion = document.getElementById("modalEdicion");
@@ -643,8 +923,81 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                 document.getElementById("edit-stock").value = button.getAttribute("data-stock");
                 document.getElementById("edit-batch").value = button.getAttribute("data-batch");
                 document.getElementById("edit-id").value = button.getAttribute("data-id");
+
+                // Cargar las tiendas seleccionadas
+                loadStores(button.getAttribute("data-stores"));
             });
+
+            function loadStores(storesJson) {
+                // Limpiar todos los checkboxes primero
+                const storeCheckboxes = document.querySelectorAll('input[name="stores[]"]');
+                storeCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+
+                // Si hay datos de tiendas, procesarlos
+                if (storesJson && storesJson !== 'null' && storesJson !== '') {
+                    try {
+                        const stores = JSON.parse(storesJson);
+                        if (Array.isArray(stores)) {
+                            stores.forEach(store => {
+                                const checkbox = document.getElementById('edit_store_' + store);
+                                if (checkbox) {
+                                    checkbox.checked = true;
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.log('Error parsing stores JSON:', e);
+                    }
+                }
+            } // Sincronizar scroll horizontal superior con el de la tabla
+            const topScroll = document.querySelector('.top-scroll-container');
+            const mainTable = document.querySelector('.table-responsive');
+
+            if (topScroll && mainTable) {
+                console.log('Scroll elements found'); // Debug
+
+                // Forzar que el top scroll sea visible ajustando su contenido al ancho real de la tabla
+                const table = mainTable.querySelector('table');
+                if (table) {
+                    const tableWidth = table.offsetWidth;
+                    const topScrollContent = topScroll.querySelector('.top-scroll-content');
+                    if (topScrollContent) {
+                        topScrollContent.style.width = tableWidth + 'px';
+                        console.log('Set top scroll width to:', tableWidth); // Debug
+                    }
+                }
+
+                // Cuando se hace scroll en la barra superior
+                topScroll.addEventListener('scroll', function() {
+                    console.log('Top scroll moved:', topScroll.scrollLeft); // Debug
+                    mainTable.scrollLeft = topScroll.scrollLeft;
+                });
+
+                // Cuando se hace scroll en la tabla principal
+                mainTable.addEventListener('scroll', function() {
+                    console.log('Main table scroll moved:', mainTable.scrollLeft); // Debug
+                    topScroll.scrollLeft = mainTable.scrollLeft;
+                });
+
+                // Forzar actualización después de que la página esté completamente cargada
+                setTimeout(function() {
+                    const table = mainTable.querySelector('table');
+                    if (table) {
+                        const tableWidth = table.scrollWidth;
+                        const topScrollContent = topScroll.querySelector('.top-scroll-content');
+                        if (topScrollContent) {
+                            topScrollContent.style.width = tableWidth + 'px';
+                            console.log('Updated top scroll width to:', tableWidth); // Debug
+                        }
+                    }
+                }, 500);
+            } else {
+                console.log('Scroll elements not found'); // Debug
+            }
         });
     </script>
 </body>
+
 </html>

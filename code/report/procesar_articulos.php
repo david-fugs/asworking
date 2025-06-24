@@ -25,13 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
         $color = $mysqli->real_escape_string($_POST['color_report'][$i]);
         $size = $mysqli->real_escape_string($_POST['size_report'][$i]);
         $cost = floatval($_POST['cost_report'][$i] ?? 0.0);
-        $category = $mysqli->real_escape_string($_POST['category_report'][$i]);
-        $weight = $mysqli->real_escape_string($_POST['weight_report'][$i]);
+        $category = $mysqli->real_escape_string($_POST['category_report'][$i]);        $weight = $mysqli->real_escape_string($_POST['weight_report'][$i]);
         $inventory = $mysqli->real_escape_string($_POST['inventory_report'][$i]);
-        $observacion = $mysqli->real_escape_string($_POST['observacion_report'][$i]);$sql_insert = "INSERT INTO items (
-            sku_item,  upc_item, date_item , brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item,id_usu
+        $observacion = $mysqli->real_escape_string($_POST['observacion_report'][$i]);
+        
+        // Procesar stores data
+        $stores_json = isset($_POST['stores_report'][$i]) ? $_POST['stores_report'][$i] : '';
+        $stores_json_escaped = $mysqli->real_escape_string($stores_json);        $sql_insert = "INSERT INTO items (
+            sku_item,  upc_item, date_item , brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, stores_item, id_usu
         ) VALUES (
-            '$sku', '$upcFinal', '$fecha', '$brand', '$item', '$cons', '$color', '$size', '$category', '$cost', '$weight', '$loc','$id_usu'
+            '$sku', '$upcFinal', '$fecha', '$brand', '$item', '$cons', '$color', '$size', '$category', '$cost', '$weight', '$loc', '$stores_json_escaped', '$id_usu'
         ) ON DUPLICATE KEY UPDATE
             sku_item = '$sku',
             upc_item = '$upcFinal',
@@ -44,7 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
             category_item = '$category',
             cost_item = '$cost',
             weight_item = '$weight',
-            inventory_item = '$loc', 
+            inventory_item = '$loc',
+            stores_item = '$stores_json_escaped',
             id_usu = '$id_usu'
 
             ";

@@ -16,9 +16,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $size = $mysqli->real_escape_string($_POST["size"]);
     $category = $mysqli->real_escape_string($_POST["category"]);
     $cost = $mysqli->real_escape_string($_POST["cost"]);
-    $weight = $mysqli->real_escape_string($_POST["weight"]);
-    $batch = $mysqli->real_escape_string($_POST["batch"]);
+    $weight = $mysqli->real_escape_string($_POST["weight"]);    $batch = $mysqli->real_escape_string($_POST["batch"]);
     $stock = (int) $_POST["stock"];
+
+    // Procesar las tiendas seleccionadas
+    $stores_selected = [];
+    if (isset($_POST['stores']) && is_array($_POST['stores'])) {
+        $valid_stores = ['AS001', 'EB001', 'EB002', 'AM002', 'WM001'];
+        foreach ($_POST['stores'] as $store) {
+            $store = strtoupper(trim($store));
+            if (in_array($store, $valid_stores)) {
+                $stores_selected[] = $store;
+            }
+        }
+    }
+
+    // Convertir las tiendas a formato JSON
+    $stores_json = json_encode($stores_selected);
+    $stores_json_escaped = $mysqli->real_escape_string($stores_json);
 
     // Obtener el valor actual de upc_item antes de actualizar
     $query_upc = "SELECT upc_item FROM items WHERE id_item = $id_item";
@@ -31,8 +46,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo json_encode(["success" => false, "error" => "ID no encontrado"]);
         exit;
     }
-
-
     // Actualizar la tabla items (sin cambiar quantity_inventory)
     $sql_update_items = "UPDATE items SET 
                             upc_item = '$upc', 
@@ -46,10 +59,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             category_item = '$category', 
                             cost_item = '$cost', 
                             weight_item = '$weight', 
-                            inventory_item = '$batch'
-                        WHERE id_item = $id_item";
-
-    if ($mysqli->query($sql_update_items) === TRUE) {
+                            inventory_item = '$batch',
+                            stores_item = '$stores_json_escaped'
+                        WHERE id_item = $id_item";    if ($mysqli->query($sql_update_items) === TRUE) {
         // Si el UPC cambió, actualizarlo también en inventory
         if ($old_upc !== $upc) {
             $sql_update_inventory = "UPDATE inventory SET upc_inventory = '$upc', quantity_inventory= $stock  WHERE upc_inventory = '$old_upc'";
@@ -59,10 +71,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // Actualizar siempre el stock en inventory
         $sql_update_stock = "UPDATE inventory SET quantity_inventory = $stock WHERE upc_inventory = '$upc'";
         $mysqli->query($sql_update_stock);
-        header("Location: showitems.php");
+        
+        // Crear mensaje de éxito con las tiendas
+        $stores_list = empty($stores_selected) ? 'None' : implode(', ', $stores_selected);
+        
+        echo "<script>
+            alert('✅ Item updated successfully!\\n📍 Stores: $stores_list');
+            window.location.href = 'showitems.php';
+        </script>";
         exit;
     } else {
-        echo json_encode(["success" => false, "error" => $mysqli->error]);
+        echo "<script>
+            alert('❌ Error updating item: " . addslashes($mysqli->error) . "');
+            window.location.href = 'showitems.php';
+        </script>";
     }
     // Cerrar conexión
     $mysqli->close();

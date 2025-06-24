@@ -54,13 +54,10 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>ASWWORKING | SOFT</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Librerías de DataTables -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+  <!-- Solo jQuery, sin DataTables -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
   <!-- Incluir SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -211,12 +208,10 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
     tbody tr:hover {
       background-color: white;
       box-shadow: 0 4px 12px rgba(99, 43, 139, 0.1);
-    }
-
-    tbody td {
+    }    tbody td {
       padding: 12px 10px;
       border-bottom: 1px solid rgba(153, 124, 171, 0.3);
-      color: var(--text-dark);
+      color: #000000 !important;
       font-size: 0.9rem;
       transition: all 0.2s ease;
       text-align: center;
@@ -368,9 +363,7 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
     .form input[type="submit"]:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Responsive adjustments */
+    }    /* Responsive adjustments */
     @media (max-width: 768px) {
       .logo {
         height: 80px;
@@ -387,64 +380,438 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
       .form input[type="submit"] {
         width: 100%;
       }
+
+      .btn-back {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+
+      .table-responsive {
+        font-size: 0.8rem;
+      }
+
+      #devolutionsTable thead th {
+        padding: 12px 8px;
+        font-size: 0.75rem;
+      }
+
+      .clickable-row td {
+        padding: 12px 8px;
+      }
     }
-  </style>
+
+    /* Alert styles */
+    .alert-info {
+      background-color: #e3f2fd;
+      border-color: #1976d2;
+      color: #1976d2;
+      border-radius: 10px;
+    }
+
+    .alert-info i {
+      color: #1976d2;
+    }
+
+    /* Estilos para el spinner de carga */
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+    }    /* Estilos mejorados para los resultados */
+    #searchResults .table {
+      margin-bottom: 0;
+    }
+
+    #searchResults .alert {
+      border-radius: 8px;
+      margin-bottom: 0;
+    }
+
+    /* Botón de retorno mejorado */
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(99, 43, 139, 0.3);
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-back:hover {
+      background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(99, 43, 139, 0.4);
+      color: white;
+      text-decoration: none;
+    }
+
+    .btn-back:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(99, 43, 139, 0.3);
+    }
+
+    .btn-back i {
+      transition: transform 0.3s ease;
+    }
+
+    .btn-back:hover i {
+      transform: translateX(-3px);
+    }
+
+    /* Estilos mejorados para la tabla */
+    .table-striped > tbody > tr:nth-of-type(odd) > td {
+      background-color: rgba(248, 249, 250, 0.8);
+    }
+
+    .table-hover > tbody > tr:hover > td {
+      background-color: rgba(99, 43, 139, 0.05);
+      transform: scale(1.002);
+      transition: all 0.2s ease;
+    }
+
+    .clickable-row {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .clickable-row:hover {
+      background: linear-gradient(45deg, rgba(99, 43, 139, 0.08), rgba(218, 199, 229, 0.15)) !important;
+      box-shadow: 0 2px 8px rgba(99, 43, 139, 0.1);
+      transform: translateY(-1px);
+    }    .clickable-row td {
+      vertical-align: middle;
+      padding: 12px 8px;
+      border-bottom: 1px solid rgba(99, 43, 139, 0.1);
+      font-size: 0.85rem;
+      color: #000000 !important;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }/* Header de tabla mejorado */
+    #returnsTable thead th {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      font-weight: 600;
+      text-align: center;
+      padding: 12px 8px;
+      border: none;
+      font-size: 0.75rem;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      white-space: nowrap;
+      min-width: 80px;
+    }/* Valores monetarios destacados */
+    .clickable-row td:nth-child(6),
+    .clickable-row td:nth-child(7),
+    .clickable-row td:nth-child(8),
+    .clickable-row td:nth-child(9),
+    .clickable-row td:nth-child(10),
+    .clickable-row td:nth-child(11),
+    .clickable-row td:nth-child(12) {
+      font-weight: 700;
+      color: #000000 !important;
+    }
+
+    /* Animación suave para la aparición de la tabla */
+    #devolutionsTable {
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Indicador de estado para filas */
+    .clickable-row::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .clickable-row:hover::before {
+      opacity: 1;
+    }    .clickable-row {
+      position: relative;
+    }
+
+    /* Badges personalizados */
+    .badge {
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .bg-outline-primary {
+      background-color: transparent !important;
+      color: var(--primary) !important;
+      border: 2px solid var(--primary);
+    }
+
+    /* Códigos de barras estilizados */
+    code {
+      background-color: rgba(99, 43, 139, 0.1);
+      color: var(--primary-dark);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+    }
+
+    /* Texto truncado con tooltip */
+    .text-truncate {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }    /* Animación para valores monetarios */
+    .text-success, .text-primary, .text-warning, .text-info, .text-danger {
+      transition: all 0.3s ease;
+      color: #000000 !important;
+    }
+
+    .clickable-row:hover .text-success,
+    .clickable-row:hover .text-primary,
+    .clickable-row:hover .text-warning,
+    .clickable-row:hover .text-info,
+    .clickable-row:hover .text-danger {
+      font-size: 1.05em;
+      font-weight: 700;
+      color: #000000 !important;
+    }    /* Asegurar que todos los elementos de texto sean negros */
+    .clickable-row td *,
+    .clickable-row td,
+    .table td,
+    .table td *,
+    .badge,
+    code,
+    em,
+    strong,
+    span {
+      color: #000000 !important;
+    }
+
+    /* Corregir badges para que mantengan color de fondo pero texto negro */
+    .badge.bg-dark {
+      background-color: #6c757d !important;
+      color: #ffffff !important;
+    }
+
+    code.bg-dark {
+      background-color: #6c757d !important;
+      color: #ffffff !important;
+    }
+
+    /* Asegurar que DataTables no agregue columnas extra */
+    .dataTable {
+      width: 100% !important;
+    }
+
+    .dataTable thead th,
+    .dataTable tbody td {
+      color: #000000 !important;
+      font-weight: 500;
+    }
+
+    .dataTable thead th {
+      color: #ffffff !important; /* Headers en blanco */
+      font-weight: 600;
+    }    /* Evitar columnas vacías */
+    .table-responsive table {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    .table-responsive th,
+    .table-responsive td {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    /* Forzar estructura de tabla correcta */
+    #returnsTable {
+      border-collapse: separate !important;
+      border-spacing: 0 !important;
+    }
+
+    #returnsTable thead tr {
+      display: table-row !important;
+    }
+
+    #returnsTable thead th {
+      display: table-cell !important;
+      vertical-align: middle !important;
+    }
+
+    #returnsTable tbody tr {
+      display: table-row !important;
+    }
+
+    #returnsTable tbody td {
+      display: table-cell !important;
+      vertical-align: middle !important;
+    }    /* Asegurar que no hay elementos flotantes interfiriendo */
+    .table-responsive {
+      clear: both;
+      overflow-x: auto;
+    }    /* Ajustes específicos para columnas */
+    #returnsTable th:nth-child(1), #returnsTable td:nth-child(1) { min-width: 100px; } /* Sell Order */
+    #returnsTable th:nth-child(2), #returnsTable td:nth-child(2) { min-width: 90px; }  /* Date */
+    #returnsTable th:nth-child(3), #returnsTable td:nth-child(3) { min-width: 120px; } /* UPC */
+    #returnsTable th:nth-child(4), #returnsTable td:nth-child(4) { min-width: 80px; }  /* SKU */
+    #returnsTable th:nth-child(5), #returnsTable td:nth-child(5) { min-width: 70px; }  /* Quantity */
+    #returnsTable th:nth-child(6), #returnsTable td:nth-child(6) { min-width: 100px; } /* Product Charge */
+    #returnsTable th:nth-child(7), #returnsTable td:nth-child(7) { min-width: 100px; } /* Shipping Paid */
+    #returnsTable th:nth-child(8), #returnsTable td:nth-child(8) { min-width: 90px; }  /* Tax Return */
+    #returnsTable th:nth-child(9), #returnsTable td:nth-child(9) { min-width: 120px; } /* Selling Fee Refund */
+    #returnsTable th:nth-child(10), #returnsTable td:nth-child(10) { min-width: 140px; } /* Refund Administration Fee */
+    #returnsTable th:nth-child(11), #returnsTable td:nth-child(11) { min-width: 120px; } /* Other Refund Fee */
+    #returnsTable th:nth-child(12), #returnsTable td:nth-child(12) { min-width: 100px; } /* Return Cost */
+    #returnsTable th:nth-child(13), #returnsTable td:nth-child(13) { min-width: 150px; max-width: 200px; } /* Buyer Comments */
+    #returnsTable th:nth-child(14), #returnsTable td:nth-child(14) { min-width: 80px; }  /* Branch */
+
+    /* Permitir que los comentarios se expandan */
+    #returnsTable td:nth-child(13) {
+      white-space: normal !important;
+      word-wrap: break-word !important;
+      max-width: 200px !important;
+    }
+
+    /* FORZAR estructura correcta - eliminar cualquier interferencia */
+    #returnsTable {
+      table-layout: auto !important;
+      width: 100% !important;
+      border-collapse: collapse !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    #returnsTable::before,
+    #returnsTable::after {
+      display: none !important;
+    }
+
+    #returnsTable thead,
+    #returnsTable tbody {
+      display: table-header-group !important;
+      width: 100% !important;
+    }
+
+    #returnsTable tbody {
+      display: table-row-group !important;
+    }
+
+    #returnsTable tr {
+      display: table-row !important;
+      width: 100% !important;
+    }
+
+    #returnsTable th,
+    #returnsTable td {
+      display: table-cell !important;
+      position: relative !important;
+      vertical-align: middle !important;
+      width: auto !important;
+    }
+
+    /* Eliminar cualquier pseudo-elemento que pueda crear columnas fantasma */
+    #returnsTable *::before,
+    #returnsTable *::after {
+      display: none !important;
+    }
+
+    /* Responsive tabla */
+    .table-responsive {
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: white;
+      overflow: hidden;
+    }
+
+    /* Mejora del contenedor de resultados */
+    #resultsContainer h2 {
+      color: var(--primary);
+      font-weight: 700;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    #resultsContainer h2::after {
+      content: '';
+      display: block;
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(to right, var(--primary), var(--secondary-light));
+      margin: 10px auto;
+      border-radius: 3px;
+    }</style>
 </head>
 
-<body>
-  <div class="header-container">
+<body>  <!-- Main Content Container -->
+    <div class="header-container">
     <div class="container text-center">
       <img src='../../img/logo.png' class="logo" alt="ASWWORKING Logo">
     </div>
   </div>
+  <div class="search-form">
+    <form id="filterForm" class="row g-3 align-items-center justify-content-center">
+      <div class="col-md-4">
+        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control" required>
+      </div>
+      <div class="col-md-3">
+        <input name="sell_order" type="text" placeholder="#Order (Optional)" id="sell_order" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <input value="Search" type="submit" class="btn btn-primary">
+      </div>
+    </form>
+  </div>
 
-  <div class="container">
-    <h1 class="page-title text-center"><i class="fa-solid fa-file-alt"></i> RETURNS</h1>
-
-    <!-- Search Form -->
-    <div class="flex">
-      <div class="box">
-        <form action="seeDevolutions.php" method="get" class="form">
-          <input name="upc_item" type="text" placeholder="Upc" value="<?= isset($_GET['upc_item']) ? htmlspecialchars($_GET['upc_item']) : '' ?>">
-          <input name="date_devolution" type="date" placeholder="Devolution Date" value="<?= isset($_GET['date_devolution']) ? htmlspecialchars($_GET['date_devolution']) : '' ?>">
-          <input name="sell_order" type="text" placeholder="Sell Order" value="<?= isset($_GET['sell_order']) ? htmlspecialchars($_GET['sell_order']) : '' ?>">
-          <input value="Search" type="submit">
-        </form>
+    <!-- Mensaje inicial -->
+    <div id="initialMessage" class="table-container text-center">
+      <div class="alert alert-info">
+        <i class="fas fa-search fa-2x mb-3"></i>
+        <h4>Search for Returns</h4>
+        <p>Enter a UPC code above to search for Return records</p>
       </div>
     </div>
 
-    <!-- Tabla de Ventas -->
-    <div class="table-container">
-      <table class="table" id="salesTable">
-        <thead>
-          <tr>
-            <th>Sell Number</th>
-            <th>Date</th>
-            <th>UPC</th>
-            <th>Sku</th>
-            <th>Quantity</th>
-            <th>Product Charge</th>
-            <th>Shipping Paid</th>
-            <th>Tax Return</th>
-            <th>Selling Fee Refund</th>
-            <th>Refund Administration Fee</th>
-            <th>Other Refund Fee</th>
-            <th>Return Cost</th>
-            <th>Buyer Comments</th>
-            <th>Sucursal</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php include "getDevolutions.php"; ?>
-        </tbody>
-      </table>
+    <!-- Tabla de Resultados (inicialmente oculta) -->
+    <div class="table-container" id="resultsContainer" style="display: none;">
+      <h2 class="text-center mb-4">Search Results</h2>
+      <div id="searchResults">
+        <!-- Los resultados se cargarán aquí -->
+      </div>
     </div>
 
-    <div class="text-center mt-4">
-      <button type="button" class="back-btn" onclick="window.location.href='../../access.php'">
-        <i class="fas fa-arrow-left"></i>
-      </button>
+    <!-- Botón de retorno mejorado -->
+    <div class="text-center mt-4 mb-4">
+      <a href="../../access.php" class="btn-back">
+        <i class="fas fa-arrow-left me-2"></i>
+        Back to Menu
+      </a>
     </div>
 
     <!-- Modal de edición -->
@@ -455,12 +822,9 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
             <h5 class="modal-title" id="editModalLabel">Edit Devolution</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            <form id="editForm">
-              <!-- Input oculto para el ID (no visible pero se envía) -->
+          <div class="modal-body">            <form id="editForm">
+              <!-- Input oculto para el ID -->
               <input type="hidden" id="edit-id-sell" name="id">
-              <input type="hidden" id="edit-store-id" name="store_id">
-              <input type="hidden" id="edit-sucursal-id" name="sucursal_id">
 
               <!-- Fila 1: 3 columnas -->
               <div class="row g-3 mb-3">
@@ -470,69 +834,63 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
                 </div>
                 <div class="col-md-4">
                   <label for="edit-date" class="form-label">Date</label>
-                  <input type="date" class="form-control" id="edit-date">
+                  <input type="date" class="form-control" id="edit-date" readonly>
                 </div>
                 <div class="col-md-4">
                   <label for="edit-upc" class="form-label">UPC</label>
-                  <input type="text" class="form-control" id="edit-upc">
+                  <input type="text" class="form-control" id="edit-upc" readonly>
                 </div>
               </div>
 
               <!-- Fila 2: 3 columnas -->
               <div class="row g-3 mb-3">
                 <div class="col-md-4">
-                  <label for="edit-store" class="form-label">Store</label>
-                  <select class="form-select" id="edit-store">
-                    <option value="" selected disabled hidden>--Select a store--</option>
-                    <?php
-                    $resultTiendas->data_seek(0); // Reinicia el puntero del resultado
-                    while ($tienda = $resultTiendas->fetch_assoc()) {
-                      echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
-                    }
-                    ?>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <label for="edit-sucursal" class="form-label">Sucursal</label>
-                  <select class="form-select" id="edit-sucursal">
-                    <option value="">Select a Sucursal</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
                   <label for="edit-quantity" class="form-label">Quantity</label>
-                  <input type="number" class="form-control" id="edit-quantity">
+                  <input type="number" class="form-control" id="edit-quantity" step="0.01">
                 </div>
-              </div>
-
-              <!-- Fila 3: 3 columnas -->
+                <div class="col-md-4">
+                  <label for="edit-product-charge" class="form-label">Product Charge</label>
+                  <input type="number" class="form-control" id="edit-product-charge" step="0.01">
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-shipping-paid" class="form-label">Shipping Paid</label>
+                  <input type="number" class="form-control" id="edit-shipping-paid" step="0.01">
+                </div>
+              </div>              <!-- Fila 3: 3 columnas -->
               <div class="row g-3 mb-3">
                 <div class="col-md-4">
-                  <label for="edit-comision" class="form-label">Comision</label>
-                  <input type="text" class="form-control" id="edit-comision">
+                  <label for="edit-tax-return" class="form-label">Tax Return</label>
+                  <input type="number" class="form-control" id="edit-tax-return" step="0.01">
                 </div>
                 <div class="col-md-4">
-                  <label for="edit-rec-shipping" class="form-label">Received Shipping</label>
-                  <input type="text" class="form-control" id="edit-rec-shipping">
+                  <label for="edit-selling-fee-refund" class="form-label">Selling Fee Refund</label>
+                  <input type="number" class="form-control" id="edit-selling-fee-refund" step="0.01">
                 </div>
                 <div class="col-md-4">
-                  <label for="edit-pay-shipping" class="form-label">Paid shipping</label>
-                  <input type="text" class="form-control" id="edit-pay-shipping">
+                  <label for="edit-refund-administration-fee" class="form-label">Refund Administration Fee</label>
+                  <input type="number" class="form-control" id="edit-refund-administration-fee" step="0.01">
+                </div>
+              </div><!-- Fila 4: 3 columnas -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <label for="edit-other-refund-fee" class="form-label">Other Refund Fee</label>
+                  <input type="number" class="form-control" id="edit-other-refund-fee" step="0.01">
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-item-profit" class="form-label">Item Profit</label>
+                  <input type="number" class="form-control" id="edit-item-profit" step="0.01" readonly>
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-return-cost" class="form-label">Return Cost (Calculated)</label>
+                  <input type="number" class="form-control" id="edit-return-cost" step="0.01" readonly style="background-color: #f8f9fa;">
                 </div>
               </div>
 
-              <!-- Fila 4: 1 campo + espacio para botones -->
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label for="edit-item_price" class="form-label">Item Price</label>
-                  <input type="text" class="form-control" id="edit-item_price">
-                </div>
-                <div class="col-md-4">
-                  <label for="edit-total-item" class="form-label">Total</label>
-                  <input type="text" class="form-control" id="edit-total-item">
-                </div>
-                <!-- Columnas vacías para mantener alineación -->
-                <div class="col-md-4">
-                  <input type="hidden" id="editComision" name="comision_item">
+              <!-- Fila 5: Comentarios -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-12">
+                  <label for="edit-buyer-comments" class="form-label">Buyer Comments</label>
+                  <textarea class="form-control" id="edit-buyer-comments" rows="3"></textarea>
                 </div>
               </div>
             </form>
@@ -546,7 +904,6 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
     </div>
   </div>
 
-  <script src="../sells/scriptSeeSells.js"></script>
-</body>
+  <script src="scriptSeeDevolutionsNew.js"></script>
 
-</html>
+
