@@ -1,33 +1,63 @@
 <?php
-require '../../conexion.php';
+include("../../conexion.php");
 
-// Procesar POST (guardar datos)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    print_r($_POST);
-    $sell_order = $_POST['sell_order'];
-    $billing_return = $_POST['billing_return'];
-
-    // Verificar si ya existe un registro de envío para esta orden
-    $checkQuery = "SELECT * FROM shipping_return WHERE sell_order = ?";
-    $stmtCheck = $mysqli->prepare($checkQuery);
-    $stmtCheck->bind_param("s", $sell_order);
-    $stmtCheck->execute();
-    $resultCheck = $stmtCheck->get_result();
-
-    if ($resultCheck->num_rows > 0) {
-        // Actualizar el registro existente
-        $updateQuery = "UPDATE shipping_return SET billing_return = ? WHERE sell_order = ?";
-        $stmtUpdate = $mysqli->prepare($updateQuery);
-        $stmtUpdate->bind_param("ds", $billing_return, $sell_order);
-        if ($stmtUpdate->execute()) {
-             header("Location: shippingReturn.php?message=Envío guardado correctamente.");
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {    $sell_order = isset($_POST['sell_order']) ? trim($_POST['sell_order']) : '';
+    $billing_return = isset($_POST['billing_return']) ? floatval($_POST['billing_return']) : 0;
+    
+    if (empty($sell_order)) {
+        echo json_encode(['success' => false, 'message' => 'Sell order is required']);
+        exit;
+    }
+    
+    // Verificar si ya existe un registro de shipping return para esta sell order
+    $checkQuery = "SELECT sell_order FROM shipping_return WHERE sell_order = ?";
+    $checkStmt = $mysqli->prepare($checkQuery);
+    $checkStmt->bind_param("s", $sell_order);
+    $checkStmt->execute();
+    $checkResult = $checkStmt->get_result();
+    
+    if ($checkResult->num_rows > 0) {        // Actualizar registro existente
+        $updateQuery = "
+        UPDATE shipping_return 
+        SET billing_return = ?
+        WHERE sell_order = ?
+        ";
+        
+        $updateStmt = $mysqli->prepare($updateQuery);
+        $updateStmt->bind_param("ds", $billing_return, $sell_order);
+        
+        if ($updateStmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Shipping return information updated successfully']);
         } else {
-            echo "Error al actualizar el envío: " . $mysqli->error;
+            echo json_encode(['success' => false, 'message' => 'Error updating shipping return information: ' . $mysqli->error]);
         }
-    } else {
-        // Insertar un nuevo registro
-        $insertQuery = "INSERT INTO shipping_return (sell_order, billing_return) VALUES (?, ?)";
-        $stmtInsert = $mysqli->prepare($insertQuery);
+        
+        $updateStmt->close();
+    } else {        // Insertar nuevo registro
+        $insertQuery = "
+        INSERT INTO shipping_return (sell_order, billing_return) 
+        VALUES (?, ?)
+        ";
+        
+        $insertStmt = $mysqli->prepare($insertQuery);
+        $insertStmt->bind_param("sd", $sell_order, $billing_return);
+        
+        if ($insertStmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Shipping return information saved successfully']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error saving shipping return information: ' . $mysqli->error]);
+        }
+        
+        $insertStmt->close();
+    }
+    
+    $checkStmt->close();
+} else {
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+}
+
+$mysqli->close();
+?>
         $stmtInsert->bind_param("sd", $sell_order, $billing_return);
         if ($stmtInsert->execute()) {
             //redirigir a la página de shipping.php
