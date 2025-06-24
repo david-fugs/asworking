@@ -315,10 +315,74 @@ $resultTiendas = $mysqli->query($queryTiendas);
   #searchResults .table {
     margin-bottom: 0;
   }
-
   #searchResults .alert {
     border-radius: 8px;
     margin-bottom: 0;
+  }
+
+  /* Estilo personalizado para thead con colores armoniosos */
+  .table-custom-header {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
+  }
+
+  .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    border-color: var(--primary-dark) !important;
+    padding: 12px 10px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    color: white !important;
+    border: 1px solid var(--primary-dark) !important;
+    vertical-align: middle !important;
+  }
+
+  /* Asegurar que las tablas dinámicas también tengan el estilo */
+  .table .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
+    border-color: var(--primary-dark) !important;
+  }
+
+  /* Override específico para Bootstrap table classes */
+  .table-bordered .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    background-color: var(--primary) !important;
+    color: white !important;
+    border: 1px solid var(--primary-dark) !important;
+  }
+
+  /* Para tablas con hover */
+  .table-hover .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
+  }
+
+  /* Para tablas pequeñas */
+  .table-sm .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
+    padding: 8px 10px !important;
+  }
+
+  /* Estilo más específico para forzar el color completo */
+  thead.table-custom-header,
+  thead.table-custom-header tr,
+  thead.table-custom-header tr th,
+  tfoot.table-custom-header,
+  tfoot.table-custom-header tr,
+  tfoot.table-custom-header tr th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    background-color: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary-dark) !important;
+  }
+
+  /* Remover cualquier hover effect de Bootstrap en headers */
+  .table-custom-header th:hover {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
   }
 </style>
 
@@ -327,11 +391,10 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <img src='../../img/logo.png' class="logo" alt="ASWWORKING Logo">
     <h1 class="page-title"><i class="fa-solid fa-file-signature"></i> DISCOUNTS</h1>
   </div>
-
   <div class="search-form">
     <form id="filterForm" class="row g-3 align-items-center justify-content-center">
       <div class="col-md-4">
-        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control" required>
+        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control">
       </div>
       <div class="col-md-3">
         <input name="item" type="text" placeholder="#Order (Optional)" id="sell_order" class="form-control">
@@ -345,7 +408,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <div class="alert alert-info">
       <i class="fas fa-search fa-2x mb-3"></i>
       <h4>Search for Discounts</h4>
-      <p>Enter a UPC code above to search for discount records</p>
+      <p>Enter a UPC code or Sell Order above to search for discount records</p>
     </div>
   </div>
 
@@ -496,9 +559,8 @@ $resultTiendas = $mysqli->query($queryTiendas);
                   </div>
                 </div>
                 <input type='hidden' name='sell_order' value='${items[0].sell_order}'>
-                <input type='hidden' name='id_sell' value='${items[0].id_sell}'>
-                <div class='text-end'>
-                  <button type='submit' class='btn' style='background-color: #632b8b; color: #fff; border-color: #632b8b;'>Save</button>
+                <input type='hidden' name='id_sell' value='${items[0].id_sell}'>                <div class='text-end'>
+                  <button type='submit' class='btn' style='background: linear-gradient(to bottom, var(--primary), var(--primary-light)); color: #fff; border: none; font-weight: 600; padding: 8px 20px; border-radius: 6px;'>Save</button>
                 </div>
               </form>
               `;
@@ -561,17 +623,15 @@ $resultTiendas = $mysqli->query($queryTiendas);
             });
         });
       });
-    }
-
-    // Manejar el formulario de búsqueda
+    }    // Manejar el formulario de búsqueda
     document.getElementById('filterForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
       const upc = document.getElementById('upc').value.trim();
       const sellOrder = document.getElementById('sell_order').value.trim();
       
-      if (!upc) {
-        alert('Please enter a UPC code to search');
+      if (!upc && !sellOrder) {
+        alert('Please enter either a UPC code or Sell Order to search');
         return;
       }
       
