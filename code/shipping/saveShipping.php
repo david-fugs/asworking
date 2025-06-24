@@ -1,55 +1,64 @@
 <?php
-require '../../conexion.php';
+include("../../conexion.php");
 
-// Procesar POST (guardar datos)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $sell_order = $_POST['sell_order'];
-    $shipping_paid = $_POST['shipping_paid'];
-    $shipping_other_carrier = $_POST['shipping_other_carrier'];
-    $shipping_adjust = $_POST['shipping_adjust'];
-
-    // Verificar si ya existe un registro de envío para esta orden
-    $checkQuery = "SELECT * FROM shipping WHERE sell_order = ?";
-    $stmtCheck = $mysqli->prepare($checkQuery);
-    $stmtCheck->bind_param("s", $sell_order);
-    $stmtCheck->execute();
-    $resultCheck = $stmtCheck->get_result();
-
-    if ($resultCheck->num_rows > 0) {
-        // Actualizar el registro existente
-        $updateQuery = "UPDATE shipping SET shipping_paid = ?, shipping_other_carrier = ?, shipping_adjust = ? WHERE sell_order = ?";
-        $stmtUpdate = $mysqli->prepare($updateQuery);
-        $stmtUpdate->bind_param("ddds", $shipping_paid, $shipping_other_carrier, $shipping_adjust, $sell_order);
-        if ($stmtUpdate->execute()) {
-             header("Location: shipping.php?message=Envío guardado correctamente.");
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {    $sell_order = isset($_POST['sell_order']) ? trim($_POST['sell_order']) : '';
+    $shipping_paid = isset($_POST['shipping_paid']) ? floatval($_POST['shipping_paid']) : 0;
+    $shipping_other_carrier = isset($_POST['shipping_other_carrier']) ? floatval($_POST['shipping_other_carrier']) : 0;
+    $shipping_adjust = isset($_POST['shipping_adjust']) ? floatval($_POST['shipping_adjust']) : 0;
+    
+    if (empty($sell_order)) {
+        echo json_encode(['success' => false, 'message' => 'Sell order is required']);
+        exit;
+    }
+    
+    // Verificar si ya existe un registro de shipping para esta sell order
+    $checkQuery = "SELECT sell_order FROM shipping WHERE sell_order = ?";
+    $checkStmt = $mysqli->prepare($checkQuery);
+    $checkStmt->bind_param("s", $sell_order);
+    $checkStmt->execute();
+    $checkResult = $checkStmt->get_result();
+    
+    if ($checkResult->num_rows > 0) {        // Actualizar registro existente
+        $updateQuery = "
+        UPDATE shipping 
+        SET shipping_paid = ?, 
+            shipping_other_carrier = ?, 
+            shipping_adjust = ?
+        WHERE sell_order = ?
+        ";
+        
+        $updateStmt = $mysqli->prepare($updateQuery);
+        $updateStmt->bind_param("ddds", $shipping_paid, $shipping_other_carrier, $shipping_adjust, $sell_order);
+        
+        if ($updateStmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Shipping information updated successfully']);
         } else {
-            echo "Error al actualizar el envío: " . $mysqli->error;
+            echo json_encode(['success' => false, 'message' => 'Error updating shipping information: ' . $mysqli->error]);
         }
-    } else {
-        // Insertar un nuevo registro
-        $insertQuery = "INSERT INTO shipping (sell_order, shipping_paid, shipping_other_carrier, shipping_adjust) VALUES (?, ?, ?, ?)";
-        $stmtInsert = $mysqli->prepare($insertQuery);
-        $stmtInsert->bind_param("sdds", $sell_order, $shipping_paid, $shipping_other_carrier, $shipping_adjust);
-        if ($stmtInsert->execute()) {
-            //redirigir a la página de shipping.php
-            header("Location: shipping.php?message=Envío guardado correctamente.");
-            
+        
+        $updateStmt->close();
+    } else {        // Insertar nuevo registro
+        $insertQuery = "
+        INSERT INTO shipping (sell_order, shipping_paid, shipping_other_carrier, shipping_adjust) 
+        VALUES (?, ?, ?, ?)
+        ";
+        
+        $insertStmt = $mysqli->prepare($insertQuery);
+        $insertStmt->bind_param("sddd", $sell_order, $shipping_paid, $shipping_other_carrier, $shipping_adjust);
+        
+        if ($insertStmt->execute()) {
+            echo json_encode(['success' => true, 'message' => 'Shipping information saved successfully']);
         } else {
-            echo "Error al guardar el envío: " . $mysqli->error;
+            echo json_encode(['success' => false, 'message' => 'Error saving shipping information: ' . $mysqli->error]);
         }
+        
+        $insertStmt->close();
     }
-
-    // Cerrar las declaraciones
-    if (isset($stmtCheck)) {
-        $stmtCheck->close();
-    }
-    if (isset($stmtUpdate)) {
-        $stmtUpdate->close();
-    }
-    if (isset($stmtInsert)) {
-        $stmtInsert->close();
-    }
+    
+    $checkStmt->close();
 } else {
-    echo "Método no permitido.";
-
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
+
+$mysqli->close();
+?>

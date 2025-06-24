@@ -287,14 +287,101 @@ $resultTiendas = $mysqli->query($queryTiendas);
             width: 100%;
             max-width: 200px;
         }
-    }
-
-    td {
+    }    td {
         text-align: center;
     }
 
     th {
         text-align: center;
+    }
+
+    .clickable-row {
+        cursor: pointer;
+    }
+
+    /* Estilos para el mensaje inicial */
+    .alert-info {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        border: 1px solid #2196f3;
+        color: #1976d2;
+        border-radius: 10px;
+    }
+
+    .alert-info i {
+        color: #1976d2;
+    }
+
+    /* Estilos para el spinner de carga */
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    /* Estilos mejorados para los resultados */
+    #searchResults .table {
+        margin-bottom: 0;
+    }    #searchResults .alert {
+        border-radius: 8px;
+        margin-bottom: 0;
+    }    /* Estilo personalizado para thead con colores armoniosos */
+    .table-custom-header {
+        background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+        color: white !important;
+    }
+
+    .table-custom-header th {
+        background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+        border-color: var(--primary-dark) !important;
+        padding: 12px 10px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        font-size: 0.75rem !important;
+        color: white !important;
+        border: 1px solid var(--primary-dark) !important;
+        vertical-align: middle !important;
+    }    /* Asegurar que las tablas dinámicas también tengan el estilo */
+    .table .table-custom-header th {
+        background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+        color: white !important;
+        border-color: var(--primary-dark) !important;
+    }
+
+    /* Override específico para Bootstrap table classes */
+    .table-bordered .table-custom-header th {
+        background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+        background-color: var(--primary) !important;
+        color: white !important;
+        border: 1px solid var(--primary-dark) !important;
+    }
+
+    /* Para tablas con hover */
+    .table-hover .table-custom-header th {
+        background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+        color: white !important;
+    }    /* Para tablas pequeñas */
+    .table-sm .table-custom-header th {
+        background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+        color: white !important;
+        padding: 8px 10px !important;
+    }
+
+    /* Estilo más específico para forzar el color completo */
+    thead.table-custom-header,
+    thead.table-custom-header tr,
+    thead.table-custom-header tr th,
+    tfoot.table-custom-header,
+    tfoot.table-custom-header tr,
+    tfoot.table-custom-header tr th {
+        background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+        background-color: var(--primary) !important;
+        color: white !important;
+        border-color: var(--primary-dark) !important;
+    }
+
+    /* Remover cualquier hover effect de Bootstrap en headers */
+    .table-custom-header th:hover {
+        background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+        color: white !important;
     }
 </style>
 
@@ -303,55 +390,42 @@ $resultTiendas = $mysqli->query($queryTiendas);
         <img src='../../img/logo.png' class="logo" alt="ASWWORKING Logo">
         <h1 class="page-title"><i class="fa-solid fa-file-signature"></i> SHIPPING</h1>
     </div>
-
-
     <div class="search-form">
         <form id="filterForm" class="row g-3 align-items-center justify-content-center">
-            <div class="col-md-3">
-                <input name="item" type="text" placeholder="Sell Order" id="sell_order" class="form-control">
-            </div>
-            <div class="col-md-3">
-                <input type="date" name="sellDate" id="date" class="form-control">
+            <div class="col-md-4">
+                <input name="sell_order" type="text" placeholder="Enter Sell Order to search" id="sell_order" class="form-control" required>
             </div>
             <div class="col-md-2">
                 <input value="Search" type="submit" class="btn btn-primary">
             </div>
         </form>
+    </div>    <!-- Mensaje inicial -->
+    <div id="initialMessage" class="table-container text-center">
+        <div class="alert alert-info">
+            <i class="fas fa-search fa-2x mb-3"></i>
+            <h4>Search for Shipping</h4>
+            <p>Enter a Sell Order above to search for shipping records</p>
+        </div>
     </div>
 
-    <!-- Tabla de Ventas -->
-    <div class="table-container">
-        <h2 class="text-center mb-4">Order sells For shipping </h2>
-        <table class="" id="salesTable">
-            <thead>
-                <tr>
-                    <th>Sell Order</th>
-                    <th>Date</th>
-                    <th>Shipping Paid</th>
-                    <th>Shipping Other Carriers</th>
-                    <th>Shipping Label Adjustment</th>
-                    <th>Add Shipping</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php include "getShipping.php"; ?>
-            </tbody>
-        </table>
+    <!-- Tabla de Shipping (inicialmente oculta) -->
+    <div class="table-container" id="resultsContainer" style="display: none;">
+        <h2 class="text-center mb-4">Search Results</h2>
+        <div id="searchResults">
+            <!-- Los resultados se cargarán aquí -->
+        </div>
     </div>
 
-    <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
-
-    <div class="modal fade" id="ventasModal" tabindex="-1" aria-labelledby="ventasModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl"> <!-- modal-xl para tamaño grande -->
+    <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>    <div class="modal fade" id="shippingModal" tabindex="-1" aria-labelledby="shippingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="ventasModalLabel">Sells by Sell Order</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <h5 class="modal-title" id="shippingModalLabel">Shipping Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div id="ventasTableContainer">
-                        <!-- Aquí irá la tabla de ventas por JavaScript -->
-                    </div>
+                <div id="shippingTableContainer" class="px-4 pb-4"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -359,6 +433,216 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
 
     <script src="shipping.js"></script>
+    <script>
+        // Función para inicializar los event listeners de las filas clickeables
+        function initializeClickableRows() {
+            document.querySelectorAll(".clickable-row").forEach(function (row) {
+                // Remover event listeners previos para evitar duplicados
+                const newRow = row.cloneNode(true);
+                row.parentNode.replaceChild(newRow, row);
+            });
+            
+            // Reinicializar los event listeners
+            document.querySelectorAll(".clickable-row").forEach(function (row) {
+                row.addEventListener("click", function () {
+                    const sell_order = this.dataset.sell_order;
+                    console.log("Selected Sell Order:", sell_order);
+                    
+                    fetch(`getShippingDetails.php?sell_order=${encodeURIComponent(sell_order)}`)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            console.log(data);
+                            if (data.error) {
+                                document.getElementById("shippingTableContainer").innerHTML = `<p>Error: ${data.error}</p>`;
+                                return;
+                            }
+                            
+                            const items = data.items;
+                            const shipping = data.shipping;                            // Crear la tabla de shipping
+                            let tableHTML = `
+                                <h4>Sell Order: ${items[0].sell_order}</h4>
+                                <table class="table table-bordered">
+                                    <thead class="table-custom-header">
+                                        <tr>
+                                            <th>UPC</th>
+                                            <th>SKU</th>
+                                            <th>Quantity</th>
+                                            <th>Final Fee</th>
+                                            <th>Fixed Charge</th>
+                                            <th>Item Profit</th>
+                                            <th>Total Item</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                            `;
+
+                            let totalGeneral = 0;
+                            items.forEach((item) => {
+                                const quantity = item.quantity || 0;
+                                const comision_item = parseFloat(item.comision_item) || 0;
+                                const cargo_fijo = parseFloat(item.cargo_fijo) || 0;
+                                const item_profit = parseFloat(item.item_profit) || 0;
+                                const total_item = parseFloat(item.total_item) || 0;
+                                
+                                tableHTML += `
+                                    <tr>
+                                        <td>${item.upc_item}</td>
+                                        <td>${item.sku}</td>
+                                        <td>${quantity}</td>
+                                        <td>$${comision_item.toFixed(2)}</td>
+                                        <td>$${cargo_fijo.toFixed(2)}</td>
+                                        <td>$${item_profit.toFixed(2)}</td>
+                                        <td>$${total_item.toFixed(2)}</td>
+                                    </tr>
+                                `;
+                                totalGeneral += total_item;
+                            });                            tableHTML += `
+                                    </tbody>
+                                    <tfoot class="table-custom-header">
+                                        <tr>
+                                            <th colspan="6">Total General:</th>
+                                            <th>$${totalGeneral.toFixed(2)}</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            `;
+
+                            // Agregar formulario de shipping
+                            tableHTML += `
+                                <hr>
+                                <h5>Shipping Information</h5>
+                                <form id='shippingForm' class='row g-3'>
+                                    <input type='hidden' name='sell_order' value='${items[0].sell_order}' />
+                                    
+                                    <div class='col-md-4'>
+                                        <label for='shipping_paid' class='form-label'>Shipping Paid</label>
+                                        <input type='number' step='0.01' class='form-control' name='shipping_paid' id='shipping_paid' value='${shipping ? shipping.shipping_paid || '' : ''}' />
+                                    </div>
+                                      <div class='col-md-4'>
+                                        <label for='shipping_other_carrier' class='form-label'>Shipping Other Carriers</label>
+                                        <input type='number' step='0.01' class='form-control' name='shipping_other_carrier' id='shipping_other_carrier' value='${shipping ? shipping.shipping_other_carrier || '' : ''}' />
+                                    </div>
+                                    
+                                    <div class='col-md-4'>
+                                        <label for='shipping_adjust' class='form-label'>Shipping Label Adjustment</label>
+                                        <input type='number' step='0.01' class='form-control' name='shipping_adjust' id='shipping_adjust' value='${shipping ? shipping.shipping_adjust || '' : ''}' />
+                                    </div>
+                                      <div class='col-12'>
+                                        <div class='text-end'>
+                                            <button type='submit' class='btn' style='background: linear-gradient(to bottom, var(--primary), var(--primary-light)); color: #fff; border: none; font-weight: 600; padding: 8px 20px; border-radius: 6px;'>Save</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            `;
+
+                            document.getElementById("shippingTableContainer").innerHTML = tableHTML;
+                            
+                            // Add form submission handler
+                            const form = document.getElementById('shippingForm');
+                            if (form) {
+                                form.addEventListener('submit', function(e) {
+                                    e.preventDefault();
+                                    
+                                    const formData = new FormData(form);
+                                    
+                                    fetch('saveShipping.php', {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Success!',
+                                                text: data.message
+                                            }).then(() => {
+                                                const modal = bootstrap.Modal.getInstance(document.getElementById('shippingModal'));
+                                                modal.hide();
+                                                // Recargar los resultados de búsqueda
+                                                document.getElementById('filterForm').dispatchEvent(new Event('submit'));
+                                            });
+                                        } else {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Error',
+                                                text: data.message
+                                            });
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: 'An error occurred while saving the shipping information.'
+                                        });
+                                    });
+                                });
+                            }
+                            
+                            // Mostrar el modal
+                            const modal = new bootstrap.Modal(document.getElementById('shippingModal'));
+                            modal.show();
+                        })
+                        .catch((error) => {
+                            console.error("Error:", error);
+                            Swal.fire('Error', 'An error occurred while loading shipping details.', 'error');
+                        });
+                });
+            });
+        }
+
+        // Manejar el formulario de búsqueda
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const sellOrder = document.getElementById('sell_order').value.trim();
+            
+            if (!sellOrder) {
+                alert('Please enter a Sell Order to search');
+                return;
+            }
+            
+            // Mostrar loading
+            document.getElementById('initialMessage').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'block';
+            document.getElementById('searchResults').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Searching...</span>
+                    </div>
+                    <p class="mt-2">Searching for shipping records...</p>
+                </div>
+            `;
+            
+            // Realizar búsqueda AJAX
+            const formData = new FormData();
+            formData.append('sell_order', sellOrder);
+            
+            fetch('searchShipping.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('searchResults').innerHTML = data;
+                
+                // Reinicializar los event listeners para las filas clickeables
+                initializeClickableRows();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('searchResults').innerHTML = `
+                    <div class="alert alert-danger text-center">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h5>Error</h5>
+                        <p>An error occurred while searching. Please try again.</p>
+                    </div>
+                `;
+            });
+        });
+    </script>
 </body>
 
 </html>

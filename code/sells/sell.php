@@ -445,11 +445,11 @@ $resultTiendas = $mysqli->query($queryTiendas);
                   <input name="profit" type="text" id="itemProfit" readonly class="form-control">
                 </div>
                 <div class="col-md-3">
-                  <label for="" class="form-label"> Markup </label>
+                  <label for="" class="form-label"> Markup Percentage </label>
                   <input name="ref" type="text" id="markup" readonly class="form-control">
                 </div>
                 <div class="col-md-3">
-                  <label for="" class="form-label"> Profit Margin </label>
+                  <label for="" class="form-label"> Profit Percentage on Cost </label>
                   <input name="ref" type="text" id="profitMargin" readonly class="form-control">
                 </div>
               <?php endif; ?>

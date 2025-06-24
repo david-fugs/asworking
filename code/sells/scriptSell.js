@@ -1015,21 +1015,36 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       console.log("❌ itemProfit not found");
     }
-    
+      // FÓRMULA CORREGIDA PARA MARKUP: (Item Profit / (Price Item + Shipping Received + Incentives Offered)) * 100
     if (markup && quantity > 0 && price > 0) {
-      const markupValue = ((profitTotal / (price * quantity)) * 100);
-      markup.value = `${markupValue.toFixed(2)}%`;
-      console.log("✅ Markup updated:", markupValue.toFixed(2), "%");
+      const baseForMarkup = (price * quantity) + receivedShippingValue + incentives_value;
+      console.log("Markup calculation - Base:", baseForMarkup, "Profit:", profitTotal);
+      
+      if (baseForMarkup > 0) {
+        const markupValue = ((profitTotal / baseForMarkup) * 100);
+        markup.value = `${markupValue.toFixed(2)}%`;
+        console.log("✅ Markup updated:", markupValue.toFixed(2), "% (Profit/Revenue)");
+      } else {
+        markup.value = "0.00%";
+        console.log("❌ Base for markup calculation is 0");
+      }
     } else {
       console.log("❌ markup not found or invalid values");
     }
     
-    if (profitMargin && (price * quantity + receivedShippingValue) > 0) {
-      const profitMarginValue = ((profitTotal / (price * quantity + receivedShippingValue)) * 100);
+    // FÓRMULA CORREGIDA PARA PROFIT MARGIN: (Item Profit / Item Cost) * 100
+    if (profitMargin && itemCostValue > 0 && quantity > 0) {
+      const totalItemCost = itemCostValue * quantity;
+      console.log("Profit Margin calculation - Total Item Cost:", totalItemCost, "Profit:", profitTotal);
+      
+      const profitMarginValue = ((profitTotal / totalItemCost) * 100);
       profitMargin.value = `${profitMarginValue.toFixed(2)}%`;
-      console.log("✅ Profit Margin updated:", profitMarginValue.toFixed(2), "%");
+      console.log("✅ Profit Margin updated:", profitMarginValue.toFixed(2), "% (Profit/Cost)");
     } else {
-      console.log("❌ profitMargin not found or invalid values");
+      console.log("❌ profitMargin not found or invalid values (itemCost:", itemCostValue, "quantity:", quantity, ")");
+      if (profitMargin) {
+        profitMargin.value = "0.00%";
+      }
     }
     
     console.log("=== RECALCULATION COMPLETED ===");
