@@ -46,262 +46,207 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .top-bar .center {
-            flex-grow: 1;
-            text-align: center;
-            margin-left: 300px;
-        }
-
         .btn-add-store {
-            padding: 10px 20px;
-            background-color: #632b8b;
+            background: linear-gradient(135deg, #632b8b, #5d337a);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 30px;
+            padding: 12px 30px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
             text-decoration: none;
-            font-weight: bold;
-            margin-right: 100px;
-            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(99, 43, 139, 0.3);
+            margin: 10px 5px;
         }
 
         .btn-add-store:hover {
-            background-color: #5d337a;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(99, 43, 139, 0.4);
+            text-decoration: none;
             color: white;
         }
 
         .header-container {
-            width: 100%;
-            background-color: #dac7e5;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #632b8b, #5d337a);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .header {
-            background-color: #dac7e5;
             display: flex;
             align-items: center;
-            padding: 30px 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: relative;
             justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
         .logo-container {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 100%;
-            display: flex;
-            align-items: center;
+            margin-right: 20px;
         }
 
         .logo {
-            height: 100px;
+            height: 80px;
             width: auto;
-            max-height: 100%;
-            transition: transform 0.3s ease;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .logo:hover {
             transform: scale(1.05);
+            transition: all 0.3s ease;
         }
 
         .title {
-            margin: 0 auto;
-            font-size: 40px;
+            margin: 0;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: #632b8b;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-align: center;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .back-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background-color: transparent;
-            border: none;
-            color: #5d337a;
-            font-size: 1.8rem;
-            cursor: pointer;
-            padding: 15px;
-            border-radius: 50%;
+            color: #632b8b;
+            font-size: 2rem;
+            text-decoration: none;
             transition: all 0.3s ease;
-            width: 50px;
-            height: 50px;
+            margin: 0 10px;
         }
 
         .back-btn:hover {
-            background-color: rgba(93, 51, 122, 0.1);
-            color: #632b8b;
-            transform: translateX(-3px);
+            color: #5d337a;
+            transform: scale(1.1);
+            text-decoration: none;
         }
 
         .table-container {
-            border-radius: 10px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
             background: white;
-            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
             margin: 20px 0;
-            max-width: 100%;
-            width: 100%;
         }
 
         .table-content {
-            min-width: 1200px;
-            width: 100%;
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         table {
             width: 100%;
-            min-width: 1200px;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(to right, #f9f5ff, #f0e6ff);
-            border: 2px solid rgb(216, 194, 234);
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         thead {
-            background: rgb(113, 63, 148);
+            background: linear-gradient(135deg, #632b8b, #5d337a);
             color: white;
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
 
         tbody tr {
-            background-color: rgba(255, 255, 255, 0.8);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.3s ease;
         }
 
         tbody tr:nth-child(even) {
-            background-color: rgba(248, 240, 255, 0.8);
+            background-color: #f8f9fa;
         }
 
         tbody tr:hover {
-            background-color: rgba(218, 199, 229, 0.4);
+            background-color: #e3f2fd !important;
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         thead th {
-            padding: 12px 8px;
+            padding: 15px 10px;
             text-align: center;
             font-weight: 600;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.3px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-            white-space: nowrap;
+            font-size: 0.9rem;
         }
 
         tbody td {
-            padding: 10px 8px;
-            border-bottom: 1px solid rgba(153, 124, 171, 0.3);
-            color: #444;
-            font-size: 0.8rem;
+            padding: 12px 8px;
             text-align: center;
             vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
         }
 
         .form-control-sm {
-            background-color: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(153, 124, 171, 0.5);
-            border-radius: 4px;
-            padding: 4px 6px;
-            font-size: 0.75rem;
+            border: 1px solid #632b8b;
+            border-radius: 5px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .badge {
-            font-size: 0.7rem;
-            padding: 4px 8px;
-            max-width: 100px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            display: inline-block;
-        }
-
-        .form-control-sm:focus {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }        .form-control-sm:focus {
+            border-color: #5d337a;
+            box-shadow: 0 0 0 2px rgba(99, 43, 139, 0.2);
             outline: none;
-            border-color: #632b8b;
-            box-shadow: 0 0 0 3px rgba(99, 43, 139, 0.2);
-            background-color: white;
         }
 
         input[type="checkbox"] {
-            -webkit-appearance: none;
-            appearance: none;
             width: 18px;
             height: 18px;
-            border: 2px solid #997cab;
-            border-radius: 4px;
+            accent-color: #632b8b;
             cursor: pointer;
-            position: relative;
-            transition: all 0.2s ease;
         }
 
         input[type="checkbox"]:checked {
             background-color: #632b8b;
-            border-color: #632b8b;
         }
 
         input[type="checkbox"]:checked::after {
             content: '✓';
-            position: absolute;
             color: white;
             font-size: 12px;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
+            font-weight: bold;
         }
 
         h5 {
             color: #632b8b;
             font-weight: 700;
-            margin-bottom: 1.8rem !important;
             text-align: center;
+            margin-bottom: 25px;
             position: relative;
-            display: inline-block;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 0 20px;
         }
 
         h5::after {
             content: '';
             position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 100%;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
             height: 3px;
-            background: linear-gradient(to right, transparent, #632b8b, transparent);
+            background: linear-gradient(to right, #632b8b, #5d337a);
             border-radius: 3px;
         }
 
         .alert-info {
-            background-color: #e6f3ff;
-            border-color: #b3d9ff;
-            color: #0066cc;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: none;
+            border-left: 4px solid #2196f3;
+            border-radius: 10px;
+            color: #1565c0;
         }
 
         .btn-save {
-            background: linear-gradient(to bottom, #28a745, #20c997);
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
             border: none;
             padding: 12px 30px;
@@ -400,6 +345,19 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
             color: #495057;
             font-weight: 500;
         }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: #f8f9fa;
+        }
+
+        .center {
+            flex-grow: 1;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -450,504 +408,160 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
     </div>
+
     <div class="container-fluid mt-5">
-            <div class="row justify-content-center">
-                <div class="col-md-12">
-                    <?php                // Show success/error messages
-                    if (isset($_SESSION['success_message'])): ?>
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <?php 
+                // Show success/error messages
+                if (isset($_SESSION['success_message'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Success!</strong> <?= htmlspecialchars($_SESSION['success_message']) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['success_message']); ?>
+                <?php endif; ?>
 
-                        <!DOCTYPE html>
-                        <html lang="es">
+                <?php if (isset($_SESSION['error_message'])): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Error:</strong> <?= htmlspecialchars($_SESSION['error_message']) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['error_message']); ?>
+                <?php endif; ?>
 
-                        <head>
-                            <meta charset="utf-8" />
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                            <title>ASWWORKING</title>
-                        </head>
+                <?php if (count($reports) == 0): ?>
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>No processed reports available for editing.</strong><br>
+                        Reports will appear here after being processed in the main menu.
+                    </div>
+                <?php else: ?>
+                    <!-- Debug Info (remove in production) -->
+                    <?php if (isset($_GET['debug'])): ?>
+                        <div class="alert alert-warning">
+                            <strong>Debug Info:</strong><br>
+                            Total reports found: <?= count($reports) ?><br>
+                            Reports: <?= implode(', ', array_column($reports, 'id_report')) ?>
+                        </div>
+                    <?php endif; ?>
 
-                        <body>
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <i class="fas fa-check-circle"></i>
-                                <strong>Success!</strong> <?= htmlspecialchars($_SESSION['success_message']) ?>
-
-                                <!DOCTYPE html>
-                                <html lang="es">
-
-                                <head>
-                                    <meta charset="utf-8" />
-                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                    <title>ASWWORKING</title>
-                                </head>
-
-                                <body>
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <form action="updateLocationFolder.php" method="POST">
+                        <div class="table-container">
+                            <h5 class="mb-4 text-center">Edit Product Details - Processed Reports (<?= count($reports) ?> records)</h5>
+                            <div class="alert alert-info">
+                                <div class="row">
+                                    <div class="col-md-12">                                        <h6><i class="fas fa-info-circle"></i> <strong>Instructions:</strong></h6>
+                                        <ul class="mb-0">
+                                            <li>Use the UPC search above to query product information</li>
+                                            <li>Select the reports you want to update by checking the checkbox</li>
+                                            <li><strong>Update only:</strong> New Folder and New Location fields (no validation required)</li>
+                                            <li>Other fields are in read-only mode for reference</li>
+                                            <li>Click "Update Selected Items" to save changes</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
-                            <?php unset($_SESSION['success_message']); ?>
 
-                            <!DOCTYPE html>
-                            <html lang="es">
-
-                            <head>
-                                <meta charset="utf-8" />
-                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                <title>ASWWORKING</title>
-                            </head>
-
-                            <body>
-                            <?php endif; ?>
-
-                            <!DOCTYPE html>
-                            <html lang="es">
-
-                            <head>
-                                <meta charset="utf-8" />
-                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                <title>ASWWORKING</title>
-                            </head>
-
-                            <body>
-                                <?php if (isset($_SESSION['error_message'])): ?>
-
-                                    <!DOCTYPE html>
-                                    <html lang="es">
-
-                                    <head>
-                                        <meta charset="utf-8" />
-                                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                        <title>ASWWORKING</title>
-                                    </head>
-
-                                    <body>
-                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            <strong>Error:</strong> <?= htmlspecialchars($_SESSION['error_message']) ?>
-
-                                            <!DOCTYPE html>
-                                            <html lang="es">
-
-                                            <head>
-                                                <meta charset="utf-8" />
-                                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                <title>ASWWORKING</title>
-                                            </head>
-
-                                            <body>
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-                                        <?php unset($_SESSION['error_message']); ?>
-
-                                        <!DOCTYPE html>
-                                        <html lang="es">
-
-                                        <head>
-                                            <meta charset="utf-8" />
-                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                            <title>ASWWORKING</title>
-                                        </head>
-
-                                        <body>
-                                        <?php endif; ?>
-
-                                        <!DOCTYPE html>
-                                        <html lang="es">
-
-                                        <head>
-                                            <meta charset="utf-8" />
-                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                            <title>ASWWORKING</title>
-                                        </head>
-
-                                        <body>
-                                            <?php if (count($reports) == 0): ?>
-
-                                                <!DOCTYPE html>
-                                                <html lang="es">
-
-                                                <head>
-                                                    <meta charset="utf-8" />
-                                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                    <title>ASWWORKING</title>
-                                                </head>
-
-                                                <body>
-                                                    <div class="alert alert-info text-center">
-                                                        <i class="fas fa-info-circle"></i>
-                                                        <strong>No processed reports available for editing.</strong><br>
-                                                        Reports will appear here after being processed in the main menu.
-                                                    </div>
-                                                <?php else: ?>
-
-                                                    <!DOCTYPE html>
-                                                    <html lang="es">
-
-                                                    <head>
-                                                        <meta charset="utf-8" />
-                                                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                        <title>ASWWORKING</title>
-                                                    </head>
-
-                                                    <body>
-                                                        <!-- Debug Info (remove in production) -->
-                                                        <?php if (isset($_GET['debug'])): ?>
-
-                                                            <!DOCTYPE html>
-                                                            <html lang="es">
-
-                                                            <head>
-                                                                <meta charset="utf-8" />
-                                                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                <title>ASWWORKING</title>
-                                                            </head>
-
-                                                            <body>
-                                                                <div class="alert alert-warning">
-                                                                    <strong>Debug Info:</strong><br>
-                                                                    Total reports found: <?= count($reports) ?>
-
-                                                                    <!DOCTYPE html>
-                                                                    <html lang="es">
-
-                                                                    <head>
-                                                                        <meta charset="utf-8" />
-                                                                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                        <title>ASWWORKING</title>
-                                                                    </head>
-
-                                                                    <body>
-                                                                        <br>
-                                                                        Reports: <?= implode(', ', array_column($reports, 'id_report')) ?>
-
-                                                                        <!DOCTYPE html>
-                                                                        <html lang="es">
-
-                                                                        <head>
-                                                                            <meta charset="utf-8" />
-                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                            <title>ASWWORKING</title>
-                                                                        </head>
-
-                                                                        <body>
-                                                                </div>
-                                                            <?php endif; ?>
-
-                                                            <!DOCTYPE html>
-                                                            <html lang="es">
-
-                                                            <head>
-                                                                <meta charset="utf-8" />
-                                                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                <title>ASWWORKING</title>
-                                                            </head>
-
-                                                            <body>
-                                                                <form action="updateLocationFolder.php" method="POST">
-                                                                    <div class="table-container">
-                                                                        <h5 class="mb-4 text-center">Edit Product Details - Processed Reports (<?= count($reports) ?> records)</h5>
-                                                                        <div class="alert alert-info">
-                                                                            <div class="row">
-                                                                                <div class="col-md-12">
-                                                                                    <h6><i class="fas fa-info-circle"></i> <strong>Instructions:</strong></h6>
-                                                                                    <ul class="mb-0">
-                                                                                        <li>Use the UPC search above to query product information</li>
-                                                                                        <li>Select the reports you want to update by checking the checkbox</li>
-                                                                                        <li>You can only modify: <strong>Folder</strong> and <strong>Location</strong></li>
-                                                                                        <li>Other fields are in read-only mode</li>
-                                                                                        <li>Click "Update Selected Items" to save changes</li>
-                                                                                    </ul>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="table-content">
-                                                                            <table>
-                                                                                <thead>
-                                                                                    <tr>
-                                                                                        <th>Select</th>
-                                                                                        <th>Date</th>
-                                                                                        <th>UPC Final</th>
-                                                                                        <th>SKU</th>
-                                                                                        <th>Item</th>
-                                                                                        <th>Brand</th>
-                                                                                        <th>Vendor</th>
-                                                                                        <th>Color</th>
-                                                                                        <th>Size</th>
-                                                                                        <th>Current Folder</th>
-                                                                                        <th>New Folder</th>
-                                                                                        <th>Current Location</th>
-                                                                                        <th>New Location</th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    <?php foreach ($reports as $index => $report): ?>
-
-                                                                                        <!DOCTYPE html>
-                                                                                        <html lang="es">
-
-                                                                                        <head>
-                                                                                            <meta charset="utf-8" />
-                                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                            <title>ASWWORKING</title>
-                                                                                        </head>
-
-                                                                                        <body>
-                                                                                            <tr>
-                                                                                                <td>
-                                                                                                    <input type="checkbox" name="selected_reports[]" value="<?= $report['id_report'] ?>">
-                                                                                                </td>
-                                                                                                <td><?= htmlspecialchars($report['fecha_alta_reporte']) ?>
-
-                                                                                                    <!DOCTYPE html>
-                                                                                                    <html lang="es">
-
-                                                                                                    <head>
-                                                                                                        <meta charset="utf-8" />
-                                                                                                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                        <title>ASWWORKING</title>
-                                                                                                    </head>
-
-                                                                                                    <body>
-                                                                                                </td>
-                                                                                                <td><?= htmlspecialchars($report['upc_final_report']) ?>
-
-                                                                                                    <!DOCTYPE html>
-                                                                                                    <html lang="es">
-
-                                                                                                    <head>
-                                                                                                        <meta charset="utf-8" />
-                                                                                                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                        <title>ASWWORKING</title>
-                                                                                                    </head>
-
-                                                                                                    <body>
-                                                                                                </td>
-                                                                                                <td><?= htmlspecialchars($report['sku_report']) ?>
-
-                                                                                                    <!DOCTYPE html>
-                                                                                                    <html lang="es">
-
-                                                                                                    <head>
-                                                                                                        <meta charset="utf-8" />
-                                                                                                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                        <title>ASWWORKING</title>
-                                                                                                    </head>
-
-                                                                                                    <body>
-                                                                                                </td>
-
-                                                                                                <!-- Item (solo lectura) -->
-                                                                                                <td style="max-width: 250px;">
-                                                                                                    <span class="badge bg-secondary" title="<?= htmlspecialchars($report['item_report']) ?>" style="max-width: 100%; white-space: normal; font-size: 0.75rem;">
-                                                                                                        <?= htmlspecialchars(substr($report['item_report'], 0, 40)) ?>
-
-                                                                                                        <!DOCTYPE html>
-                                                                                                        <html lang="es">
-
-                                                                                                        <head>
-                                                                                                            <meta charset="utf-8" />
-                                                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                            <title>ASWWORKING</title>
-                                                                                                        </head>
-
-                                                                                                        <body>
-                                                                                                            <?= strlen($report['item_report']) > 40 ? '...' : '' ?>
-
-                                                                                                            <!DOCTYPE html>
-                                                                                                            <html lang="es">
-
-                                                                                                            <head>
-                                                                                                                <meta charset="utf-8" />
-                                                                                                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                                <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                                <title>ASWWORKING</title>
-                                                                                                            </head>
-
-                                                                                                            <body>
-                                                                                                    </span>
-                                                                                                </td>
-
-                                                                                                <!-- Brand (solo lectura) -->
-                                                                                                <td>
-                                                                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['brand_report']) ?>
-
-                                                                                                        <!DOCTYPE html>
-                                                                                                        <html lang="es">
-
-                                                                                                        <head>
-                                                                                                            <meta charset="utf-8" />
-                                                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                            <title>ASWWORKING</title>
-                                                                                                        </head>
-
-                                                                                                        <body>
-                                                                                                    </span>
-                                                                                                </td>
-
-                                                                                                <!-- Vendor (solo lectura) -->
-                                                                                                <td>
-                                                                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['vendor_report']) ?>
-
-                                                                                                        <!DOCTYPE html>
-                                                                                                        <html lang="es">
-
-                                                                                                        <head>
-                                                                                                            <meta charset="utf-8" />
-                                                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                            <title>ASWWORKING</title>
-                                                                                                        </head>
-
-                                                                                                        <body>
-                                                                                                    </span>
-                                                                                                </td>
-
-                                                                                                <!-- Color (solo lectura) -->
-                                                                                                <td>
-                                                                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['color_report']) ?>
-
-                                                                                                        <!DOCTYPE html>
-                                                                                                        <html lang="es">
-
-                                                                                                        <head>
-                                                                                                            <meta charset="utf-8" />
-                                                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                            <title>ASWWORKING</title>
-                                                                                                        </head>
-
-                                                                                                        <body>
-                                                                                                    </span>
-                                                                                                </td>
-
-                                                                                                <!-- Size (solo lectura) -->
-                                                                                                <td>
-                                                                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['size_report']) ?>
-
-                                                                                                        <!DOCTYPE html>
-                                                                                                        <html lang="es">
-
-                                                                                                        <head>
-                                                                                                            <meta charset="utf-8" />
-                                                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                            <title>ASWWORKING</title>
-                                                                                                        </head>
-
-                                                                                                        <body>
-                                                                                                    </span>
-                                                                                                </td>
-
-                                                                                                <!-- Current Folder -->
-                                                                                                <td>
-                                                                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['folder_report']) ?>
-
-                                                                                                        <!DOCTYPE html>
-                                                                                                        <html lang="es">
-
-                                                                                                        <head>
-                                                                                                            <meta charset="utf-8" />
-                                                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                            <title>ASWWORKING</title>
-                                                                                                        </head>
-
-                                                                                                        <body>
-                                                                                                    </span>
-                                                                                                </td>
-                                                                                                <!-- New Folder (editable) -->
-                                                                                                <td>
-                                                                                                    <input style="width: 120px;" type="text"
-                                                                                                        name="new_folder[<?= $report['id_report'] ?>]"
-                                                                                                        class="form-control form-control-sm"
-                                                                                                        value="<?= htmlspecialchars($report['folder_report']) ?>"
-                                                                                                        placeholder="New folder">
-                                                                                                </td>
-
-                                                                                                <!-- Current Location -->
-                                                                                                <td>
-                                                                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['loc_report']) ?>
-
-                                                                                                        <!DOCTYPE html>
-                                                                                                        <html lang="es">
-
-                                                                                                        <head>
-                                                                                                            <meta charset="utf-8" />
-                                                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                                            <title>ASWWORKING</title>
-                                                                                                        </head>
-
-                                                                                                        <body>
-                                                                                                    </span>
-                                                                                                </td>
-                                                                                                <!-- New Location (editable) -->
-                                                                                                <td>
-                                                                                                    <input style="width: 120px;" type="text"
-                                                                                                        name="new_location[<?= $report['id_report'] ?>]"
-                                                                                                        class="form-control form-control-sm"
-                                                                                                        value="<?= htmlspecialchars($report['loc_report']) ?>"
-                                                                                                        placeholder="New location">
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                        <?php endforeach; ?>
-
-                                                                                        <!DOCTYPE html>
-                                                                                        <html lang="es">
-
-                                                                                        <head>
-                                                                                            <meta charset="utf-8" />
-                                                                                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                                            <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                                            <title>ASWWORKING</title>
-                                                                                        </head>
-
-                                                                                        <body>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </div>
-
-                                                                        <div class="text-center mt-4">
-                                                                            <button type="submit" class="btn-save">
-                                                                                <i class="fas fa-save"></i> Update Selected Items
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                </form>
-                                                            <?php endif; ?>
-
-                                                            <!DOCTYPE html>
-                                                            <html lang="es">
-
-                                                            <head>
-                                                                <meta charset="utf-8" />
-                                                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                                                <meta http-equiv="X-UA-Compatible" content="ie=edge">
-                                                                <title>ASWWORKING</title>
-                                                            </head>
-
-                                                            <body>
-                </div>
+                            <div class="table-content">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Select</th>
+                                            <th>Date</th>
+                                            <th>UPC Final</th>
+                                            <th>SKU</th>
+                                            <th>Item</th>
+                                            <th>Brand</th>
+                                            <th>Vendor</th>
+                                            <th>Color</th>
+                                            <th>Size</th>
+                                            <th>Current Folder</th>                                            <th>New Folder</th>
+                                            <th>Current Location</th>
+                                            <th>New Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($reports as $index => $report): ?>
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" name="selected_reports[]" value="<?= $report['id_report'] ?>">
+                                                </td>
+                                                <td><?= htmlspecialchars($report['fecha_alta_reporte']) ?></td>
+                                                <td><?= htmlspecialchars($report['upc_final_report']) ?></td>
+                                                <td><?= htmlspecialchars($report['sku_report']) ?></td>
+
+                                                <!-- Item (solo lectura) -->
+                                                <td style="max-width: 250px;">
+                                                    <span class="badge bg-secondary" title="<?= htmlspecialchars($report['item_report']) ?>" style="max-width: 100%; white-space: normal; font-size: 0.75rem;">
+                                                        <?= htmlspecialchars(substr($report['item_report'], 0, 40)) ?>
+                                                        <?= strlen($report['item_report']) > 40 ? '...' : '' ?>
+                                                    </span>
+                                                </td>
+
+                                                <!-- Brand (solo lectura) -->
+                                                <td>
+                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['brand_report']) ?></span>
+                                                </td>
+
+                                                <!-- Vendor (solo lectura) -->
+                                                <td>
+                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['vendor_report']) ?></span>
+                                                </td>
+
+                                                <!-- Color (solo lectura) -->
+                                                <td>
+                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['color_report']) ?></span>
+                                                </td>
+
+                                                <!-- Size (solo lectura) -->
+                                                <td>
+                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['size_report']) ?></span>
+                                                </td>
+
+                                                <!-- Current Folder -->
+                                                <td>
+                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['folder_report']) ?></span>
+                                                </td>                                                <!-- New Folder (editable, sin validación) -->
+                                                <td>
+                                                    <input style="width: 120px;" type="text"
+                                                        name="new_folder[<?= $report['id_report'] ?>]"
+                                                        class="form-control form-control-sm"
+                                                        value="<?= htmlspecialchars($report['folder_report']) ?>"
+                                                        placeholder="New folder">
+                                                </td>
+
+                                                <!-- Current Location -->
+                                                <td>
+                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['loc_report']) ?></span>
+                                                </td>                                                <!-- New Location (editable, sin validación) -->
+                                                <td>
+                                                    <input style="width: 120px;" type="text"
+                                                        name="new_location[<?= $report['id_report'] ?>]"
+                                                        class="form-control form-control-sm"
+                                                        value="<?= htmlspecialchars($report['loc_report']) ?>"
+                                                        placeholder="New location">
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn-save">
+                                    <i class="fas fa-save"></i> Update Selected Items
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                <?php endif; ?>
             </div>
         </div>
+    </div>
+
     <center>
         <a href="../../access.php" class="back-btn" title="Go Back">
             <i class="fas fa-arrow-circle-left fa-xl"></i>
@@ -973,6 +587,7 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
     </div>
+
     <script>
         // Function to search UPC
         function searchUPC() {
@@ -1058,10 +673,12 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                     <div class="item-detail">
                         <span class="item-label">Size:</span>
                         <span class="item-value">${item.size || 'N/A'}</span>
-                    </div>                    <div class="item-detail">
+                    </div>
+                    <div class="item-detail">
                         <span class="item-label">Category:</span>
                         <span class="item-value">${item.category || 'N/A'}</span>
-                    </div>                    <div class="item-detail">
+                    </div>
+                    <div class="item-detail">
                         <span class="item-label">Weight:</span>
                         <span class="item-value">${item.weight || 'N/A'}</span>
                     </div>
@@ -1114,9 +731,7 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                         row.style.border = '';
                     }
                 });
-            });
-
-            // Form validation
+            });            // Simplified form validation - only check for selected reports
             const form = document.querySelector('form');
             form.addEventListener('submit', function(e) {
                 const selectedCheckboxes = document.querySelectorAll('input[name="selected_reports[]"]:checked');
@@ -1133,9 +748,7 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                     e.preventDefault();
                     return false;
                 }
-            });
-        });
+            });        });
     </script>
 </body>
-
 </html>
