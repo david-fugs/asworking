@@ -988,8 +988,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     // Calcular el total
     const total = ventaTotal + receivedShippingValue + taxInputValue - withheldTaxValue - finalComision - finalCargoFijo + incentives_value - international_fee_value - ad_fee_value - other_fee_value;
-    
-    // Calcular profit usando el costo del item
+      // Calcular profit usando el costo del item
     const itemCostValue = itemProfitValue || 0;
     console.log("Using item cost value:", itemCostValue);
     
@@ -1031,16 +1030,74 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       console.log("❌ profitMargin not found or invalid values");
     }
-    
-    console.log("=== RECALCULATION COMPLETED ===");
+      console.log("=== RECALCULATION COMPLETED ===");
   }
   
-  // SIMPLE EVENT DELEGATION para Final Fee, Fixed Charge y Withheld Tax
+  // Agregar event listeners DIRECTOS para Final Fee y Fixed Charge para asegurar recálculo  function addDirectEventListeners() {
+    console.log("Adding direct event listeners to Final Fee and Fixed Charge...");
+    
+    const comisionField = document.getElementById("comisionItem");
+    const cargoFijoField = document.getElementById("cargo_fijo");
+    
+    if (comisionField) {
+      // Eliminar event listeners anteriores si existen
+      comisionField.removeEventListener('input', handleFieldChange);
+      comisionField.removeEventListener('change', handleFieldChange);
+      comisionField.removeEventListener('blur', handleFieldChange);
+      comisionField.removeEventListener('keyup', handleFieldChange);
+      
+      // Agregar nuevos event listeners
+      comisionField.addEventListener('input', handleFieldChange);
+      comisionField.addEventListener('change', handleFieldChange);
+      comisionField.addEventListener('blur', handleFieldChange);
+      comisionField.addEventListener('keyup', handleFieldChange);
+      
+      // Marcar que tiene listeners
+      comisionField.setAttribute('data-direct-listeners', 'true');
+      console.log("✅ Final Fee direct event listeners added");
+    } else {
+      console.log("❌ Final Fee field not found");
+    }
+    
+    if (cargoFijoField) {
+      // Eliminar event listeners anteriores si existen
+      cargoFijoField.removeEventListener('input', handleFieldChange);
+      cargoFijoField.removeEventListener('change', handleFieldChange);
+      cargoFijoField.removeEventListener('blur', handleFieldChange);
+      cargoFijoField.removeEventListener('keyup', handleFieldChange);
+      
+      // Agregar nuevos event listeners
+      cargoFijoField.addEventListener('input', handleFieldChange);
+      cargoFijoField.addEventListener('change', handleFieldChange);
+      cargoFijoField.addEventListener('blur', handleFieldChange);
+      cargoFijoField.addEventListener('keyup', handleFieldChange);
+      
+      // Marcar que tiene listeners
+      cargoFijoField.setAttribute('data-direct-listeners', 'true');      console.log("✅ Fixed Charge direct event listeners added");
+    } else {
+      console.log("❌ Fixed Charge field not found");
+    }
+  }
+  
+  function handleFieldChange(e) {
+    console.log(`Direct field change detected: ${e.target.id} = ${e.target.value}`);
+    setTimeout(() => {
+      console.log("Triggering recalculation from direct event listener");
+      recalcularTotalesConValoresActuales();
+    }, 20);
+  }
+  
+  // Ejecutar immediatamente y también con delay para asegurar que los campos existan
+  addDirectEventListeners();
+  setTimeout(addDirectEventListeners, 500);
+  setTimeout(addDirectEventListeners, 1000);
+  
+  // DELEGACIÓN DE EVENTOS - Escuchar en el documento para campos que pueden ser recreados
   document.addEventListener('input', function(e) {
     if (e.target.id === 'comisionItem' || e.target.id === 'cargo_fijo' || e.target.id === 'withheld_tax') {
-      console.log(`🔥 FIELD CHANGED: ${e.target.id} = ${e.target.value}`);
+      console.log(`🎯 DELEGATED INPUT EVENT - ${e.target.id} changed to: ${e.target.value}`);
       setTimeout(() => {
-        console.log("→ Triggering recalculation...");
+        console.log("Triggering recalculation from delegated input event");
         recalcularTotalesConValoresActuales();
       }, 50);
     }
@@ -1048,26 +1105,66 @@ document.addEventListener("DOMContentLoaded", function () {
   
   document.addEventListener('change', function(e) {
     if (e.target.id === 'comisionItem' || e.target.id === 'cargo_fijo' || e.target.id === 'withheld_tax') {
-      console.log(`🔥 FIELD CHANGED (change): ${e.target.id} = ${e.target.value}`);
+      console.log(`🎯 DELEGATED CHANGE EVENT - ${e.target.id} final value: ${e.target.value}`);
       setTimeout(() => {
-        console.log("→ Triggering recalculation from change event...");
+        console.log("Triggering recalculation from delegated change event");
         recalcularTotalesConValoresActuales();
       }, 50);
     }
   });
   
-  // DEBUG BUTTON
-  setTimeout(() => {
-    const debugButton = document.getElementById('debug-calc');
-    if (debugButton) {
-      debugButton.addEventListener('click', function() {
-        console.log('🔧 DEBUG BUTTON CLICKED - Manual recalculation');
+  // Event listeners adicionales usando keyup y blur
+  document.addEventListener('keyup', function(e) {
+    if (e.target.id === 'comisionItem' || e.target.id === 'cargo_fijo' || e.target.id === 'withheld_tax') {
+      console.log(`🎯 DELEGATED KEYUP EVENT - ${e.target.id} value: ${e.target.value}`);
+      setTimeout(() => {
+        console.log("Triggering recalculation from delegated keyup event");
         recalcularTotalesConValoresActuales();
-      });
-      console.log('✅ Debug button listener added');
+      }, 100);
     }
-  }, 100);
+  });
   
-  console.log('✅ Event delegation setup completed');
-
+  document.addEventListener('blur', function(e) {
+    if (e.target.id === 'comisionItem' || e.target.id === 'cargo_fijo' || e.target.id === 'withheld_tax') {
+      console.log(`🎯 DELEGATED BLUR EVENT - ${e.target.id} final value: ${e.target.value}`);
+      setTimeout(() => {
+        console.log("Triggering recalculation from delegated blur event");
+        recalcularTotalesConValoresActuales();
+      }, 50);
+    }
+  });
+  
+  console.log("✅ Event delegation set up for Final Fee, Fixed Charge, and Withheld Tax fields");
+  
+  // DEBUG BUTTON - TEMPORAL
+  const debugButton = document.getElementById('debug-calc');
+  if (debugButton) {
+    debugButton.addEventListener('click', function() {
+      console.log('=== DEBUG BUTTON CLICKED ===');
+      
+      // Verificar valores actuales
+      const comisionField = document.getElementById("comisionItem");
+      const cargoFijoField = document.getElementById("cargo_fijo");
+      const withheldTaxField = document.getElementById("withheld_tax");
+      
+      console.log('Current values:');
+      console.log('Final Fee:', comisionField ? comisionField.value : 'NOT FOUND');
+      console.log('Fixed Charge:', cargoFijoField ? cargoFijoField.value : 'NOT FOUND');
+      console.log('Withheld Tax:', withheldTaxField ? withheldTaxField.value : 'NOT FOUND');
+      console.log('Quantity:', quantityInput ? quantityInput.value : 'NOT FOUND');
+      console.log('Price:', priceInput ? priceInput.value : 'NOT FOUND');
+      
+      // Verificar si los campos son editables
+      console.log('Field editability:');
+      console.log('Final Fee editable:', comisionField ? (!comisionField.readOnly && !comisionField.disabled) : 'NOT FOUND');
+      console.log('Fixed Charge editable:', cargoFijoField ? (!cargoFijoField.readOnly && !cargoFijoField.disabled) : 'NOT FOUND');
+      
+      // Forzar recálculo
+      console.log('Forcing recalculation...');
+      recalcularTotalesConValoresActuales();
+      
+      console.log('=== DEBUG COMPLETED ===');
+    });
+  }
+  
 });

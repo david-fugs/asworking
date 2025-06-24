@@ -26,6 +26,7 @@ $sql = "INSERT INTO sell (
   quantity, 
   received_shipping, 
   tax,
+  withheld_tax,
   id_store, 
   id_sucursal, 
   comision_item,
@@ -40,7 +41,7 @@ $sql = "INSERT INTO sell (
   item_profit,
   markup,
   profit_margin
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ? ,? ,?, ?)";
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ? ,? ,?, ?)";
 
 
 $stmt = $mysqli->prepare($sql);
@@ -55,9 +56,9 @@ if (!$stmt) {
 foreach ($data['ventas'] as $venta) {
   $upc_item = $venta['upc_item'];
   $sku_item = isset($venta['sku']) ? $venta['sku'] : '';
-  $quantity = (int) $venta['quantity'];
-  $received_shipping = isset($venta['received_shipping']) ? (float) $venta['received_shipping'] : 0;
+  $quantity = (int) $venta['quantity'];  $received_shipping = isset($venta['received_shipping']) ? (float) $venta['received_shipping'] : 0;
   $tax = isset($venta['tax']) ? (float) $venta['tax'] : 0;
+  $withheld_tax = isset($venta['withheld_tax']) ? (float) $venta['withheld_tax'] : 0;
   $id_store = isset($venta['id_store']) ? (int) $venta['id_store'] : 0;
   $id_sucursal = isset($venta['id_sucursal']) ? (int) $venta['id_sucursal'] : 0;
   $comision_item = isset($venta['comision']) ? (float) $venta['comision'] : 0;
@@ -70,16 +71,16 @@ foreach ($data['ventas'] as $venta) {
   $total_item = isset($venta['total_item']) ? (float) $venta['total_item'] : 0;
   $item_profit = isset($venta['item_profit']) ? (float) $venta['item_profit'] : 0;
   $markup = isset($venta['markup']) ? (float) $venta['markup'] : 0;
-  $profit_margin = isset($venta['profit_margin']) ? (float) $venta['profit_margin'] : 0;
-  // Ahora, vincula los parámetros y ejecuta la consulta
+  $profit_margin = isset($venta['profit_margin']) ? (float) $venta['profit_margin'] : 0;  // Ahora, vincula los parámetros y ejecuta la consulta
   $stmt->bind_param(
-    "sssidiiiddddddddsddd",
+    "sssiddiiiddddddddsddd",
     $sell_order,
     $upc_item,
     $sku_item,
     $quantity,
     $received_shipping,
     $tax,
+    $withheld_tax,
     $id_store,
     $id_sucursal,
     $comision_item,

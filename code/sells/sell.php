@@ -368,6 +368,16 @@ $resultTiendas = $mysqli->query($queryTiendas);
               <div class="col-md-3">
                 <label for="tax" class="form-label">Tax</label>
                 <input type="number" name="tax" id="taxItem" class="form-control">
+              </div>              <!-- campo de Withheld Tax -->
+              <div class="col-md-3">
+                <label for="withheld_tax" class="form-label">Withheld Tax</label>
+                <input type="number" name="withheld_tax" id="withheld_tax" step="0.01" min="0" class="form-control">
+              </div>
+
+              <!-- DEBUG BUTTON - TEMPORAL -->
+              <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" id="debug-calc" class="btn btn-warning btn-sm form-control">DEBUG: Test Calculation</button>
               </div>
 
               <!-- <div class="col-md-3">
@@ -464,10 +474,10 @@ $resultTiendas = $mysqli->query($queryTiendas);
               <th>Store Cod</th>
               <!-- <th>Brand</th> -->
               <th>Final Fee</th>
-              <th>Fixed Charge</th>
-              <!-- <th>Date</th> -->
+              <th>Fixed Charge</th>              <!-- <th>Date</th> -->
               <th>Shipping Received</th>
               <th>Tax</th>
+              <th>Withheld Tax</th>
               <!-- <th>Paid Shipping</th> -->
               <th>Price Item</th>
               <th>Total Item</th>

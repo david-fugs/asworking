@@ -32,13 +32,13 @@ if ($sucursal) {
 
 $whereClause = "WHERE " . implode(" AND ", $conditions);
 
-try {
-    // Main query to get consolidated financial data
-    $query = "        SELECT 
+try {    // Main query to get consolidated financial data
+    $query = "SELECT 
             s.sell_order,
             s.date,
             s.id_sucursal,
             s.total_item,
+            s.withheld_tax,
             COALESCE(sh.shipping_paid, 0) as shipping_paid,
             COALESCE(sh.shipping_other_carrier, 0) as shipping_other_carrier,
             COALESCE(sh.shipping_adjust, 0) as shipping_adjust,

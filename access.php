@@ -621,7 +621,7 @@ if ($current_month_orders > 0) {
             <span class="navlink_icon">
               <i class="fa-solid fa-shop"></i>
             </span>
-            <span class="navlink">STORE</span>
+            <span class="navlink">MARKETPLACE</span>
             <i class="bx bx-chevron-right arrow-left"></i>
           </div>
           <ul class="menu_items submenu">
@@ -635,7 +635,7 @@ if ($current_month_orders > 0) {
             <span class="navlink_icon">
               <i class="fa-solid fa-store"></i>
             </span>
-            <span class="navlink">SUCURSAL</span>
+            <span class="navlink">STORE</span>
             <i class="bx bx-chevron-right arrow-left"></i>
           </div>
           <ul class="menu_items submenu">
