@@ -5,16 +5,16 @@ include("../../conexion.php");
 $upc_item = isset($_POST['upc_item']) ? trim($_POST['upc_item']) : '';
 $sell_order = isset($_POST['sell_order']) ? trim($_POST['sell_order']) : '';
 
-if (empty($upc_item)) {
+if (empty($upc_item) && empty($sell_order)) {
     echo '<div class="alert alert-warning text-center">
             <i class="fas fa-exclamation-triangle"></i>
-            <h5>No UPC provided</h5>
-            <p>Please enter a UPC code to search</p>
+            <h5>No search criteria provided</h5>
+            <p>Please enter either a UPC code or Sell Order to search</p>
           </div>';
     exit;
 }
 
-// Construir la consulta SQL con filtros - Buscar en tabla sell como SafetClaim
+// Construir la consulta SQL con filtros dinámicos
 $query = "SELECT 
             sell.id_sell,
             sell.sell_order,
@@ -26,10 +26,6 @@ $query = "SELECT
             sell.id_store,
             sell.id_sucursal,
             code_sucursal,
-            items.brand_item,
-            items.item_item,
-            items.color_item,
-            items.ref_item,
             returns.id_return,
             returns.quantity,
             returns.product_charge,
@@ -43,19 +39,29 @@ $query = "SELECT
           FROM sell
           LEFT JOIN store ON store.id_store = sell.id_store
           LEFT JOIN sucursal ON sucursal.id_sucursal = sell.id_sucursal
-          LEFT JOIN items ON items.sku_item = sell.sku_item 
-                          AND (items.upc_item = sell.upc_item OR items.upc_item IS NULL)
           LEFT JOIN returns ON BINARY returns.sell_order = BINARY sell.sell_order
-          WHERE sell.estado_sell = 1 AND sell.upc_item = ?";
+          WHERE sell.estado_sell = 1";
 
-$params = [$upc_item];
-$types = "s";
+$params = [];
+$types = "";
 
-// Agregar filtro por orden de venta si se proporciona
+// Agregar filtros dinámicamente
+$conditions = [];
+
+if (!empty($upc_item)) {
+    $conditions[] = "sell.upc_item = ?";
+    $params[] = $upc_item;
+    $types .= "s";
+}
+
 if (!empty($sell_order)) {
-    $query .= " AND sell.sell_order = ?";
+    $conditions[] = "sell.sell_order = ?";
     $params[] = $sell_order;
     $types .= "s";
+}
+
+if (!empty($conditions)) {
+    $query .= " AND (" . implode(" OR ", $conditions) . ")";
 }
 
 $query .= " ORDER BY sell.date DESC";
@@ -63,7 +69,9 @@ $query .= " ORDER BY sell.date DESC";
 // Preparar y ejecutar la consulta
 $stmt = $mysqli->prepare($query);
 if ($stmt) {
-    $stmt->bind_param($types, ...$params);
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
     $stmt->execute();
     $result = $stmt->get_result();
       if ($result->num_rows > 0) {        echo '<div class="table-responsive">
@@ -129,18 +137,34 @@ if ($stmt) {
             echo "<td>" . (empty($row['buyer_comments']) ? '<em style="color: #000000 !important;">No comments</em>' : '<span class="text-truncate d-inline-block" style="max-width: 150px; color: #000000 !important;" title="' . htmlspecialchars($row['buyer_comments']) . '">' . htmlspecialchars($row['buyer_comments']) . '</span>') . "</td>";
             echo "<td><span class='badge bg-dark text-white'>" . htmlspecialchars($row['code_sucursal']) . "</span></td>";
             echo "</tr>";        }
-        
+        // Construir mensaje dinámico basado en los criterios de búsqueda
+        $search_terms = [];
+        if (!empty($upc_item)) {
+            $search_terms[] = "UPC: " . htmlspecialchars($upc_item);
+        }
+        if (!empty($sell_order)) {
+            $search_terms[] = "Sell Order: " . htmlspecialchars($sell_order);
+        }
+        $search_term = implode(" and ", $search_terms);
         echo '</tbody></table></div>
               <div class="alert alert-success mt-3 text-center">
                 <i class="fas fa-check-circle me-2"></i>
-                <strong>Search completed:</strong> Found ' . $result->num_rows . ' record(s) for UPC: <strong>' . htmlspecialchars($upc_item) . '</strong>
+                <strong>Search completed:</strong> Found ' . $result->num_rows . ' record(s) for ' . $search_term . '
               </div>';
-        
-    } else {
+          } else {
+        // Construir mensaje dinámico basado en los criterios de búsqueda
+        $search_terms = [];
+        if (!empty($upc_item)) {
+            $search_terms[] = "UPC: " . htmlspecialchars($upc_item);
+        }
+        if (!empty($sell_order)) {
+            $search_terms[] = "Sell Order: " . htmlspecialchars($sell_order);
+        }
+        $search_term = implode(" and ", $search_terms);
         echo '<div class="alert alert-warning text-center">
                 <i class="fas fa-search"></i>
                 <h5>No Returns Found</h5>
-                <p>No return records found for UPC: <strong>' . htmlspecialchars($upc_item) . '</strong></p>
+                <p>No return records found for ' . $search_term . '</p>
               </div>';
     }
     

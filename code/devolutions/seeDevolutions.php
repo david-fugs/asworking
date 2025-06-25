@@ -778,10 +778,10 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
   <div class="search-form">
     <form id="filterForm" class="row g-3 align-items-center justify-content-center">
       <div class="col-md-4">
-        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control" required>
+        <input name="upc_item" type="text" placeholder="Enter UPC (Optional)" id="upc" class="form-control">
       </div>
       <div class="col-md-3">
-        <input name="sell_order" type="text" placeholder="#Order (Optional)" id="sell_order" class="form-control">
+        <input name="sell_order" type="text" placeholder="Enter Sell Order (Optional)" id="sell_order" class="form-control">
       </div>
       <div class="col-md-2">
         <input value="Search" type="submit" class="btn btn-primary">
@@ -794,7 +794,7 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
       <div class="alert alert-info">
         <i class="fas fa-search fa-2x mb-3"></i>
         <h4>Search for Returns</h4>
-        <p>Enter a UPC code above to search for Return records</p>
+        <p>Enter a UPC code or Sell Order number above to search for Return records</p>
       </div>
     </div>
 
@@ -904,6 +904,6 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
     </div>
   </div>
 
-  <script src="scriptSeeDevolutionsNew.js"></script>
+  <script src="scriptSeeDevolutionsNew.js?v=<?php echo time(); ?>"></script>
 
 

@@ -1,18 +1,28 @@
 $(document).ready(function() {
+    // Updated validation - UPC is now optional - v2.0
     // Manejar el envío del formulario de búsqueda
     $('#filterForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        const upc = $('#upc').val().trim();
+        e.preventDefault();        const upc = $('#upc').val().trim();
         const sellOrder = $('#sell_order').val().trim();
         
-        if (!upc) {
+        console.log('Debug - UPC:', upc, 'Sell Order:', sellOrder);
+        
+        if (!upc && !sellOrder) {
             Swal.fire({
                 icon: 'warning',
-                title: 'UPC Required',
-                text: 'Please enter a UPC code to search'
+                title: 'Search Criteria Required',
+                text: 'Please enter either a UPC code or Sell Order number to search'
             });
             return;
+        }
+          // Determinar el criterio de búsqueda para el mensaje
+        let searchCriteria = '';
+        if (upc && sellOrder) {
+            searchCriteria = `UPC: ${upc} and Sell Order: ${sellOrder}`;
+        } else if (upc) {
+            searchCriteria = `UPC: ${upc}`;
+        } else {
+            searchCriteria = `Sell Order: ${sellOrder}`;
         }
         
         // Mostrar spinner de carga
@@ -21,7 +31,7 @@ $(document).ready(function() {
                 <div class="spinner-border" role="status">
                     <span class="visually-hidden">Searching...</span>
                 </div>
-                <p class="mt-2">Searching for returns...</p>
+                <p class="mt-2">Searching for returns with ${searchCriteria}...</p>
             </div>
         `);
         

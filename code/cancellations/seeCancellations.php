@@ -168,7 +168,6 @@ $resultTiendas = $mysqli->query($queryTiendas);
   #salesTable {
     width: 100%;
   }
-
   #salesTable thead {
     background: var(--primary);
     color: white;
@@ -179,6 +178,36 @@ $resultTiendas = $mysqli->query($queryTiendas);
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.75rem;
+  }
+
+  /* Estilos para header personalizado de tabla */
+  .table-custom-header {
+    background: linear-gradient(135deg, #4a2568, #632b8b) !important;
+    color: white !important;
+  }
+
+  .table-custom-header th {
+    background: transparent !important;
+    color: white !important;
+    border: none !important;
+    padding: 15px 8px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.5px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    position: relative !important;
+  }
+
+  .table-custom-header th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
   }
 
   #salesTable tbody tr {
@@ -400,11 +429,10 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <img src="../../img/logo.png" alt="Logo" class="logo">
     <h1 class="page-title"><i class="fa-solid fa-ban"></i> CANCELLATIONS</h1>
   </div>
-
   <div class="search-form">
     <form id="filterForm" class="row g-3 align-items-center justify-content-center">
       <div class="col-md-4">
-        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control" required>
+        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control">
       </div>
       <div class="col-md-3">
         <input name="item" type="text" placeholder="#Order (Optional)" id="sell_order" class="form-control">
@@ -420,7 +448,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <div class="alert alert-info">
       <i class="fas fa-search fa-2x mb-3"></i>
       <h4>Search for Cancellations</h4>
-      <p>Enter a UPC code above to search for cancellation records</p>
+      <p>Enter a UPC code or Sell Order above to search for cancellation records</p>
     </div>
   </div>
 
@@ -692,8 +720,8 @@ $resultTiendas = $mysqli->query($queryTiendas);
       
       console.log('UPC:', upc, 'Sell Order:', sellOrder);
       
-      if (!upc) {
-        alert('Please enter a UPC code to search');
+      if (!upc && !sellOrder) {
+        alert('Please enter either a UPC code or Sell Order to search');
         return;
       }
       
