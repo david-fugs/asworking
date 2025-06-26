@@ -32,13 +32,14 @@ $query = "SELECT
             safetclaim.shipping_reimbursement,
             safetclaim.tax_reimbursement,
             safetclaim.label_avoid,
-            safetclaim.other_fee_reimbursement
+            safetclaim.other_fee_reimbursement,
+            safetclaim.safetclaim_date
           FROM sell 
           LEFT JOIN store  ON store.id_store = sell.id_store
           LEFT JOIN sucursal  ON sucursal.id_sucursal = sell.id_sucursal
           LEFT JOIN items ON items.sku_item = sell.sku_item 
                           AND (items.upc_item = sell.upc_item OR items.upc_item IS NULL)
-          LEFT JOIN safetclaim ON BINARY safetclaim.sell_order = BINARY sell.sell_order
+          LEFT JOIN safetclaim ON safetclaim.id_sell = sell.id_sell
           WHERE sell.estado_sell = 1
           limit $inicio, 15";
 
@@ -63,12 +64,13 @@ if ($result->num_rows > 0) {
     echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['tax_reimbursement'] ? '$' . number_format($row['tax_reimbursement'], 2) : '-') . "</td>";
     echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['label_avoid'] ? '$' . number_format($row['label_avoid'], 2) : '-') . "</td>";
     echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['other_fee_reimbursement'] ? '$' . number_format($row['other_fee_reimbursement'], 2) : '-') . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['safetclaim_date'] ? $row['safetclaim_date'] : 'Not set') . "</td>";
     echo "<td>
     <button class='btn-action-icon btn-delete' data-id='" . $row['id_sell'] . "'><i class='fas fa-trash-alt'></i></button> </td>";
     echo "</tr>";
   }
 } else {
-  echo "<tr><td colspan='15'>No se encontraron registros.</td></tr>";
+  echo "<tr><td colspan='16'>No se encontraron registros.</td></tr>";
 }
 $pagination->render();
 

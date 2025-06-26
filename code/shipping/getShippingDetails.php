@@ -44,7 +44,8 @@ if (isset($_GET['sell_order'])) {
     SELECT 
         shipping_paid,
         shipping_other_carrier,
-        shipping_adjust
+        shipping_adjust,
+        shipping_date
     FROM shipping
     WHERE sell_order = ?
     ";

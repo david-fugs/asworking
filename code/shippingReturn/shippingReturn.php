@@ -529,6 +529,11 @@ $resultTiendas = $mysqli->query($queryTiendas);
                                         <label for='billing_return' class='form-label'>Billing for Return Postage</label>
                                         <input type='number' step='0.01' class='form-control' name='billing_return' id='billing_return' value='${shippingReturn ? shippingReturn.billing_return || '' : ''}' />
                                     </div>
+
+                                    <div class='col-md-6'>
+                                        <label for='shipping_return_date' class='form-label'>Shipping Return Date</label>
+                                        <input type='date' class='form-control' name='shipping_return_date' id='shipping_return_date' value='${shippingReturn ? shippingReturn.shipping_return_date || '' : ''}' />
+                                    </div>
                                     
                                     <div class='col-12'>
                                         <div class='text-end'>

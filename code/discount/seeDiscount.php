@@ -470,9 +470,11 @@ $resultTiendas = $mysqli->query($queryTiendas);
       document.querySelectorAll(".clickable-row").forEach(function (row) {
         row.addEventListener("click", function () {
           const sell_order = this.dataset.sell_order;
-          console.log("Selected Sell Order:", sell_order);
+          const upc_item = this.dataset.upc_item;
+          const id_sell = this.dataset.id_sell;
+          console.log("Selected Sell Order:", sell_order, "UPC:", upc_item, "ID Sell:", id_sell);
           
-          fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}`)
+          fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}&upc_item=${encodeURIComponent(upc_item)}&id_sell=${encodeURIComponent(id_sell)}`)
             .then((response) => response.json())
             .then((data) => {
               console.log(data);
@@ -532,13 +534,17 @@ $resultTiendas = $mysqli->query($queryTiendas);
                 </tbody>
               </table>              <form method='post' action='saveDiscount.php' class='mt-4' id='discountForm'>
                 <div class='row mb-3'>
-                  <div class='col-md-6'>
+                  <div class='col-md-4'>
                     <label for='price_discount' class='form-label'>Price Discount</label>
                     <input type='number' step='0.01' name='price_discount' id='price_discount' class='form-control' value='${discount ? (discount.price_discount || '') : ''}' onchange='calculateNetMarkdown()'>
                   </div>
-                  <div class='col-md-6'>
+                  <div class='col-md-4'>
                     <label for='shipping_discount' class='form-label'>Shipping Discount</label>
                     <input type='number' step='0.01' name='shipping_discount' id='shipping_discount' class='form-control' value='${discount ? (discount.shipping_discount || '') : ''}' onchange='calculateNetMarkdown()'>
+                  </div>
+                  <div class='col-md-4'>
+                    <label for='discount_date' class='form-label'>Discount Date</label>
+                    <input type='date' name='discount_date' id='discount_date' class='form-control' value='${discount ? (discount.discount_date || '') : ''}'>
                   </div>
                 </div>
                 <div class='row mb-3'>
@@ -559,7 +565,8 @@ $resultTiendas = $mysqli->query($queryTiendas);
                   </div>
                 </div>
                 <input type='hidden' name='sell_order' value='${items[0].sell_order}'>
-                <input type='hidden' name='id_sell' value='${items[0].id_sell}'>                <div class='text-end'>
+                <input type='hidden' name='id_sell' value='${items[0].id_sell}'>
+                <input type='hidden' name='upc_item' value='${upc_item}'>                <div class='text-end'>
                   <button type='submit' class='btn' style='background: linear-gradient(to bottom, var(--primary), var(--primary-light)); color: #fff; border: none; font-weight: 600; padding: 8px 20px; border-radius: 6px;'>Save</button>
                 </div>
               </form>

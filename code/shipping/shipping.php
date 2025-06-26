@@ -514,18 +514,23 @@ $resultTiendas = $mysqli->query($queryTiendas);
                                 <form id='shippingForm' class='row g-3'>
                                     <input type='hidden' name='sell_order' value='${items[0].sell_order}' />
                                     
-                                    <div class='col-md-4'>
+                                    <div class='col-md-3'>
                                         <label for='shipping_paid' class='form-label'>Shipping Paid</label>
                                         <input type='number' step='0.01' class='form-control' name='shipping_paid' id='shipping_paid' value='${shipping ? shipping.shipping_paid || '' : ''}' />
                                     </div>
-                                      <div class='col-md-4'>
+                                      <div class='col-md-3'>
                                         <label for='shipping_other_carrier' class='form-label'>Shipping Other Carriers</label>
                                         <input type='number' step='0.01' class='form-control' name='shipping_other_carrier' id='shipping_other_carrier' value='${shipping ? shipping.shipping_other_carrier || '' : ''}' />
                                     </div>
                                     
-                                    <div class='col-md-4'>
+                                    <div class='col-md-3'>
                                         <label for='shipping_adjust' class='form-label'>Shipping Label Adjustment</label>
                                         <input type='number' step='0.01' class='form-control' name='shipping_adjust' id='shipping_adjust' value='${shipping ? shipping.shipping_adjust || '' : ''}' />
+                                    </div>
+
+                                    <div class='col-md-3'>
+                                        <label for='shipping_date' class='form-label'>Shipping Date</label>
+                                        <input type='date' class='form-control' name='shipping_date' id='shipping_date' value='${shipping ? shipping.shipping_date || '' : ''}' />
                                     </div>
                                       <div class='col-12'>
                                         <div class='text-end'>

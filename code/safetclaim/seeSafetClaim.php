@@ -524,6 +524,12 @@ $resultTiendas = $mysqli->query($queryTiendas);
                     <input type='number' step='0.01' name='other_fee_reimbursement' id='other_fee_reimbursement' class='form-control' value='${safetclaim ? (safetclaim.other_fee_reimbursement || '') : ''}' onchange='calculateNetReimbursement()'>
                   </div>
                   <div class='col-md-6'>
+                    <label for='safetclaim_date' class='form-label'>SafetClaim Date</label>
+                    <input type='date' name='safetclaim_date' id='safetclaim_date' class='form-control' value='${safetclaim ? (safetclaim.safetclaim_date || '') : ''}'>
+                  </div>
+                </div>
+                <div class='row mb-3'>
+                  <div class='col-md-12'>
                     <label for='net_reimbursement' class='form-label'><strong>Net Reimbursement</strong></label>
                     <input type='number' step='0.01' name='net_reimbursement' id='net_reimbursement' class='form-control bg-light' value='${safetclaim ? (safetclaim.net_reimbursement || '') : ''}' readonly>
                   </div>

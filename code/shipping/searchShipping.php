@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         s.date, 
         COALESCE(sh.shipping_paid, 0) as shipping_paid, 
         COALESCE(sh.shipping_other_carrier, 0) as shipping_other_carrier, 
-        COALESCE(sh.shipping_adjust, 0) as shipping_adjust
+        COALESCE(sh.shipping_adjust, 0) as shipping_adjust,
+        sh.shipping_date
     FROM sell AS s
     LEFT JOIN shipping AS sh ON s.sell_order = sh.sell_order
     WHERE s.sell_order = ?
@@ -38,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <th>Shipping Paid</th>
                         <th>Shipping Other Carriers</th>
                         <th>Shipping Label Adjustment</th>
+                        <th>Shipping Date</th>
                         <th>Add Shipping</th>
                     </tr>
                 </thead>
@@ -49,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<td>$" . number_format($row['shipping_paid'], 2) . "</td>";
             echo "<td>$" . number_format($row['shipping_other_carrier'], 2) . "</td>";
             echo "<td>$" . number_format($row['shipping_adjust'], 2) . "</td>";
+            echo "<td>" . ($row['shipping_date'] ? htmlspecialchars($row['shipping_date']) : 'Not set') . "</td>";
             echo "<td>";
             echo "<button class='btn btn-action-icon btn-edit btn-sm' onclick=\"event.stopPropagation(); document.querySelector('[data-sell_order=\\\"" . htmlspecialchars($row['sell_order']) . "\\\"]').click();\"><i class='fas fa-edit'></i></button>";
             echo "</td>";

@@ -46,20 +46,25 @@ if (isset($_GET['sell_order'])) {
     $result = $stmt->get_result();
     $response['items'] = $result->fetch_all(MYSQLI_ASSOC);
     
-    // Get existing safetclaim data if any
-    $safetclaim_sql = "SELECT * FROM safetclaim WHERE sell_order = ?";
-    $safetclaim_stmt = $mysqli->prepare($safetclaim_sql);
-    $safetclaim_stmt->bind_param("s", $sell_order);
-    $safetclaim_stmt->execute();
-    $safetclaim_result = $safetclaim_stmt->get_result();
-    
-    if ($safetclaim_result->num_rows > 0) {
-        $response['safetclaim'] = $safetclaim_result->fetch_assoc();
+    // Get existing safetclaim data if any - use id_sell from the first item for accuracy
+    if (!empty($response['items'])) {
+        $id_sell = $response['items'][0]['id_sell'];
+        $safetclaim_sql = "SELECT * FROM safetclaim WHERE id_sell = ?";
+        $safetclaim_stmt = $mysqli->prepare($safetclaim_sql);
+        $safetclaim_stmt->bind_param("i", $id_sell);
+        $safetclaim_stmt->execute();
+        $safetclaim_result = $safetclaim_stmt->get_result();
+        
+        if ($safetclaim_result->num_rows > 0) {
+            $response['safetclaim'] = $safetclaim_result->fetch_assoc();
+        } else {
+            $response['safetclaim'] = null;
+        }
+        
+        $safetclaim_stmt->close();
     } else {
         $response['safetclaim'] = null;
     }
-    
-    $safetclaim_stmt->close();
     $stmt->close();
 
     echo json_encode($response);

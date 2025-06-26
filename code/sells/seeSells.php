@@ -293,6 +293,128 @@ $resultTiendas = $mysqli->query($queryTiendas);
   .clickable-row {
     cursor: pointer;
   }
+
+  /* Estilos para el mensaje inicial */
+  .alert-info {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border: 1px solid #2196f3;
+    color: #1976d2;
+    border-radius: 10px;
+  }
+
+  .alert-info i {
+    color: #1976d2;
+  }
+
+  /* Estilos para el spinner de carga */
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  /* Estilos mejorados para los resultados */
+  #searchResults .table {
+    margin-bottom: 0;
+  }
+  #searchResults .alert {
+    border-radius: 8px;
+    margin-bottom: 0;
+  }
+
+  /* Estilo personalizado para thead con colores armoniosos */
+  .table-custom-header {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
+  }
+
+  .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    border-color: var(--primary-dark) !important;
+    padding: 12px 10px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    color: white !important;
+    border: 1px solid var(--primary-dark) !important;
+    vertical-align: middle !important;
+  }
+
+  /* Asegurar que las tablas dinámicas también tengan el estilo */
+  .table .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
+    border-color: var(--primary-dark) !important;
+  }
+
+  /* Override específico para Bootstrap table classes */
+  .table-bordered .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    background-color: var(--primary) !important;
+    color: white !important;
+    border: 1px solid var(--primary-dark) !important;
+  }
+
+  /* Para tablas con hover */
+  .table-hover .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
+  }
+
+  /* Para tablas pequeñas */
+  .table-sm .table-custom-header th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
+    padding: 8px 10px !important;
+  }
+
+  /* Estilo más específico para forzar el color completo */
+  thead.table-custom-header,
+  thead.table-custom-header tr,
+  thead.table-custom-header tr th,
+  tfoot.table-custom-header,
+  tfoot.table-custom-header tr,
+  tfoot.table-custom-header tr th {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    background-color: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary-dark) !important;
+  }
+
+  /* Remover cualquier hover effect de Bootstrap en headers */
+  .table-custom-header th:hover {
+    background: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;
+    color: white !important;
+  }
+
+  /* Estilos para las tarjetas del modal */
+  .card {
+    border: 1px solid var(--secondary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    background: linear-gradient(to right, var(--secondary-light), #f8f9fa);
+    border-bottom: 1px solid var(--secondary);
+  }
+
+  .card-title {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* Estilos para los iconos de estado */
+  .text-success {
+    color: #28a745 !important;
+  }
+
+  .text-danger {
+    color: #dc3545 !important;
+  }
+
+  /* Mejorar la apariencia de las celdas con iconos */
+  .text-center {
+    vertical-align: middle !important;
+  }
 </style>
 
 <body>
@@ -304,14 +426,11 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
   <div class="search-form">
     <form id="filterForm" class="row g-3 align-items-center justify-content-center">
-      <div class="col-md-3">
-        <input name="upc_item" type="text" placeholder="UPC" id="upc" class="form-control">
+      <div class="col-md-4">
+        <input name="upc_item" type="text" placeholder="Enter UPC to search" id="upc" class="form-control">
       </div>
       <div class="col-md-3">
-        <input name="item" type="text" placeholder="#Order" id="sell_order" class="form-control">
-      </div>
-      <div class="col-md-3">
-        <input type="date" name="sellDate" id="date" class="form-control">
+        <input name="item" type="text" placeholder="#Order (Optional)" id="sell_order" class="form-control">
       </div>
       <div class="col-md-2">
         <input value="Search" type="submit" class="btn btn-primary">
@@ -319,36 +438,21 @@ $resultTiendas = $mysqli->query($queryTiendas);
     </form>
   </div>
 
-  <div class="text-center">
-    <button id="bulkReturnBtn" class="btn btn-success btn-action">
-      <i class="fas fa-exchange-alt"></i> Make Returns
-    </button>
+  <!-- Mensaje inicial -->
+  <div id="initialMessage" class="table-container text-center">
+    <div class="alert alert-info">
+      <i class="fas fa-search fa-2x mb-3"></i>
+      <h4>Search for Sales</h4>
+      <p>Enter a UPC code or Sell Order above to search for sales records</p>
+    </div>
   </div>
 
-  <!-- Tabla de Ventas -->
-  <div class="table-container">
-    <h2 class="text-center mb-4">Registered Sales</h2>
-    <table class="" id="salesTable">
-      <thead>
-        <tr>
-          <th>Sell Number</th>
-          <th>Date</th>
-          <th>UPC</th>
-          <th>Received Shipping</th>
-          <th>Payeed Shipping</th>
-          <th>Store</th>
-          <th>Sucursal</th>
-          <th>Comision</th>
-          <th>Quantity</th>
-          <th>Item Price</th>
-          <th>Total Item</th>
-          <th>Delete Sell</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php include "getSells.php"; ?>
-      </tbody>
-    </table>
+  <!-- Tabla de Ventas (inicialmente oculta) -->
+  <div class="table-container" id="resultsContainer" style="display: none;">
+    <h2 class="text-center mb-4">Search Results</h2>
+    <div id="searchResults">
+      <!-- Los resultados se cargarán aquí -->
+    </div>
   </div>
 
   <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
@@ -458,12 +562,12 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="returnModalLabel">Return</h5>
+          <h5 class="modal-title" id="returnModalLabel">Sales Details</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="ventasTableContainer" class="px-4 pb-4"></div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
@@ -474,6 +578,197 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
   <script src="returns.js"></script>
   <script src="scriptSeeSells.js"></script>
+  <script>
+    // Función para inicializar los event listeners de las filas clickeables
+    function initializeClickableRows() {
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        // Remover event listeners previos para evitar duplicados
+        const newRow = row.cloneNode(true);
+        row.parentNode.replaceChild(newRow, row);
+      });
+      
+      // Reinicializar los event listeners usando la misma lógica que returns.js
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        row.addEventListener("click", function () {
+          const sell_order = this.dataset.sell_order;
+          console.log("Selected Sell Order:", sell_order);
+          
+          fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}`)
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              if (data.error) {
+                document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${data.error}</p>`;
+                return;
+              }
+              
+              const items = data.items;
+              
+              // Crear la tabla (mismo código que en returns.js)
+              let tableHTML = `
+                <h4>Sell Order: ${items[0].sell_order}</h4>
+                
+                <!-- Información detallada de la venta -->
+                <div class="row mb-4">
+                  <div class="col-md-12">
+                    <div class="card">
+                      <div class="card-header">
+                        <h5 class="card-title mb-0">Sale Details</h5>
+                      </div>
+                      <div class="card-body">
+                        <div class="row">
+                          <div class="col-md-3">
+                            <strong>UPC:</strong><br>
+                            <span class="text-muted">${items[0].upc_item || '-'}</span>
+                          </div>
+                          <div class="col-md-3">
+                            <strong>SKU:</strong><br>
+                            <span class="text-muted">${items[0].sku_item || '-'}</span>
+                          </div>
+                          <div class="col-md-3">
+                            <strong>Quantity:</strong><br>
+                            <span class="text-muted">${items[0].quantity || 0}</span>
+                          </div>
+                          <div class="col-md-3">
+                            <strong>Date:</strong><br>
+                            <span class="text-muted">${items[0].date || '-'}</span>
+                          </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                          <div class="col-md-3">
+                            <strong>Received Shipping:</strong><br>
+                            <span class="text-muted">$${(parseFloat(items[0].received_shipping) || 0).toFixed(2)}</span>
+                          </div>
+                          <div class="col-md-3">
+                            <strong>Payed Shipping:</strong><br>
+                            <span class="text-muted">$${(parseFloat(items[0].payed_shipping) || 0).toFixed(2)}</span>
+                          </div>
+                          <div class="col-md-3">
+                            <strong>Comision:</strong><br>
+                            <span class="text-muted">$${(parseFloat(items[0].comision_item) || 0).toFixed(2)}</span>
+                          </div>
+                          <div class="col-md-3">
+                            <strong>Item Price:</strong><br>
+                            <span class="text-muted">$${(parseFloat(items[0].item_price) || 0).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Tabla de items -->
+                <table class="table table-bordered table-sm mt-3">
+                  <thead>
+                    <tr>
+                      <th>UPC</th>
+                      <th>SKU</th>
+                      <th>Quantity</th>
+                      <th>Final Fee</th>
+                      <th>Fixed Charge</th>
+                      <th>Item Profit</th>
+                      <th>Total Item</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+              `;
+
+              let totalGeneral = 0;
+              items.forEach((item) => {
+                const quantity = item.quantity || 0;
+                const comision_item = parseFloat(item.comision_item) || 0;
+                const cargo_fijo = parseFloat(item.cargo_fijo) || 0;
+                const item_profit = parseFloat(item.item_profit) || 0;
+                const total_item = parseFloat(item.total_item) || 0;
+                
+                tableHTML += `
+                  <tr>
+                    <td>${item.upc_item}</td>
+                    <td>${item.sku_item || "-"}</td>
+                    <td>${quantity}</td>
+                    <td>$${comision_item.toFixed(2)}</td>
+                    <td>$${cargo_fijo.toFixed(2)}</td>
+                    <td>$${item_profit.toFixed(2)}</td>
+                    <td>$${total_item.toFixed(2)}</td>
+                  </tr>
+                `;
+                totalGeneral += total_item;
+              });
+
+              tableHTML += `
+                  <tr>
+                    <td colspan="6" class="text-end"><strong>Total General</strong></td>
+                    <td><strong>$${totalGeneral.toFixed(2)}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+              `;
+
+              document.getElementById("ventasTableContainer").innerHTML = tableHTML;
+              
+              const modal = new bootstrap.Modal(document.getElementById("returnModal"));
+              modal.show();
+            })
+            .catch((err) => {
+              document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${err.message}</p>`;
+            });
+        });
+      });
+    }
+
+    // Manejar el formulario de búsqueda
+    document.getElementById('filterForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const upc = document.getElementById('upc').value.trim();
+      const sellOrder = document.getElementById('sell_order').value.trim();
+      
+      if (!upc && !sellOrder) {
+        alert('Please enter either a UPC code or Sell Order to search');
+        return;
+      }
+      
+      // Mostrar loading
+      document.getElementById('initialMessage').style.display = 'none';
+      document.getElementById('resultsContainer').style.display = 'block';
+      document.getElementById('searchResults').innerHTML = `
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Searching...</span>
+          </div>
+          <p class="mt-2">Searching for sales...</p>
+        </div>
+      `;
+      
+      // Realizar búsqueda AJAX
+      const formData = new FormData();
+      formData.append('upc_item', upc);
+      formData.append('sell_order', sellOrder);
+      
+      fetch('searchSells.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('searchResults').innerHTML = data;
+        
+        // Reinicializar los event listeners para las filas clickeables
+        initializeClickableRows();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('searchResults').innerHTML = `
+          <div class="alert alert-danger text-center">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h5>Error</h5>
+            <p>An error occurred while searching. Please try again.</p>
+          </div>
+        `;
+      });
+    });
+  </script>
 </body>
 
 </html>

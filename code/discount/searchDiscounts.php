@@ -30,11 +30,12 @@ $query = "SELECT
             discounts.shipping_discount,
             discounts.fee_credit,
             discounts.tax_return,
-            discounts.net_markdown
+            discounts.net_markdown,
+            discounts.discount_date
           FROM sell 
           LEFT JOIN store ON store.id_store = sell.id_store
           LEFT JOIN sucursal ON sucursal.id_sucursal = sell.id_sucursal
-          LEFT JOIN discounts ON BINARY discounts.sell_order = BINARY sell.sell_order
+          LEFT JOIN discounts ON BINARY discounts.upc_item = BINARY sell.upc_item AND discounts.id_sell = sell.id_sell
           WHERE sell.estado_sell = 1";
 
 $params = [];
@@ -92,23 +93,25 @@ if ($result->num_rows > 0) {
                 <th>Fee Credit</th>
                 <th>Tax Return</th>
                 <th>Net Markdown</th>
+                <th>Discount Date</th>
               </tr>
             </thead>
             <tbody>';
     
     while ($row = $result->fetch_assoc()) {
         echo "<tr>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['sell_order']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['date']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['upc_item']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['sku_item'] ?: '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['store_name']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['code_sucursal']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['price_discount'] ? '$' . number_format($row['price_discount'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['shipping_discount'] ? '$' . number_format($row['shipping_discount'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['fee_credit'] ? '$' . number_format($row['fee_credit'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['tax_return'] ? '$' . number_format($row['tax_return'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['net_markdown'] ? '$' . number_format($row['net_markdown'], 2) : '-') . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . htmlspecialchars($row['sell_order']) . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . htmlspecialchars($row['date']) . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . htmlspecialchars($row['upc_item']) . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . htmlspecialchars($row['sku_item'] ?: '-') . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . htmlspecialchars($row['store_name']) . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . htmlspecialchars($row['code_sucursal']) . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . ($row['price_discount'] ? '$' . number_format($row['price_discount'], 2) : '-') . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . ($row['shipping_discount'] ? '$' . number_format($row['shipping_discount'], 2) : '-') . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . ($row['fee_credit'] ? '$' . number_format($row['fee_credit'], 2) : '-') . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . ($row['tax_return'] ? '$' . number_format($row['tax_return'], 2) : '-') . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . ($row['net_markdown'] ? '$' . number_format($row['net_markdown'], 2) : '-') . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "' data-upc_item='" . htmlspecialchars($row['upc_item']) . "' data-id_sell='" . htmlspecialchars($row['id_sell']) . "'>" . ($row['discount_date'] ? htmlspecialchars($row['discount_date']) : 'Not set') . "</td>";
         echo "</tr>";
     }
     

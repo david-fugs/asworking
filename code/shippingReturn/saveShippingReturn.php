@@ -3,6 +3,7 @@ include("../../conexion.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {    $sell_order = isset($_POST['sell_order']) ? trim($_POST['sell_order']) : '';
     $billing_return = isset($_POST['billing_return']) ? floatval($_POST['billing_return']) : 0;
+    $shipping_return_date = isset($_POST['shipping_return_date']) ? trim($_POST['shipping_return_date']) : null;
     
     if (empty($sell_order)) {
         echo json_encode(['success' => false, 'message' => 'Sell order is required']);
@@ -19,12 +20,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {    $sell_order = isset($_POST['sell
     if ($checkResult->num_rows > 0) {        // Actualizar registro existente
         $updateQuery = "
         UPDATE shipping_return 
-        SET billing_return = ?
+        SET billing_return = ?,
+            shipping_return_date = ?
         WHERE sell_order = ?
         ";
         
         $updateStmt = $mysqli->prepare($updateQuery);
-        $updateStmt->bind_param("ds", $billing_return, $sell_order);
+        $updateStmt->bind_param("dss", $billing_return, $shipping_return_date, $sell_order);
         
         if ($updateStmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Shipping return information updated successfully']);
@@ -35,12 +37,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {    $sell_order = isset($_POST['sell
         $updateStmt->close();
     } else {        // Insertar nuevo registro
         $insertQuery = "
-        INSERT INTO shipping_return (sell_order, billing_return) 
-        VALUES (?, ?)
+        INSERT INTO shipping_return (sell_order, billing_return, shipping_return_date) 
+        VALUES (?, ?, ?)
         ";
         
         $insertStmt = $mysqli->prepare($insertQuery);
-        $insertStmt->bind_param("sd", $sell_order, $billing_return);
+        $insertStmt->bind_param("sds", $sell_order, $billing_return, $shipping_return_date);
         
         if ($insertStmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Shipping return information saved successfully']);
@@ -58,27 +60,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {    $sell_order = isset($_POST['sell
 
 $mysqli->close();
 ?>
-        $stmtInsert->bind_param("sd", $sell_order, $billing_return);
-        if ($stmtInsert->execute()) {
-            //redirigir a la página de shipping.php
-            header("Location: shippingReturn.php?message=Envío guardado correctamente.");
-            
-        } else {
-            echo "Error al guardar el envío: " . $mysqli->error;
-        }
-    }
-
-    // Cerrar las declaraciones
-    if (isset($stmtCheck)) {
-        $stmtCheck->close();
-    }
-    if (isset($stmtUpdate)) {
-        $stmtUpdate->close();
-    }
-    if (isset($stmtInsert)) {
-        $stmtInsert->close();
-    }
-} else {
-    echo "Método no permitido.";
-
-}

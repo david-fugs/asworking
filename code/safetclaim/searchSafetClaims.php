@@ -31,11 +31,12 @@ $query = "SELECT
             safetclaim.tax_reimbursement,
             safetclaim.label_avoid,
             safetclaim.other_fee_reimbursement,
-            safetclaim.net_reimbursement
+            safetclaim.net_reimbursement,
+            safetclaim.safetclaim_date
           FROM sell
           LEFT JOIN store ON store.id_store = sell.id_store
           LEFT JOIN sucursal ON sucursal.id_sucursal = sell.id_sucursal
-          LEFT JOIN safetclaim ON BINARY safetclaim.sell_order = BINARY sell.sell_order
+          LEFT JOIN safetclaim ON safetclaim.id_sell = sell.id_sell
           WHERE sell.estado_sell = 1";
 
 $params = [];
@@ -93,6 +94,7 @@ if ($result->num_rows > 0) {    echo '<table class="table table-striped" id="sal
                 <th>Label Avoid</th>
                 <th>Other Fee Reimbursement</th>
                 <th>Net Reimbursement</th>
+                <th>SafetClaim Date</th>
               </tr>
             </thead>
             <tbody>';
@@ -109,6 +111,7 @@ if ($result->num_rows > 0) {    echo '<table class="table table-striped" id="sal
         echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['label_avoid'] ? '$' . number_format($row['label_avoid'], 2) : '-') . "</td>";
         echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['other_fee_reimbursement'] ? '$' . number_format($row['other_fee_reimbursement'], 2) : '-') . "</td>";
         echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['net_reimbursement'] ? '$' . number_format($row['net_reimbursement'], 2) : '-') . "</td>";
+        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['safetclaim_date'] ? htmlspecialchars($row['safetclaim_date']) : 'Not set') . "</td>";
         echo "</tr>";
     }
     

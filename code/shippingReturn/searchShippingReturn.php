@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     SELECT DISTINCT 
         s.sell_order, 
         s.date, 
-        COALESCE(sr.billing_return, 0) as billing_return
+        COALESCE(sr.billing_return, 0) as billing_return,
+        sr.shipping_return_date
     FROM sell AS s
     LEFT JOIN shipping_return AS sr ON s.sell_order = sr.sell_order
     WHERE s.sell_order = ?
@@ -35,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <th>Sell Order</th>
                         <th>Date</th>
                         <th>Billing for Return Postage</th>
+                        <th>Shipping Return Date</th>
                         <th>Add Shipping Return</th>
                     </tr>
                 </thead>
@@ -44,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "<tr class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>";            echo "<td>" . htmlspecialchars($row['sell_order']) . "</td>";
             echo "<td>" . htmlspecialchars($row['date']) . "</td>";
             echo "<td>$" . number_format($row['billing_return'], 2) . "</td>";
+            echo "<td>" . ($row['shipping_return_date'] ? htmlspecialchars($row['shipping_return_date']) : 'Not set') . "</td>";
             echo "<td>";
             echo "<button class='btn btn-action-icon btn-edit btn-sm' onclick=\"event.stopPropagation(); document.querySelector('[data-sell_order=\\\"" . htmlspecialchars($row['sell_order']) . "\\\"]').click();\"><i class='fas fa-edit'></i></button>";
             echo "</td>";

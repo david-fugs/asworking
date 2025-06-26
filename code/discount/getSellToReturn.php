@@ -2,9 +2,13 @@
 
 include("../../conexion.php");
 
-if (isset($_GET['sell_order'])) {
+if (isset($_GET['sell_order']) && isset($_GET['upc_item'])) {
     $sell_order = $_GET['sell_order'];
-    $response = [];    // Consulta principal
+    $upc_item = $_GET['upc_item'];
+    $id_sell = isset($_GET['id_sell']) ? $_GET['id_sell'] : null;
+    $response = [];
+
+    // Consulta principal - filtramos por sell_order y upc_item (y opcionalmente id_sell) para obtener el registro específico
     $sql = "SELECT 
                 s.id_sell,
                 s.sell_order,
@@ -38,29 +42,47 @@ if (isset($_GET['sell_order'])) {
             LEFT JOIN sucursal ON sucursal.id_sucursal = s.id_sucursal
             LEFT JOIN items ON items.sku_item = s.sku_item 
                             AND (items.upc_item = s.upc_item OR items.upc_item IS NULL)
-            WHERE s.sell_order = ?";
-    $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param("s", $sell_order);    $stmt->execute();
+            WHERE s.sell_order = ? AND s.upc_item = ?";
+    
+    // Si tenemos id_sell específico, agregarlo al filtro para mayor precisión
+    if ($id_sell) {
+        $sql .= " AND s.id_sell = ?";
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param("ssi", $sell_order, $upc_item, $id_sell);
+    } else {
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param("ss", $sell_order, $upc_item);
+    }
+
+    $stmt->execute();
     $result = $stmt->get_result();
     $response['items'] = $result->fetch_all(MYSQLI_ASSOC);
     
-    // Get existing discount data if any
-    $discount_sql = "SELECT * FROM discounts WHERE sell_order = ?";
-    $discount_stmt = $mysqli->prepare($discount_sql);
-    $discount_stmt->bind_param("s", $sell_order);
-    $discount_stmt->execute();
-    $discount_result = $discount_stmt->get_result();
-    
-    if ($discount_result->num_rows > 0) {
-        $response['discount'] = $discount_result->fetch_assoc();
+    // Obtener el id_sell específico para la consulta de discount
+    if (!empty($response['items'])) {
+        $target_id_sell = $response['items'][0]['id_sell'];
+        
+        // Get existing discount data if any - usar id_sell y upc_item para identificación única
+        $discount_sql = "SELECT * FROM discounts WHERE id_sell = ? AND upc_item = ?";
+        $discount_stmt = $mysqli->prepare($discount_sql);
+        $discount_stmt->bind_param("is", $target_id_sell, $upc_item);
+        $discount_stmt->execute();
+        $discount_result = $discount_stmt->get_result();
+        
+        if ($discount_result->num_rows > 0) {
+            $response['discount'] = $discount_result->fetch_assoc();
+        } else {
+            $response['discount'] = null;
+        }
+        
+        $discount_stmt->close();
     } else {
         $response['discount'] = null;
     }
     
-    $discount_stmt->close();
     $stmt->close();
 
     echo json_encode($response);
 } else {
-    echo json_encode(['error' => 'No id_sell provided']);
+    echo json_encode(['error' => 'No sell_order or upc_item provided']);
 }

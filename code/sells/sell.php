@@ -375,10 +375,10 @@ $resultTiendas = $mysqli->query($queryTiendas);
               </div>
 
               <!-- DEBUG BUTTON - TEMPORAL -->
-              <div class="col-md-3">
+              <!-- <div class="col-md-3">
                 <label class="form-label">&nbsp;</label>
                 <button type="button" id="debug-calc" class="btn btn-warning btn-sm form-control">DEBUG: Test Calculation</button>
-              </div>
+              </div> -->
 
               <!-- <div class="col-md-3">
                 <label for="payedShipping" class="form-label">Paid Shipping</label>

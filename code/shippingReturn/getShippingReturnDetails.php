@@ -42,7 +42,8 @@ if (isset($_GET['sell_order'])) {
       // Obtener información de shipping return si existe
     $queryShippingReturn = "
     SELECT 
-        billing_return
+        billing_return,
+        shipping_return_date
     FROM shipping_return
     WHERE sell_order = ?
     ";
