@@ -273,38 +273,8 @@ $resultTiendas = $mysqli->query($queryTiendas);
   /* Clickable row styling */
   .clickable-row {
     cursor: pointer;
-    transition: background-color 0.3s ease;
   }
   .clickable-row:hover {
-    background-color: rgba(99, 43, 139, 0.1) !important;
-  }
-  .clickable-row:hover td {
-    background-color: transparent !important;
-  }
-
-  /* Selected row styling */
-  .table-warning {
-    background-color: rgba(255, 193, 7, 0.25) !important;
-  }
-  
-  .table-warning td {
-    border-color: rgba(255, 193, 7, 0.5) !important;
-  }
-
-  /* Row styling based on cancellation data status */
-  .table-success {
-    background-color: rgba(40, 167, 69, 0.1) !important;
-  }
-  
-  .table-light {
-    background-color: rgba(248, 249, 250, 0.8) !important;
-  }
-  
-  .table-success:hover {
-    background-color: rgba(40, 167, 69, 0.2) !important;
-  }
-  
-  .table-light:hover {
     background-color: rgba(99, 43, 139, 0.1) !important;
   }
 
@@ -393,7 +363,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="returnModalLabel">Cancellation Details</h5>
+          <h5 class="modal-title" id="returnModalLabel">Cancellations</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div id="ventasTableContainer" class="px-4 pb-4"></div>
@@ -404,7 +374,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
     </div>
   </div>
 
-  <script src="seeCancellations.js"></script>
+  <script src="seeCancellations_clean.js"></script>
 </body>
 
 </html>

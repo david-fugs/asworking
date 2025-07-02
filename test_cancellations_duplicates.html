@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Cancellations with Duplicate UPC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Test: Multiple Items with Same UPC</h2>
+        <p>This page tests the cancellations system with items that have the same UPC but different id_sell values.</p>
+        
+        <div class="alert alert-info">
+            <strong>Test Order:</strong> TEST_DUP_UPC_123<br>
+            <strong>Test UPC:</strong> 123456789012<br>
+            This order contains two items with the same UPC but different id_sell and SKU values.
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Test the Cancellations Module</h5>
+            </div>
+            <div class="card-body">
+                <p>Go to the cancellations module and search for <strong>TEST_DUP_UPC_123</strong></p>
+                <p>You should see two items with the same UPC (123456789012) but different SKUs (SKU001 and SKU002).</p>
+                <p>Each item should be clickable and show its own cancellation form with unique data.</p>
+                
+                <a href="code/cancellations/seeCancellations.php" class="btn btn-primary">
+                    Go to Cancellations Module
+                </a>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6>Expected Behavior:</h6>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li>Click on row with SKU001 → Should show cancellation form with $5.00 refund (if exists)</li>
+                    <li>Click on row with SKU002 → Should show cancellation form with $7.50 refund (if exists)</li>
+                    <li>Each form should be independent and save separately</li>
+                    <li>Form title should show: Order, ID Sell, UPC, and SKU</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6>Cleanup Test Data:</h6>
+            </div>
+            <div class="card-body">
+                <button onclick="cleanupTestData()" class="btn btn-warning">
+                    Clean Up Test Data
+                </button>
+                <div id="cleanupResult" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function cleanupTestData() {
+            fetch('cleanup_test_cancellations.php')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('cleanupResult').innerHTML = '<div class="alert alert-success">' + data + '</div>';
+                })
+                .catch(error => {
+                    document.getElementById('cleanupResult').innerHTML = '<div class="alert alert-danger">Error: ' + error + '</div>';
+                });
+        }
+    </script>
+</body>
+</html>

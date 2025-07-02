@@ -4,6 +4,8 @@ include("../../conexion.php");
 
 if (isset($_GET['sell_order'])) {
     $sell_order = $_GET['sell_order'];
+    $upc_item = isset($_GET['upc_item']) ? $_GET['upc_item'] : null;
+    $id_sell = isset($_GET['id_sell']) ? $_GET['id_sell'] : null;
     $response = [];
       // Consulta principal
     $sql = "SELECT 
@@ -40,8 +42,20 @@ if (isset($_GET['sell_order'])) {
             LEFT JOIN items ON items.sku_item = s.sku_item 
                             AND (items.upc_item = s.upc_item OR items.upc_item IS NULL)
             WHERE s.sell_order = ?";
-    $stmt = $mysqli->prepare($sql);
-    $stmt->bind_param("s", $sell_order);
+    
+    // Si tenemos upc_item e id_sell específicos, agregamos filtros adicionales para mayor precisión
+    if ($upc_item && $id_sell) {
+        $sql .= " AND s.upc_item = ? AND s.id_sell = ?";
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param("ssi", $sell_order, $upc_item, $id_sell);
+    } else if ($upc_item) {
+        $sql .= " AND s.upc_item = ?";
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param("ss", $sell_order, $upc_item);
+    } else {
+        $stmt = $mysqli->prepare($sql);
+        $stmt->bind_param("s", $sell_order);
+    }
     $stmt->execute();
     $result = $stmt->get_result();
     $response['items'] = $result->fetch_all(MYSQLI_ASSOC);

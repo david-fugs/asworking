@@ -32,11 +32,15 @@ $query = "SELECT
             cancellations.final_fee_refund,
             cancellations.fixed_charge_refund,
             cancellations.other_fee_refund,
-            cancellations.net_cancellation
+            cancellations.net_cancellation,
+            cancellations.cancellation_date,
+            cancellations.sku_item as cancellation_sku
           FROM sell
           LEFT JOIN store ON store.id_store = sell.id_store
           LEFT JOIN sucursal ON sucursal.id_sucursal = sell.id_sucursal
-          LEFT JOIN cancellations ON BINARY cancellations.order_id = BINARY sell.sell_order
+          LEFT JOIN cancellations ON BINARY cancellations.order_id = BINARY sell.sell_order 
+                                    AND BINARY cancellations.upc_item = BINARY sell.upc_item
+                                    AND cancellations.id_sell = sell.id_sell
           WHERE sell.estado_sell = 1";
 
 $params = [];
@@ -95,23 +99,43 @@ if ($result->num_rows > 0) {    echo '<table class="table table-striped" id="sal
                 <th>Fixed Charge Refund</th>
                 <th>Other Fee Refund</th>
                 <th>Net Cancellation</th>
+                <th>Cancellation Date</th>
               </tr>
             </thead>
             <tbody>';
     
     while ($row = $result->fetch_assoc()) {
-        echo "<tr>";        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['sell_order']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['date']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['upc_item']) . "</td>";        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['sku_item']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['store_name']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . htmlspecialchars($row['code_sucursal']) . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['refund_amount'] ? '$' . number_format($row['refund_amount'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['shipping_refund'] ? '$' . number_format($row['shipping_refund'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['tax_refund'] ? '$' . number_format($row['tax_refund'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['final_fee_refund'] ? '$' . number_format($row['final_fee_refund'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['fixed_charge_refund'] ? '$' . number_format($row['fixed_charge_refund'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['other_fee_refund'] ? '$' . number_format($row['other_fee_refund'], 2) : '-') . "</td>";
-        echo "<td class='clickable-row' data-sell_order='" . htmlspecialchars($row['sell_order']) . "'>" . ($row['net_cancellation'] ? '$' . number_format($row['net_cancellation'], 2) : '-') . "</td>";
+        // Crear los atributos data para cada fila
+        $dataAttributes = "data-sell_order='" . htmlspecialchars($row['sell_order']) . "' " .
+                         "data-upc_item='" . htmlspecialchars($row['upc_item']) . "' " .
+                         "data-id_sell='" . htmlspecialchars($row['id_sell']) . "' " .
+                         "data-sku_item='" . htmlspecialchars($row['sku_item']) . "'";
+        
+        // Verificar si tiene datos de cancelación
+        $hasCancellationData = !empty($row['refund_amount']) || !empty($row['shipping_refund']) || 
+                              !empty($row['tax_refund']) || !empty($row['final_fee_refund']) || 
+                              !empty($row['fixed_charge_refund']) || !empty($row['other_fee_refund']) ||
+                              !empty($row['cancellation_date']);
+        
+        // Agregar clase CSS según tenga o no datos de cancelación
+        $rowClass = $hasCancellationData ? 'table-success' : 'table-light';
+        $statusIcon = $hasCancellationData ? '<i class="fas fa-check-circle text-success"></i>' : '<i class="fas fa-minus-circle text-muted"></i>';
+        
+        echo "<tr class='clickable-row " . $rowClass . "' " . $dataAttributes . ">";
+        echo "<td>" . htmlspecialchars($row['sell_order']) . " " . $statusIcon . "</td>";
+        echo "<td>" . htmlspecialchars($row['date']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['upc_item']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['sku_item']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['store_name']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['code_sucursal']) . "</td>";
+        echo "<td>" . ($row['refund_amount'] ? '$' . number_format($row['refund_amount'], 2) : '-') . "</td>";
+        echo "<td>" . ($row['shipping_refund'] ? '$' . number_format($row['shipping_refund'], 2) : '-') . "</td>";
+        echo "<td>" . ($row['tax_refund'] ? '$' . number_format($row['tax_refund'], 2) : '-') . "</td>";
+        echo "<td>" . ($row['final_fee_refund'] ? '$' . number_format($row['final_fee_refund'], 2) : '-') . "</td>";
+        echo "<td>" . ($row['fixed_charge_refund'] ? '$' . number_format($row['fixed_charge_refund'], 2) : '-') . "</td>";
+        echo "<td>" . ($row['other_fee_refund'] ? '$' . number_format($row['other_fee_refund'], 2) : '-') . "</td>";
+        echo "<td>" . ($row['net_cancellation'] ? '$' . number_format($row['net_cancellation'], 2) : '-') . "</td>";
+        echo "<td>" . ($row['cancellation_date'] ? htmlspecialchars($row['cancellation_date']) : '-') . "</td>";
         echo "</tr>";
     }
     

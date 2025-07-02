@@ -435,9 +435,16 @@ $resultTiendas = $mysqli->query($queryTiendas);
       document.querySelectorAll(".clickable-row").forEach(function (row) {
         row.addEventListener("click", function () {
           const sell_order = this.dataset.sell_order;
-          console.log("Selected Sell Order:", sell_order);
+          const upc_item = this.dataset.upc_item;
+          const id_sell = this.dataset.id_sell;
+          console.log("Selected:", { sell_order, upc_item, id_sell });
           
-          fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}`)
+          // Construir URL con parámetros específicos
+          let url = `getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}`;
+          if (upc_item) url += `&upc_item=${encodeURIComponent(upc_item)}`;
+          if (id_sell) url += `&id_sell=${encodeURIComponent(id_sell)}`;
+          
+          fetch(url)
             .then((response) => response.json())
             .then((data) => {
               console.log(data);
@@ -536,6 +543,7 @@ $resultTiendas = $mysqli->query($queryTiendas);
                 </div>
                 <input type='hidden' name='sell_order' value='${items[0].sell_order}'>
                 <input type='hidden' name='id_sell' value='${items[0].id_sell}'>
+                <input type='hidden' name='upc_item' value='${items[0].upc_item}'>
                 <div class='text-end'>
                   <button type='submit' class='btn' style='background-color: #632b8b; color: #fff; border-color: #632b8b;'>Save</button>
                 </div>

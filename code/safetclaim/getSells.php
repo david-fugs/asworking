@@ -50,21 +50,21 @@ $data = [];
 if ($result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
     echo "<tr>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['sell_order'] . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['date'] . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['upc_item'] . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['brand_item'] . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['item_item'] . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['color_item'] . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['ref_item'] . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['store_name'] . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . $row['code_sucursal'] . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['safet_reimbursement'] ? '$' . number_format($row['safet_reimbursement'], 2) : '-') . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['shipping_reimbursement'] ? '$' . number_format($row['shipping_reimbursement'], 2) : '-') . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['tax_reimbursement'] ? '$' . number_format($row['tax_reimbursement'], 2) : '-') . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['label_avoid'] ? '$' . number_format($row['label_avoid'], 2) : '-') . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['other_fee_reimbursement'] ? '$' . number_format($row['other_fee_reimbursement'], 2) : '-') . "</td>";
-    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "'>" . ($row['safetclaim_date'] ? $row['safetclaim_date'] : 'Not set') . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . $row['sell_order'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . $row['date'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . $row['upc_item'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . $row['brand_item'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . $row['item_item'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . $row['color_item'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . $row['ref_item'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . $row['store_name'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . $row['code_sucursal'] . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . ($row['safet_reimbursement'] ? '$' . number_format($row['safet_reimbursement'], 2) : '-') . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . ($row['shipping_reimbursement'] ? '$' . number_format($row['shipping_reimbursement'], 2) : '-') . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . ($row['tax_reimbursement'] ? '$' . number_format($row['tax_reimbursement'], 2) : '-') . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . ($row['label_avoid'] ? '$' . number_format($row['label_avoid'], 2) : '-') . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . ($row['other_fee_reimbursement'] ? '$' . number_format($row['other_fee_reimbursement'], 2) : '-') . "</td>";
+    echo "<td  class='clickable-row' data-sell_order='" . $row['sell_order'] . "' data-upc_item='" . $row['upc_item'] . "' data-id_sell='" . $row['id_sell'] . "'>" . ($row['safetclaim_date'] ? $row['safetclaim_date'] : 'Not set') . "</td>";
     echo "<td>
     <button class='btn-action-icon btn-delete' data-id='" . $row['id_sell'] . "'><i class='fas fa-trash-alt'></i></button> </td>";
     echo "</tr>";

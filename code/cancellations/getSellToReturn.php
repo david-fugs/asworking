@@ -8,6 +8,8 @@ if (!isset($_GET['sell_order'])) {
 }
 
 $sell_order = $_GET['sell_order'];
+$upc_item = isset($_GET['upc_item']) ? $_GET['upc_item'] : null;
+$id_sell = isset($_GET['id_sell']) ? $_GET['id_sell'] : null;
 
 try {
     // Obtener información de la venta
@@ -51,20 +53,44 @@ try {
     }
 
     // Obtener información de cancellation existente (si existe)
-    $cancellationQuery = "SELECT * FROM cancellations WHERE order_id = ?";
-    $cancellationStmt = $mysqli->prepare($cancellationQuery);
-    $cancellationStmt->bind_param("s", $sell_order);
-    $cancellationStmt->execute();
-    $cancellationResult = $cancellationStmt->get_result();
+    // Si se especifica un UPC e id_sell, buscar cancelación específica para ese combination
+    $cancellations = [];
     
-    $cancellation = null;
-    if ($cancellationResult->num_rows > 0) {
-        $cancellation = $cancellationResult->fetch_assoc();
+    if ($upc_item && $id_sell) {
+        // Buscar cancelación específica para este order_id + id_sell + upc_item
+        $cancellationQuery = "SELECT * FROM cancellations WHERE order_id = ? AND id_sell = ? AND upc_item = ?";
+        $cancellationStmt = $mysqli->prepare($cancellationQuery);
+        $cancellationStmt->bind_param("sis", $sell_order, $id_sell, $upc_item);
+        $cancellationStmt->execute();
+        $cancellationResult = $cancellationStmt->get_result();
+        
+        if ($cancellationResult->num_rows > 0) {
+            $cancellation = $cancellationResult->fetch_assoc();
+            // Usar id_sell + upc_item como clave para el array de cancelaciones
+            $cancellations[$id_sell . '_' . $upc_item] = $cancellation;
+        }
+    } else {
+        // Obtener todas las cancelaciones para este order_id
+        $cancellationQuery = "SELECT * FROM cancellations WHERE order_id = ?";
+        $cancellationStmt = $mysqli->prepare($cancellationQuery);
+        $cancellationStmt->bind_param("s", $sell_order);
+        $cancellationStmt->execute();
+        $cancellationResult = $cancellationStmt->get_result();
+        
+        while ($cancellation = $cancellationResult->fetch_assoc()) {
+            // Usar id_sell + upc_item como clave para el array de cancelaciones
+            $key = $cancellation['id_sell'] . '_' . $cancellation['upc_item'];
+            $cancellations[$key] = $cancellation;
+        }
     }
 
     echo json_encode([
         'items' => $items,
-        'cancellation' => $cancellation
+        'cancellations' => $cancellations,
+        // Para compatibilidad con código existente, retornar la primera cancelación
+        'cancellation' => ($upc_item && $id_sell && isset($cancellations[$id_sell . '_' . $upc_item])) ? 
+                          $cancellations[$id_sell . '_' . $upc_item] : 
+                          (count($cancellations) > 0 ? reset($cancellations) : null)
     ]);
 
 } catch (Exception $e) {
