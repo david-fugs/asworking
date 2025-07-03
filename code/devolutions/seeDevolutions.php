@@ -837,17 +837,29 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
                   <input type="date" class="form-control" id="edit-date" readonly>
                 </div>
                 <div class="col-md-4">
-                  <label for="edit-upc" class="form-label">UPC</label>
-                  <input type="text" class="form-control" id="edit-upc" readonly>
+                  <label for="edit-devolution-date" class="form-label">Devolution Date</label>
+                  <input type="date" class="form-control" id="edit-devolution-date" name="devolution_date">
                 </div>
               </div>
 
               <!-- Fila 2: 3 columnas -->
               <div class="row g-3 mb-3">
                 <div class="col-md-4">
+                  <label for="edit-upc" class="form-label">UPC</label>
+                  <input type="text" class="form-control" id="edit-upc" readonly>
+                </div>
+                <div class="col-md-4">
+                  <label for="edit-sku" class="form-label">SKU</label>
+                  <input type="text" class="form-control" id="edit-sku" readonly>
+                </div>
+                <div class="col-md-4">
                   <label for="edit-quantity" class="form-label">Quantity</label>
                   <input type="number" class="form-control" id="edit-quantity" step="0.01">
                 </div>
+              </div>
+
+              <!-- Fila 3: 3 columnas -->
+              <div class="row g-3 mb-3">
                 <div class="col-md-4">
                   <label for="edit-product-charge" class="form-label">Product Charge</label>
                   <input type="number" class="form-control" id="edit-product-charge" step="0.01">
@@ -856,12 +868,14 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
                   <label for="edit-shipping-paid" class="form-label">Shipping Paid</label>
                   <input type="number" class="form-control" id="edit-shipping-paid" step="0.01">
                 </div>
-              </div>              <!-- Fila 3: 3 columnas -->
-              <div class="row g-3 mb-3">
                 <div class="col-md-4">
                   <label for="edit-tax-return" class="form-label">Tax Return</label>
                   <input type="number" class="form-control" id="edit-tax-return" step="0.01">
                 </div>
+              </div>
+
+              <!-- Fila 4: 3 columnas -->
+              <div class="row g-3 mb-3">
                 <div class="col-md-4">
                   <label for="edit-selling-fee-refund" class="form-label">Selling Fee Refund</label>
                   <input type="number" class="form-control" id="edit-selling-fee-refund" step="0.01">
@@ -870,12 +884,14 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
                   <label for="edit-refund-administration-fee" class="form-label">Refund Administration Fee</label>
                   <input type="number" class="form-control" id="edit-refund-administration-fee" step="0.01">
                 </div>
-              </div><!-- Fila 4: 3 columnas -->
-              <div class="row g-3 mb-3">
                 <div class="col-md-4">
                   <label for="edit-other-refund-fee" class="form-label">Other Refund Fee</label>
                   <input type="number" class="form-control" id="edit-other-refund-fee" step="0.01">
                 </div>
+              </div>
+
+              <!-- Fila 5: 3 columnas -->
+              <div class="row g-3 mb-3">
                 <div class="col-md-4">
                   <label for="edit-item-profit" class="form-label">Item Profit</label>
                   <input type="number" class="form-control" id="edit-item-profit" step="0.01" readonly>
@@ -884,9 +900,12 @@ if (isset($_GET['upc_item']) || isset($_GET['date_devolution']) || isset($_GET['
                   <label for="edit-return-cost" class="form-label">Return Cost (Calculated)</label>
                   <input type="number" class="form-control" id="edit-return-cost" step="0.01" readonly style="background-color: #f8f9fa;">
                 </div>
+                <div class="col-md-4">
+                  <!-- Columna vacía para balance visual -->
+                </div>
               </div>
 
-              <!-- Fila 5: Comentarios -->
+              <!-- Fila 6: Comentarios -->
               <div class="row g-3 mb-3">
                 <div class="col-md-12">
                   <label for="edit-buyer-comments" class="form-label">Buyer Comments</label>

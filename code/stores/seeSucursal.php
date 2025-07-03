@@ -334,7 +334,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
     </div>
 
     <div class="container">
-        <h1 class="page-title text-center"><i class="fa-solid fa-store"></i> SUCURSALES</h1>
+        <h1 class="page-title text-center"><i class="fa-solid fa-store"></i> STORES</h1>
 
         <!-- Search Form -->
         <div class="search-form">
@@ -382,6 +382,10 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
         store.store_name,
         sucursal.id_sucursal,
         sucursal.code_sucursal,
+        sucursal.items_price,
+        sucursal.shipping_received,
+        sucursal.tax,
+        sucursal.incentives_offered,
         GROUP_CONCAT(CONCAT('Sales less than $', f.sales_less_than , ': ', f.comision, ' fee / ', f.cargo_fijo, ' Fixed Charge') SEPARATOR '<br>') AS detalles_rangos
     FROM store
     JOIN sucursal ON store.id_store = sucursal.id_store
@@ -451,6 +455,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
             echo '<th>No.</th>';
             echo '<th>STORE NAME</th>';
             echo '<th>REFERENCE CODE</th>';
+            echo '<th>OPTIONS</th>';
             echo '<th>RANGES</th>';
             echo '<th>ACTIONS</th>';
             echo '</tr>';
@@ -459,10 +464,19 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
 
             $i = 1;
             while ($row = mysqli_fetch_array($result)) {
+                // Crear una cadena de opciones seleccionadas
+                $options = [];
+                if ($row['items_price'] == 1) $options[] = 'Items price';
+                if ($row['shipping_received'] == 1) $options[] = 'Shipping received';
+                if ($row['tax'] == 1) $options[] = 'Tax';
+                if ($row['incentives_offered'] == 1) $options[] = 'Incentives Offered';
+                $options_text = !empty($options) ? implode('<br>', $options) : '<em>None</em>';
+                
                 echo '<tr>';
                 echo '<td>' . $i++ . '</td>';
                 echo '<td>' . htmlspecialchars($row['store_name']) . '</td>';
                 echo '<td>' . htmlspecialchars($row['code_sucursal']) . '</td>';
+                echo '<td>' . $options_text . '</td>';
                 echo '<td>' . ($row['detalles_rangos'] ? $row['detalles_rangos'] : '<em>No config</em>') . '</td>';
                 echo '<td class="action-buttons">';
                 echo '<button type="button" class="btn-action btn-edit" 
@@ -521,6 +535,34 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                             <input type="text" class="form-control" id="edit_code_sucursal" name="code_sucursal" placeholder="Código de la sucursal">
                         </div>
                     </div>
+
+                    <!-- CHECKBOXES -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Additional Options</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="edit_items_price" name="items_price" value="1">
+                                    <label class="form-check-label" for="edit_items_price">Items price</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="edit_shipping_received" name="shipping_received" value="1">
+                                    <label class="form-check-label" for="edit_shipping_received">Shipping received</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="edit_tax" name="tax" value="1">
+                                    <label class="form-check-label" for="edit_tax">Tax</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="edit_incentives_offered" name="incentives_offered" value="1">
+                                    <label class="form-check-label" for="edit_incentives_offered">Incentives Offered</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <hr>
                     <!-- Rangos -->
                     <div id="rangos-container">
@@ -616,6 +658,33 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                             <input type="text" class="form-control" id="code_sucursal" name="code_sucursal" required>
                         </div>
 
+                        <!-- CHECKBOXES -->
+                        <div class="mb-3">
+                            <label class="form-label">Additional Options</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="items_price" name="items_price" value="1">
+                                        <label class="form-check-label" for="items_price">Items price</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="shipping_received" name="shipping_received" value="1">
+                                        <label class="form-check-label" for="shipping_received">Shipping received</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="tax" name="tax" value="1">
+                                        <label class="form-check-label" for="tax">Tax</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incentives_offered" name="incentives_offered" value="1">
+                                        <label class="form-check-label" for="incentives_offered">Incentives Offered</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- RANGOS -->
                         <label class="form-label">Fee and Fixed Charge by Sales Range</label>
                         <div class="row g-2 border p-2 mb-2">
@@ -663,8 +732,22 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                     selectStore.dispatchEvent(new Event('change')); // opcional
                 }
 
-
+                // Obtener los datos actuales de la sucursal (incluyendo checkboxes)
                 let id_sucursal = button.getAttribute("data-id_sucursal");
+
+                // Obtener datos de la sucursal para los checkboxes
+                fetch("get_sucursal_data.php?id_sucursal=" + id_sucursal)
+                    .then(res => res.json())
+                    .then(data => {
+                        // Actualizar checkboxes
+                        document.getElementById("edit_items_price").checked = data.items_price == 1;
+                        document.getElementById("edit_shipping_received").checked = data.shipping_received == 1;
+                        document.getElementById("edit_tax").checked = data.tax == 1;
+                        document.getElementById("edit_incentives_offered").checked = data.incentives_offered == 1;
+                    })
+                    .catch(err => {
+                        console.error("Error loading sucursal data:", err);
+                    });
 
                 // Limpiar inputs de rangos
                 for (let i = 1; i <= 3; i++) {

@@ -6,9 +6,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Capturar datos del formulario
     $id_store = (int) $_POST["id_store"];
     $code_sucursal = $mysqli->real_escape_string($_POST["code_sucursal"]);
+    
+    // Capturar checkboxes (1 si está marcado, 0 si no)
+    $items_price = isset($_POST['items_price']) ? 1 : 0;
+    $shipping_received = isset($_POST['shipping_received']) ? 1 : 0;
+    $tax = isset($_POST['tax']) ? 1 : 0;
+    $incentives_offered = isset($_POST['incentives_offered']) ? 1 : 0;
 
     // Insertar sucursal principal
-    $sql_insert_sucursal = "INSERT INTO sucursal (id_store, code_sucursal) VALUES ('$id_store', '$code_sucursal')";
+    $sql_insert_sucursal = "INSERT INTO sucursal (id_store, code_sucursal, items_price, shipping_received, tax, incentives_offered) 
+                           VALUES ('$id_store', '$code_sucursal', '$items_price', '$shipping_received', '$tax', '$incentives_offered')";
 
     if ($mysqli->query($sql_insert_sucursal)) {
         $id_sucursal = $mysqli->insert_id; // ID recién insertado

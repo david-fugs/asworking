@@ -35,11 +35,18 @@ $query = "SELECT
             returns.refund_administration_fee,
             returns.other_refund_fee,
             returns.return_cost,
-            returns.buyer_comments
+            returns.buyer_comments,
+            returns.devolution_date
           FROM sell
           LEFT JOIN store ON store.id_store = sell.id_store
           LEFT JOIN sucursal ON sucursal.id_sucursal = sell.id_sucursal
-          LEFT JOIN returns ON BINARY returns.sell_order = BINARY sell.sell_order
+          LEFT JOIN returns ON BINARY returns.sell_order = BINARY sell.sell_order 
+                             AND returns.id_sell = sell.id_sell
+                             AND BINARY returns.upc_item = BINARY sell.upc_item
+                             AND (BINARY returns.sku_item = BINARY sell.sku_item 
+                                  OR (returns.sku_item IS NULL AND sell.sku_item IS NULL)
+                                  OR (returns.sku_item = '' AND sell.sku_item IS NULL)
+                                  OR (returns.sku_item IS NULL AND sell.sku_item = ''))
           WHERE sell.estado_sell = 1";
 
 $params = [];
@@ -90,6 +97,7 @@ if ($stmt) {
                     <th style="display: table-cell !important;"><i class="fas fa-plus me-1"></i>Other Refund Fee</th>
                     <th style="display: table-cell !important;"><i class="fas fa-undo me-1"></i>Return Cost</th>
                     <th style="display: table-cell !important;"><i class="fas fa-comment me-1"></i>Buyer Comments</th>
+                    <th style="display: table-cell !important;"><i class="fas fa-calendar-check me-1"></i>Devolution Date</th>
                     <th style="display: table-cell !important;"><i class="fas fa-store me-1"></i>Branch</th>
                   </tr>
                 </thead>
@@ -107,11 +115,12 @@ if ($stmt) {
             $calculated_return_cost = $product_charge + $shipping_paid + $tax_return - $selling_fee_refund + $refund_administration_fee + $other_refund_fee + $item_profit;
             
             echo "<tr class='clickable-row' style='cursor: pointer;' 
-                    data-id='" . htmlspecialchars($row['id_return']) . "'
+                    data-id='" . htmlspecialchars($row['id_return'] ?? '') . "'
+                    data-id-sell='" . htmlspecialchars($row['id_sell']) . "'
                     data-sell-order='" . htmlspecialchars($row['sell_order']) . "'
                     data-date='" . htmlspecialchars($row['date']) . "'
                     data-upc='" . htmlspecialchars($row['upc_item']) . "'
-                    data-sku='" . htmlspecialchars($row['sku_item']) . "'
+                    data-sku='" . htmlspecialchars($row['sku_item'] ?? '') . "'
                     data-quantity='" . htmlspecialchars($row['quantity'] ?? '0') . "'
                     data-product-charge='" . htmlspecialchars($row['product_charge'] ?? '0.00') . "'
                     data-shipping-paid='" . htmlspecialchars($row['shipping_paid'] ?? '0.00') . "'
@@ -122,6 +131,7 @@ if ($stmt) {
                     data-return-cost='" . htmlspecialchars(number_format($calculated_return_cost, 2)) . "'
                     data-buyer-comments='" . htmlspecialchars($row['buyer_comments'] ?? '') . "'
                     data-item-profit='" . htmlspecialchars($row['item_profit'] ?? '0.00') . "'
+                    data-devolution-date='" . htmlspecialchars($row['devolution_date'] ?? '') . "'
                     data-code-sucursal='" . htmlspecialchars($row['code_sucursal']) . "'>";            echo "<td><strong style='color: #000000 !important;'>" . htmlspecialchars($row['sell_order']) . "</strong></td>";
             echo "<td><span class='badge bg-dark text-white'>" . date('M d, Y', strtotime($row['date'])) . "</span></td>";
             echo "<td><code class='bg-dark text-white'>" . htmlspecialchars($row['upc_item']) . "</code></td>";
@@ -135,6 +145,7 @@ if ($stmt) {
             echo "<td class='text-end'><strong style='color: #000000 !important;'>$" . number_format($row['other_refund_fee'] ?? 0, 2) . "</strong></td>";
             echo "<td class='text-end'><strong style='color: #000000 !important;'>$" . number_format($calculated_return_cost, 2) . "</strong></td>";
             echo "<td>" . (empty($row['buyer_comments']) ? '<em style="color: #000000 !important;">No comments</em>' : '<span class="text-truncate d-inline-block" style="max-width: 150px; color: #000000 !important;" title="' . htmlspecialchars($row['buyer_comments']) . '">' . htmlspecialchars($row['buyer_comments']) . '</span>') . "</td>";
+            echo "<td>" . (empty($row['devolution_date']) ? '<em style="color: #000000 !important;">Not set</em>' : '<span class="badge bg-primary text-white">' . date('M d, Y', strtotime($row['devolution_date'])) . '</span>') . "</td>";
             echo "<td><span class='badge bg-dark text-white'>" . htmlspecialchars($row['code_sucursal']) . "</span></td>";
             echo "</tr>";        }
         // Construir mensaje dinámico basado en los criterios de búsqueda

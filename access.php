@@ -639,7 +639,7 @@ if ($current_month_orders > 0) {
             <i class="bx bx-chevron-right arrow-left"></i>
           </div>
           <ul class="menu_items submenu">
-            <a href="code/stores/seeSucursal.php" class="nav_link sublink">See Sucursal</a>
+            <a href="code/stores/seeSucursal.php" class="nav_link sublink">See Store</a>
           </ul>
         </li>        <!-- DAILY REPORT -->
         <li class="item">

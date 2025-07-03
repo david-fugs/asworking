@@ -78,10 +78,12 @@ $(document).ready(function() {
         document.querySelectorAll(".clickable-row").forEach(function (row) {
             row.addEventListener("click", function () {
                 const rowData = this.dataset;                  // Llenar el modal con los datos de la fila
-                $('#edit-id-sell').val(rowData.id);
+                $('#edit-id-sell').val(rowData.idSell);  // Cambiar para usar id_sell
                 $('#edit-sell-order').val(rowData.sellOrder);
                 $('#edit-date').val(rowData.date.split(' ')[0]); // Solo la fecha, sin la hora
+                $('#edit-devolution-date').val(rowData.devolutionDate);
                 $('#edit-upc').val(rowData.upc);
+                $('#edit-sku').val(rowData.sku || ''); // Asegurar que no sea undefined
                 $('#edit-quantity').val(rowData.quantity);
                 $('#edit-product-charge').val(rowData.productCharge);
                 $('#edit-shipping-paid').val(rowData.shippingPaid);
@@ -92,6 +94,10 @@ $(document).ready(function() {
                 $('#edit-item-profit').val(rowData.itemProfit);
                 $('#edit-buyer-comments').val(rowData.buyerComments);
                 
+                // Almacenar id_return en un atributo data del modal para uso posterior
+                $('#editModal').attr('data-id-return', rowData.id || '');
+                $('#editModal').attr('data-id-sell', rowData.idSell);
+                
                 // Calcular Return Cost automáticamente
                 calculateReturnCost();
                 
@@ -101,8 +107,11 @@ $(document).ready(function() {
         });
     }    // Manejar guardado de cambios
     $('#saveEdit').click(function() {        const formData = {
-            id: $('#edit-id-sell').val(),
+            id: $('#editModal').attr('data-id-return'),      // Usar id_return para actualizaciones
+            id_sell: $('#editModal').attr('data-id-sell'),   // Usar id_sell para identificación única
             sell_order: $('#edit-sell-order').val(),
+            upc_item: $('#edit-upc').val(),
+            sku_item: $('#edit-sku').val() || '', // Asegurar que no sea undefined
             quantity: $('#edit-quantity').val(),
             product_charge: $('#edit-product-charge').val(),
             shipping_paid: $('#edit-shipping-paid').val(),
@@ -112,18 +121,24 @@ $(document).ready(function() {
             other_refund_fee: $('#edit-other-refund-fee').val(),
             item_profit: $('#edit-item-profit').val(),
             return_cost: $('#edit-return-cost').val(),
-            buyer_comments: $('#edit-buyer-comments').val()
+            buyer_comments: $('#edit-buyer-comments').val(),
+            devolution_date: $('#edit-devolution-date').val()
         };
 
         // Validar campos requeridos
-        if (!formData.sell_order) {
+        if (!formData.sell_order || !formData.id_sell) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Missing required data'
+                text: 'Missing required data (sell_order, id_sell)'
             });
             return;
         }
+
+        // Debug log
+        console.log('Sending data:', formData);
+        console.log('Current protocol:', window.location.protocol);
+        console.log('Current URL:', window.location.href);
 
         // Enviar datos via AJAX
         $.ajax({
@@ -131,8 +146,10 @@ $(document).ready(function() {
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(formData),
+            dataType: 'json',  // Especificar que esperamos JSON
             success: function(response) {
-                if (response.success) {
+                console.log('Response received:', response); // Debug log
+                if (response && response.success) {
                     Swal.fire({
                         icon: 'success',
                         title: 'Success',
@@ -148,22 +165,41 @@ $(document).ready(function() {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: response.message
+                        text: response ? response.message : 'Unknown error occurred'
                     });
                 }
             },
             error: function(xhr, status, error) {
-                console.error('AJAX Error:', error);
+                console.error('AJAX Error Details:', {
+                    status: status,
+                    error: error,
+                    responseText: xhr.responseText,
+                    statusCode: xhr.status
+                });
+                
+                let errorMessage = 'Error communicating with server';
+                if (xhr.status === 0) {
+                    errorMessage = 'Network error - check if server is running';
+                } else if (xhr.status === 404) {
+                    errorMessage = 'File not found (404)';
+                } else if (xhr.status === 500) {
+                    errorMessage = 'Server error (500)';
+                } else if (xhr.responseText) {
+                    errorMessage = 'Server error: ' + xhr.responseText.substring(0, 100);
+                }
+                
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: 'Error communicating with server'
+                    title: 'Connection Error',
+                    text: errorMessage
                 });
             }
         });
     });    // Limpiar modal al cerrarse
     $('#editModal').on('hidden.bs.modal', function() {
         $('#editForm')[0].reset();
+        $(this).removeAttr('data-id-return');
+        $(this).removeAttr('data-id-sell');
     });    // Función para calcular Return Cost automáticamente
     function calculateReturnCost() {
         const productCharge = parseFloat($('#edit-product-charge').val()) || 0;

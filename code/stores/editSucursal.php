@@ -6,11 +6,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $id_sucursal = (int) $_POST["id_sucursal"];
     $store_id = (int) $_POST["store"];
     $code_sucursal = $mysqli->real_escape_string($_POST["code_sucursal"]);
+    
+    // Capturar checkboxes (1 si está marcado, 0 si no)
+    $items_price = isset($_POST['items_price']) ? 1 : 0;
+    $shipping_received = isset($_POST['shipping_received']) ? 1 : 0;
+    $tax = isset($_POST['tax']) ? 1 : 0;
+    $incentives_offered = isset($_POST['incentives_offered']) ? 1 : 0;
 
     // Actualizar la tabla sucursal
     $sql_update_sucursal = "UPDATE sucursal SET 
                                 id_store = $store_id,
-                                code_sucursal = '$code_sucursal'
+                                code_sucursal = '$code_sucursal',
+                                items_price = $items_price,
+                                shipping_received = $shipping_received,
+                                tax = $tax,
+                                incentives_offered = $incentives_offered
                             WHERE id_sucursal = $id_sucursal";
 
     if (!$mysqli->query($sql_update_sucursal)) {
