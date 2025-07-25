@@ -352,7 +352,12 @@ header("Content-Type: text/html;charset=utf-8");
                             </div>
                             <div class="col-12 col-sm-3">
                                 <label for="cost_item" class="form-label required-field">COST</label>
-                                <input type='number' name='cost_item' class='form-control' id="cost_item" step="0.01" required />
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="cost-addon">$</span>
+                                    </div>
+                                    <input type='number' name='cost_item' class='form-control' id="cost_item" step="0.01" aria-describedby="cost-addon" required />
+                                </div>
                             </div>
                             <div class="col-12 col-sm-3">
                                 <label for="weight_item" class="form-label required-field">WEIGHT</label>
@@ -393,10 +398,20 @@ header("Content-Type: text/html;charset=utf-8");
                                         <input class="form-check-input" type="checkbox" name="stores[]" value="WM001" id="store_WM001">
                                         <label class="form-check-label" for="store_WM001">WM001</label>
                                     </div>
+
                                 </div>
                                 <div id="stores-error" class="text-danger mt-1" style="display: none;">
                                     <small>Please select at least one store.</small>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Observation field -->
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="observation_inventory" class="form-label">Observation</label>
+                                <textarea name="observation_inventory" id="observation_inventory" class="form-control" rows="2" maxlength="255" placeholder="Enter any observation or note..."></textarea>
                             </div>
                         </div>
                     </div>

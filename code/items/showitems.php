@@ -581,7 +581,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         require_once("../../zebra.php");
 
         // Inicializa la consulta base
-        $queryBase = "SELECT items.*, inventory.quantity_inventory 
+        $queryBase = "SELECT items.*, inventory.quantity_inventory , inventory.observation_inventory
         FROM items 
         LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
         WHERE 1=1";
@@ -668,6 +668,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <th style="min-width: 70px; text-align: center;">STOCK</th>
                                 <th style="min-width: 70px; text-align: center;">BATCH</th>
                                 <th style="min-width: 110px; text-align: center;">STORES</th>
+                                <th style="min-width: 140px; text-align: center;">OBSERVATION</th>
                                 <th style="min-width: 50px; text-align: center;">EDIT</th>
                                 <th style="min-width: 50px; text-align: center;">DELETE</th>
                             </tr>
@@ -704,7 +705,9 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <td>' . $row['weight_item'] . '</td>
                                 <td>' . $row['quantity_inventory'] . '</td>
                                 <td>' . $row['inventory_item'] . '</td>
-                                <td>' . $stores_display . '</td>                                <td>
+                                <td>' . $stores_display . '</td>
+                                <td>' . (isset($row['observation_inventory']) && $row['observation_inventory'] !== '' ? htmlspecialchars($row['observation_inventory']) : '<span class="text-muted">-</span>') . '</td>
+                                <td>
                                     <button type="button" class="btn-action btn-edit" 
                                         data-bs-toggle="modal" data-bs-target="#modalEdicion"
                                         data-upc="' . $row['upc_item'] . '"
@@ -722,6 +725,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                         data-estado="' . $row['estado_item'] . '"
                                         data-stock="' . $row['quantity_inventory'] . '"
                                         data-batch="' . $row['inventory_item'] . '"
+                                        data-observation="' . htmlspecialchars($row['observation_inventory']) . '"
                                         data-stores=\'' . htmlspecialchars($row['stores_item']) . '\'>
                                         <i class="fas fa-edit"></i>
                                     </button>     
@@ -870,7 +874,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
 
                         <!-- Sección de Tiendas -->
                         <h5 class="mb-3">Stores to Publish</h5>
-                        <div class="checkbox-group">
+                        <div class="checkbox-group mb-3">
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="checkbox" name="stores[]" value="AS001" id="edit_store_AS001">
                                 <label class="form-check-label" for="edit_store_AS001">AS001</label>
@@ -891,6 +895,11 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <input class="form-check-input" type="checkbox" name="stores[]" value="WM001" id="edit_store_WM001">
                                 <label class="form-check-label" for="edit_store_WM001">WM001</label>
                             </div>
+                        </div>
+                        <!-- Observation field -->
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="edit-observation" name="observation" rows="2" maxlength="255" placeholder="Observation"></textarea>
+                            <label for="edit-observation">Observation</label>
                         </div>
 
                         <div class="modal-footer">
@@ -923,6 +932,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                 document.getElementById("edit-stock").value = button.getAttribute("data-stock");
                 document.getElementById("edit-batch").value = button.getAttribute("data-batch");
                 document.getElementById("edit-id").value = button.getAttribute("data-id");
+                document.getElementById("edit-observation").value = button.getAttribute("data-observation") || '';
 
                 // Cargar las tiendas seleccionadas
                 loadStores(button.getAttribute("data-stores"));

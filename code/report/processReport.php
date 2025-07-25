@@ -36,22 +36,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // VALIDACIÓN 2: Generar SKU único de 10 dígitos
+    // VALIDACIÓN 2: Generar SKU único alfanumérico (8 caracteres, letras y números)
     function generateUniqueSKU($mysqli) {
         $max_attempts = 100;
         $attempts = 0;
-        
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $length = 8;
         do {
             $sku = '';
-            for ($i = 0; $i < 10; $i++) {
-                $sku .= rand(0, 9);
+            for ($i = 0; $i < $length; $i++) {
+                $sku .= $characters[rand(0, strlen($characters) - 1)];
             }
-            
             // Verificar en tabla items
             $check_items = "SELECT COUNT(*) as count FROM items WHERE sku_item = '$sku'";
             $result_items = $mysqli->query($check_items);
             $exists_items = $result_items->fetch_assoc()['count'] > 0;
-            
             // Verificar en tabla inventory
             $exists_inventory = false;
             $check_inventory = "SELECT COUNT(*) as count FROM inventory WHERE sku_inventory = '$sku'";
@@ -59,11 +58,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if ($result_inventory) {
                 $exists_inventory = $result_inventory->fetch_assoc()['count'] > 0;
             }
-            
             $attempts++;
-            
         } while (($exists_items || $exists_inventory) && $attempts < $max_attempts);
-        
         return ($attempts < $max_attempts) ? $sku : false;
     }
 

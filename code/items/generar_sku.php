@@ -2,9 +2,14 @@
 // Include database connection
 include_once '../../conexion.php';
 
-function generateRandomSKU() {
-    // Generate a random 10-digit number
-    return str_pad(mt_rand(1, 9999999999), 10, '0', STR_PAD_LEFT);
+function generateRandomSKU($length = 8) {
+    $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
 }
 
 function isSkuUnique($sku, $mysqli) {
@@ -22,20 +27,15 @@ function isSkuUnique($sku, $mysqli) {
 function generateUniqueSKU($mysqli) {
     $maxAttempts = 100; // Prevent infinite loop
     $attempts = 0;
-    
     do {
-        $sku = generateRandomSKU();
+        $sku = generateRandomSKU(8); // 8 caracteres alfanuméricos
         $attempts++;
-        
         if ($attempts >= $maxAttempts) {
-            // If we can't find a unique SKU after many attempts, 
-            // use timestamp + random number as fallback
+            // Fallback: timestamp + random
             $sku = date('YmdHis') . mt_rand(1000, 9999);
             break;
         }
-        
     } while (!isSkuUnique($sku, $mysqli));
-    
     return $sku;
 }
 

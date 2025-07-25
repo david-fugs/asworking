@@ -46,6 +46,7 @@ try {
                 'category' => $item['category_item'] ?? '',
                 'weight' => $item['weight_item'] ?? '',
                 'inventory' => $item['inventory_item'] ?? 0,
+                'location' => $item['inventory_item'] ?? '',
                 'status' => $item['estado_item'] ?? 0
             ]
         ];

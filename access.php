@@ -81,7 +81,7 @@ $current_month_orders = $row_monthly['current_month_orders'] ?? 0;
 // Calculate sales growth percentage
 $sales_growth = 0;
 if ($previous_month_sales > 0) {
-    $sales_growth = (($current_month_sales - $previous_month_sales) / $previous_month_sales) * 100;
+  $sales_growth = (($current_month_sales - $previous_month_sales) / $previous_month_sales) * 100;
 }
 
 // Low stock items (items with less than 10 units)
@@ -114,7 +114,7 @@ $avg_order_value = $row_avg_order['avg_order_value'] ?? 0;
 // Return rate calculation
 $return_rate = 0;
 if ($current_month_orders > 0) {
-    $return_rate = ($total_devoluciones_count / $current_month_orders) * 100;
+  $return_rate = ($total_devoluciones_count / $current_month_orders) * 100;
 }
 ?>
 
@@ -185,11 +185,14 @@ if ($current_month_orders > 0) {
     .logo_item img {
       height: 40px;
       filter: brightness(0) invert(1);
-    }    #sidebarOpen {
+    }
+
+    #sidebarOpen {
       font-size: 1.5rem;
       cursor: pointer;
       transition: var(--transition);
-      display: none; /* Ocultar el botón hamburguesa */
+      display: none;
+      /* Ocultar el botón hamburguesa */
     }
 
     #sidebarOpen:hover {
@@ -226,7 +229,9 @@ if ($current_month_orders > 0) {
     .profile:hover {
       transform: scale(1.1);
       border-color: white;
-    }    /* Sidebar */
+    }
+
+    /* Sidebar */
     .sidebar {
       background: white;
       width: 270px;
@@ -355,7 +360,9 @@ if ($current_month_orders > 0) {
 
     .collapse_sidebar {
       display: none;
-    }    /* Main Content */
+    }
+
+    /* Main Content */
     .main-content {
       margin-top: 70px;
       margin-left: 270px;
@@ -366,7 +373,9 @@ if ($current_month_orders > 0) {
 
     .main-content.active {
       margin-left: 270px;
-    }/* Dashboard Cards */
+    }
+
+    /* Dashboard Cards */
     .dashboard-cards {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -418,7 +427,9 @@ if ($current_month_orders > 0) {
       justify-content: center;
       color: var(--primary);
       font-size: 1.5rem;
-    }    .card-title {
+    }
+
+    .card-title {
       font-size: 0.9rem;
       color: var(--secondary);
       font-weight: 600;
@@ -641,7 +652,7 @@ if ($current_month_orders > 0) {
           <ul class="menu_items submenu">
             <a href="code/stores/seeSucursal.php" class="nav_link sublink">See Store</a>
           </ul>
-        </li>        <!-- DAILY REPORT -->
+        </li> <!-- DAILY REPORT -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
             <span class="navlink_icon">
@@ -670,12 +681,14 @@ if ($current_month_orders > 0) {
             <a href="code/sells/sell.php" class="nav_link sublink">Sales</a>
             <a href="code/sells/seeSells.php" class="nav_link sublink">See Sales</a>
             <a href="code/shipping/shipping.php" class="nav_link sublink">Shipping</a>
-            <a href="code/shippingReturn/shippingReturn.php" class="nav_link sublink">Shipping Return</a>            <a href="code/discount/seeDiscount.php" class="nav_link sublink">Discounts</a>
+            <a href="code/shippingReturn/shippingReturn.php" class="nav_link sublink">Shipping Return</a> <a href="code/discount/seeDiscount.php" class="nav_link sublink">Discounts</a>
             <a href="code/safetclaim/seeSafetClaim.php" class="nav_link sublink">Safe T-Claim/Label Avoid </a>
             <a href="code/cancellations/seeCancellations.php" class="nav_link sublink">Cancellations</a>
-
             <a href="code/devolutions/seeDevolutions.php" class="nav_link sublink">Returns</a>
-          </ul>        </li>        <!-- ANALYTICS -->
+            <a href="code/promedios/index.php" class="nav_link sublink">Averages</a>
+
+          </ul>
+        </li> <!-- ANALYTICS -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
             <span class="navlink_icon">
@@ -701,7 +714,7 @@ if ($current_month_orders > 0) {
           <ul class="menu_items submenu">
             <a href="code/informs/generateInforms.php" class="nav_link sublink">Generate Informs</a>
           </ul>
-        </li>        <!-- USER -->
+        </li> <!-- USER -->
         <li class="item">
           <div href="#" class="nav_link submenu_item">
             <span class="navlink_icon">
@@ -872,7 +885,7 @@ if ($current_month_orders > 0) {
         </div>
       </div>
 
-    </div>    <!-- Recent Activity & Key Insights -->
+    </div> <!-- Recent Activity & Key Insights -->
     <div class="recent-activity">
       <h3 class="section-title">Key Business Insights</h3>
       <ul class="activity-list">
@@ -893,7 +906,7 @@ if ($current_month_orders > 0) {
             </div>
           </div>
         </li>
-        
+
         <li class="activity-item">
           <div class="activity-icon">
             <i class="fa-solid fa-exclamation-triangle"></i>
@@ -903,11 +916,11 @@ if ($current_month_orders > 0) {
             <div class="activity-time">
               <?php if ($low_stock_items > 0): ?>
                 <?= $low_stock_items ?> items are running low on stock (< 10 units)
-              <?php else: ?>
-                All items have adequate stock levels
-              <?php endif; ?>
+                  <?php else: ?>
+                  All items have adequate stock levels
+                  <?php endif; ?>
+                  </div>
             </div>
-          </div>
         </li>
 
         <li class="activity-item">
@@ -940,26 +953,27 @@ if ($current_month_orders > 0) {
         </li>
 
         <?php if ($total_reportes > 0): ?>
-        <li class="activity-item">
-          <div class="activity-icon">
-            <i class="fa-solid fa-clipboard-list"></i>
-          </div>
-          <div class="activity-content">
-            <div class="activity-title">Pending Tasks</div>
-            <div class="activity-time"><?= $total_reportes ?> daily reports require processing</div>
-          </div>
-        </li>
+          <li class="activity-item">
+            <div class="activity-icon">
+              <i class="fa-solid fa-clipboard-list"></i>
+            </div>
+            <div class="activity-content">
+              <div class="activity-title">Pending Tasks</div>
+              <div class="activity-time"><?= $total_reportes ?> daily reports require processing</div>
+            </div>
+          </li>
         <?php endif; ?>
       </ul>
     </div>
   </div>
 
-  <!-- JavaScript -->  <script>
+  <!-- JavaScript -->
+  <script>
     // Sidebar siempre visible - sin toggle
     const sidebar = document.querySelector('.sidebar');
     const mainContent = document.querySelector('.main-content');
     const submenuItems = document.querySelectorAll('.submenu_item');
-    
+
     // Asegurar que el sidebar y main-content estén siempre activos
     sidebar.classList.add('active');
     mainContent.classList.add('active');

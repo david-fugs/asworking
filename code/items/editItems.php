@@ -18,6 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $cost = $mysqli->real_escape_string($_POST["cost"]);
     $weight = $mysqli->real_escape_string($_POST["weight"]);    $batch = $mysqli->real_escape_string($_POST["batch"]);
     $stock = (int) $_POST["stock"];
+    $observation = isset($_POST["observation"]) ? $mysqli->real_escape_string($_POST["observation"]) : '';
 
     // Procesar las tiendas seleccionadas
     $stores_selected = [];
@@ -64,12 +65,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         WHERE id_item = $id_item";    if ($mysqli->query($sql_update_items) === TRUE) {
         // Si el UPC cambió, actualizarlo también en inventory
         if ($old_upc !== $upc) {
-            $sql_update_inventory = "UPDATE inventory SET upc_inventory = '$upc', quantity_inventory= $stock  WHERE upc_inventory = '$old_upc'";
+            $sql_update_inventory = "UPDATE inventory SET upc_inventory = '$upc', quantity_inventory= $stock, observation_inventory = '$observation' WHERE upc_inventory = '$old_upc'";
             $mysqli->query($sql_update_inventory);
         }
 
         // Actualizar siempre el stock en inventory
-        $sql_update_stock = "UPDATE inventory SET quantity_inventory = $stock WHERE upc_inventory = '$upc'";
+        $sql_update_stock = "UPDATE inventory SET quantity_inventory = $stock, observation_inventory = '$observation' WHERE upc_inventory = '$upc'";
         $mysqli->query($sql_update_stock);
         
         // Crear mensaje de éxito con las tiendas

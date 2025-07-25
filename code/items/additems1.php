@@ -27,6 +27,7 @@ $cost_item          = $_POST['cost_item'];
 $weight_item        = mb_strtoupper($_POST['weight_item']);
 $inventory_item     = mb_strtoupper($_POST['inventory_item']);
 $quantity_inventory = $_POST['quantity_inventory'] ?? 0;
+$observation_inventory = isset($_POST['observation_inventory']) ? trim($_POST['observation_inventory']) : '';
 
 // Procesar las tiendas seleccionadas
 $stores_selected = [];
@@ -82,84 +83,106 @@ $check_duplicate_sql = "SELECT * FROM items WHERE upc_item = '$upc_item'";
 $check_duplicate_result = $mysqli->query($check_duplicate_sql);
 
 // La clave no existe, realizar la inserción
+// Construir el SQL para items
 $sql = "INSERT INTO items (
-            upc_item, sku_item, date_item, brand_item, item_item, ref_item, 
-            color_item, size_item, category_item, cost_item, weight_item, 
-            inventory_item, stores_item, estado_item, fecha_alta_item, fecha_edit_item, id_usu
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    upc_item, sku_item, date_item, brand_item, item_item, ref_item, 
+    color_item, size_item, category_item, cost_item, weight_item, 
+    inventory_item, stores_item, estado_item, fecha_alta_item, fecha_edit_item, id_usu
+) VALUES (
+    '$upc_item', '$sku_item', '$date_item', '$brand_item', '$item_item', '$ref_item',
+    '$color_item', '$size_item', '$category_item', '$cost_item', '$weight_item',
+    '$inventory_item', '$stores_json', '$estado_item', '$fecha_alta_item', '$fecha_edit_item', '$id_usu'
+)";
 
-$stmt = $mysqli->prepare($sql);
-
-if ($stmt) {
-    $stmt->bind_param(
-        "sssssssssssssssss",
-        $upc_item,
-        $sku_item,
-        $date_item,
-        $brand_item,
-        $item_item,
-        $ref_item,
-        $color_item,
-        $size_item,
-        $category_item,
-        $cost_item,
-        $weight_item,
-        $inventory_item,
-        $stores_json,
-        $estado_item,
-        $fecha_alta_item,
-        $fecha_edit_item,
-        $id_usu
-    );    if ($stmt->execute()) {
-        $stores_list = implode(', ', $stores_selected);
-        echo "<div class='alert alert-success'>✅ Item registered successfully!<br><strong>UPC:</strong> $upc_item<br><strong>Item:</strong> $item_item<br><strong>Stores:</strong> $stores_list</div>";
-
-        //agregar en la tabla inventario en la columna upc_inventory y quantity_inventory
-        $sql_inventory = "INSERT INTO inventory (upc_inventory, quantity_inventory) VALUES (?, ?)";
-        $stmt_inventory = $mysqli->prepare($sql_inventory);
-        $stmt_inventory->bind_param("si", $upc_item, $quantity_inventory);
-        if ($stmt_inventory->execute()) {
-            echo "<div class='alert alert-success'>✅ Inventory record inserted successfully.</div>";
-        } else {
-            echo "<div class='alert alert-danger'>❌ Error inserting inventory: " . $stmt_inventory->error . "</div>";
+if ($mysqli->query($sql)) {
+    // Insertar en la tabla inventory
+    $sql_inventory = "INSERT INTO inventory (upc_inventory, sku_inventory, quantity_inventory, observation_inventory) VALUES ('$upc_item', '$sku_item', $quantity_inventory, '" . $mysqli->real_escape_string($observation_inventory) . "')";
+    if ($mysqli->query($sql_inventory)) {
+        // Insertar en la tabla daily_report para el flujo de reportes
+        $estado_reporte = 0;
+        $fecha_alta_reporte = $fecha_alta_item;
+        // Limitar longitud del JSON para evitar error de constraint en stores_report
+        $max_length = 200; // Ajusta este valor según el tamaño real del campo en tu base de datos
+        $stores_json_valid = $stores_selected;
+        while (strlen(json_encode($stores_json_valid)) > $max_length && count($stores_json_valid) > 0) {
+            array_pop($stores_json_valid);
         }
-        $stmt_inventory->close();
+        $stores_json_final = json_encode($stores_json_valid);
+        $stores_json_escaped = $mysqli->real_escape_string($stores_json_final);
+        // Definir valores para los campos vacíos
+        $empty = '';
+        $cons_report = $empty;
+        $folder_report = $empty;
+        $loc_report = $empty;
+        $vendor_report = $empty;
+        $observacion_report = $empty;
+        $sql_report = "INSERT INTO daily_report (
+            upc_asignado_report, upc_final_report, cons_report, folder_report, 
+            loc_report, quantity_report, sku_report, brand_report, item_report, 
+            vendor_report, color_report, size_report, category_report, 
+            weight_report, inventory_report, observacion_report, stores_report, estado_reporte, fecha_alta_reporte
+        ) VALUES (
+            '$upc_item', '$upc_item', '$cons_report', '$folder_report', '$loc_report', $quantity_inventory, '$sku_item', '$brand_item', '$item_item', '$vendor_report', '$color_item', '$size_item', '$category_item', '$weight_item', '$inventory_item', '$observacion_report', '$stores_json_escaped', $estado_reporte, '$fecha_alta_reporte'
+        )";
+        if ($mysqli->query($sql_report)) {
+            // Todo OK, mostrar SweetAlert y redirigir
+            echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
+            echo "<script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Item registered successfully!',
+                    confirmButtonText: 'Go to Edit Location',
+                    confirmButtonColor: '#632b8b'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '../report/editLocationFolder.php';
+                    }
+                });
+            </script>";
+            exit();
+        } else {
+            // Error al insertar en daily_report
+            $errorMsg = addslashes($mysqli->error);
+            echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
+            echo "<script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    html: 'Error inserting report: $errorMsg',
+                    confirmButtonText: 'Reload',
+                    confirmButtonColor: '#632b8b'
+                }).then(() => { window.location.reload(); });
+            </script>";
+            exit();
+        }
     } else {
-        echo "<div class='alert alert-danger'>❌ Error inserting item: " . $stmt->error . "</div>";
+        // Error al insertar en inventory
+        $errorMsg = addslashes($mysqli->error);
+        echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
+        echo "<script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                html: 'Error inserting inventory: $errorMsg',
+                confirmButtonText: 'Reload',
+                confirmButtonColor: '#632b8b'
+            }).then(() => { window.location.reload(); });
+        </script>";
+        exit();
     }
-
-    $stmt->close();
 } else {
-    echo "<div class='alert alert-danger'>❌ Error en la preparación de la consulta: " . $mysqli->error . "</div>";
+    // Error al insertar en items
+    $errorMsg = addslashes($mysqli->error);
+    echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
+    echo "<script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            html: 'Error inserting item: $errorMsg',
+            confirmButtonText: 'Reload',
+            confirmButtonColor: '#632b8b'
+        }).then(() => { window.location.reload(); });
+    </script>";
+    exit();
 }
-echo "
-                <!DOCTYPE html>
-                    <html lang='es'>
-                        <head>
-                            <meta charset='utf-8' />
-                            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-                            <meta http-equiv='X-UA-Compatible' content='ie=edge'>
-                            <link href='https://fonts.googleapis.com/css?family=Lobster' rel='stylesheet'>
-                            <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet'>
-                            <link rel='stylesheet' href='../../css/bootstrap.min.css'>
-                            <link href='../../fontawesome/css/all.css' rel='stylesheet'>
-                            <title>ASWWORKING</title>
-                            <style>
-                                .responsive {
-                                    max-width: 100%;
-                                    height: auto;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <center>
-                               <img src='../../img/logo.png' width=300 height=174 class='responsive'>
-                            <div class='container'>
-                                <br />
-                                <h3><b><i class='fas fa-users'></i> THE PROCESS WAS SUCCESSFULLY REGISTERED</b></h3><br />
-                                <p align='center'><a href='../../access.php'><img src='../../img/atras.png' width=96 height=96></a></p>
-                            </div>
-                            </center>
-                        </body>
-                    </html>
-        ";

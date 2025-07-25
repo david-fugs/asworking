@@ -506,9 +506,13 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                                     <span class="badge bg-secondary"><?= htmlspecialchars($report['brand_report']) ?></span>
                                                 </td>
 
-                                                <!-- Vendor (solo lectura) -->
+                                                <!-- Vendor (editable) -->
                                                 <td>
-                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['vendor_report']) ?></span>
+                                                    <input style="width: 120px;" type="text"
+                                                        name="new_vendor[<?= $report['id_report'] ?>]"
+                                                        class="form-control form-control-sm"
+                                                        value="<?= isset($report['vendor_report']) ? htmlspecialchars($report['vendor_report']) : '' ?>"
+                                                        placeholder="Vendor">
                                                 </td>
 
                                                 <!-- Color (solo lectura) -->
@@ -678,14 +682,15 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                         <span class="item-label">Category:</span>
                         <span class="item-value">${item.category || 'N/A'}</span>
                     </div>
-                    <div class="item-detail">
-                        <span class="item-label">Weight:</span>
-                        <span class="item-value">${item.weight || 'N/A'}</span>
-                    </div>
-                    <div class="item-detail">
-                        <span class="item-label">Inventory:</span>
-                        <span class="item-value">${item.inventory || '0'}</span>
-                    </div>
+            <div class="item-detail">
+                <span class="item-label">Weight:</span>
+                <span class="item-value">${item.weight || 'N/A'}</span>
+            </div>
+            <!-- Inventory row removed, only Location will be shown -->
+            <div class="item-detail">
+                <span class="item-label">Location:</span>
+                <span class="item-value">${item.location || 'N/A'}</span>
+            </div>
                     <div class="item-detail">
                         <span class="item-label">Status:</span>
                         <span class="item-value">
