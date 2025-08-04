@@ -576,7 +576,6 @@ header("Content-Type: text/html;charset=utf-8");
 
             $('#upc_item').on('blur', function() {
                 var upc = $(this).val().toUpperCase();
-
                 if (upc.trim() !== '') {
                     $.ajax({
                         url: 'verificar_upc.php',
@@ -585,40 +584,101 @@ header("Content-Type: text/html;charset=utf-8");
                             upc_item: upc
                         },
                         success: function(respuesta) {
-                            var data = JSON.parse(respuesta);
-
-                            // Si se encontró el UPC
-                            if (data.status === 'existe') {
-                                var itemsMessage = '';
-
-                                // Si hay múltiples coincidencias, mostramos todas
-                                data.items.forEach(function(item) {
-                                    itemsMessage += 'Brand: ' + item.brand_item + ', Item: ' + item.item_item + '\n';
-
-                                    // Llenar los campos con los primeros valores encontrados
-                                    $('#brand_item').val(item.brand_item);
-                                    $('#item_item').val(item.item_item);
-                                });
-
-                                // Usamos SweetAlert para mostrar las coincidencias
+                            var data;
+                            try {
+                                data = (typeof respuesta === 'object') ? respuesta : JSON.parse(respuesta);
+                            } catch (e) {
                                 Swal.fire({
-                                    title: 'UPC already exists!',
-                                    text: itemsMessage,
-                                    icon: 'warning',
-                                    confirmButtonText: 'Ok',
+                                    title: 'Error',
+                                    text: 'Respuesta inesperada del servidor. Contacta al administrador.',
+                                    icon: 'error',
                                     confirmButtonColor: '#632b8b'
                                 });
+                                return;
+                            }
+                            if (data.status === 'existe') {
+                                // Mostrar la información en una tabla para mayor claridad
+                                var tableHtml = '<table class="table table-bordered"><thead><tr><th>Brand</th><th>Item</th><th>SKU</th><th>Quantity</th></tr></thead><tbody>';
+                                data.items.forEach(function(item, idx) {
+                                    tableHtml += '<tr>' +
+                                        '<td>' + item.brand_item + '</td>' +
+                                        '<td>' + item.item_item + '</td>' +
+                                        '<td>' + item.sku_item + '</td>' +
+                                        '<td>' + item.quantity_inventory + '</td>' +
+                                        '</tr>';
+                                });
+                                tableHtml += '</tbody></table>';
 
-                                // Cambiar el atributo de mensaje-error de display none a display
+                                // Llenar los campos con los primeros valores encontrados
+                                if (data.items.length > 0) {
+                                    var first = data.items[0];
+                                    $('#brand_item').val(first.brand_item);
+                                    $('#item_item').val(first.item_item);
+                                    $('#sku_item').val(first.sku_item);
+                                    $('#quantity_inventory').val(first.quantity_inventory);
+                                }
+
+                                // Input para agregar cantidad
+                                var addQtyHtml = '<div class="form-group text-left">' +
+                                    '<label for="add-qty-input">Add Quantity:</label>' +
+                                    '<input type="number" min="1" id="add-qty-input" class="form-control" style="width:120px;display:inline-block;" />' +
+                                    '</div>';
+
+                                Swal.fire({
+                                    title: 'UPC already exists!',
+                                    html: '<div style="text-align:left">' + tableHtml + addQtyHtml + '</div>',
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Add Quantity',
+                                    cancelButtonText: 'Cancel',
+                                    confirmButtonColor: '#632b8b',
+                                    preConfirm: () => {
+                                        const addQty = parseInt(document.getElementById('add-qty-input').value);
+                                        if (isNaN(addQty) || addQty <= 0) {
+                                            Swal.showValidationMessage('Please enter a valid quantity to add.');
+                                            return false;
+                                        }
+                                        return addQty;
+                                    }
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        var addQty = result.value;
+                                        // Sumar la cantidad al campo de cantidad actual
+                                        var currentQty = parseInt($('#quantity_inventory').val()) || 0;
+                                        var newQty = currentQty + addQty;
+                                        $('#quantity_inventory').val(newQty);
+                                        Swal.fire({
+                                            title: 'Quantity Updated',
+                                            text: 'The new quantity is: ' + newQty,
+                                            icon: 'success',
+                                            confirmButtonColor: '#632b8b'
+                                        });
+                                    }
+                                });
+
                                 $('#mensaje-upc').show();
                                 $('#mensaje-upc').text('This UPC already exists in the database.').css('color', 'red');
                                 $('#mensaje-upc').addClass('alert alert-danger');
-                            } else {
-                                // Cambiar el color de mensaje-upc a verde
+                            } else if (data.status === 'no_existe') {
                                 $('#mensaje-upc').removeClass('alert alert-danger');
                                 $('#mensaje-upc').addClass('alert alert-success');
                                 $('#mensaje-upc').text('This UPC is available.').css('color', 'green');
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: data.message || 'Error desconocido.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#632b8b'
+                                });
                             }
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'No se pudo conectar con el servidor. Intenta más tarde.',
+                                icon: 'error',
+                                confirmButtonColor: '#632b8b'
+                            });
                         }
                     });
                 }

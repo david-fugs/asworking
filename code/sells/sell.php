@@ -306,6 +306,40 @@ $resultTiendas = $mysqli->query($queryTiendas);
       padding: 50px;
       margin-bottom: 50px;
     }
+
+    /* Estilos para la sección de totales */
+    #tableTotals tr {
+      border-top: 3px solid var(--primary) !important;
+    }
+
+    #tableTotals td {
+      padding: 15px 8px !important;
+      font-weight: 600;
+      background-color: #f8f9fa !important;
+    }
+
+    #tableTotals .form-control-sm {
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 2px solid var(--primary);
+      text-align: center;
+    }
+
+    #tableTotals .form-control-sm:focus {
+      border-color: var(--success);
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+    }
+
+    #totalAllItems {
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    #finalOrderTotal {
+      color: var(--success) !important;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
   </style>
 </head>
 
@@ -325,6 +359,28 @@ $resultTiendas = $mysqli->query($queryTiendas);
         <div class="mb-3">
           <label for="sellDate" class="form-label">Date</label>
           <input type="date" class="form-control" name="sellDate" id="sellDate">
+        </div>
+
+        <!-- Selectores de Tienda y Sucursal -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6" style="display:none;">
+            <label for="tienda" class="form-label" style="display:none;">Marketplace</label>
+            <select id="tienda" name="tienda" class="form-select">
+              <option value="">--Select a store--</option>
+              <?php
+              $resultTiendas->data_seek(0);
+              while ($tienda = $resultTiendas->fetch_assoc()) {
+                echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
+              }
+              ?>
+            </select>
+          </div>
+          <div class="col-md-6" style="display:none;">
+            <label for="sucursal" class="form-label" style="display:none;">Store Code</label>
+            <select name="sucursal" id="sucursal" class="form-select">
+              <option value="">--First select store--</option>
+            </select>
+          </div>
         </div>
 
         <form class="form">
@@ -374,47 +430,11 @@ $resultTiendas = $mysqli->query($queryTiendas);
                 <input type="number" name="withheld_tax" id="withheld_tax" step="0.01" min="0" class="form-control">
               </div>
 
-              <!-- DEBUG BUTTON - TEMPORAL -->
-              <!-- <div class="col-md-3">
-                <label class="form-label">&nbsp;</label>
-                <button type="button" id="debug-calc" class="btn btn-warning btn-sm form-control">DEBUG: Test Calculation</button>
-              </div> -->
-
               <!-- <div class="col-md-3">
                 <label for="payedShipping" class="form-label">Paid Shipping</label>
                 <input type="number" name="payedShipping" id="payedShipping" class="form-control">
               </div> -->
 
-              <div class="col-md-3">
-                <!-- era stor pero cliente pide cambio de nombr epor marketplace -->
-                <label for="tienda" class="form-label">Marketplace</label>
-                <select id="tienda" name="id_store" class="form-select">
-                  <option value="">--Select a store--</option>
-                  <?php
-                  $resultTiendas->data_seek(0); // Reinicia el puntero del resultado
-                  while ($tienda = $resultTiendas->fetch_assoc()) {
-                    echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
-                  }
-                  ?>
-                </select>
-              </div>
-
-              <div class="col-md-3">
-                <!-- se cambia nombre stor cod, pero era sucursal en codigo -->
-                <label for="sucursal" class="form-label">Store Cod</label>
-                <select name="sucursal" id="sucursal" class="form-select">
-                  <option value="">--First select a store--</option>
-                </select>
-              </div>
-
-              <div class="col-md-3">
-                <label for="comisionItem" class="form-label">Final Fee</label>
-                <input type="number" name="comisionItem" id="comisionItem" step="0.01" min="0" class="form-control">
-              </div>
-              <div class="col-md-3">
-                <label for="cargo_fijo" class="form-label">Fixed Charge</label>
-                <input type="number" name="cargo_fijo" id="cargo_fijo" step="0.01" min="0" class="form-control">
-              </div>
               <div class="col-md-3">
                 <label for="" class="form-label">Incentives offered </label>
                 <input type="number" name="incentives" id="incentives" step="0.01" min="0" class="form-control">
@@ -463,6 +483,46 @@ $resultTiendas = $mysqli->query($queryTiendas);
         </form>
       </div>
 
+      <!-- Sección de configuración de orden (después del botón Validate) -->
+      <div class="form-container" id="orderConfigSection" style="display: none;">
+        <h5 class="mb-3" style="color: var(--primary); font-weight: 600;">
+          <i class="fas fa-cog"></i> Order Configuration
+        </h5>
+        <div class="container">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label for="orderMarketplace" class="form-label">Marketplace</label>
+              <select id="orderMarketplace" name="order_store" class="form-select">
+                <option value="">--Select a store--</option>
+                <?php
+                $resultTiendas->data_seek(0);
+                while ($tienda = $resultTiendas->fetch_assoc()) {
+                  echo "<option value='{$tienda['id_store']}'>{$tienda['store_name']}</option>";
+                }
+                ?>
+              </select>
+            </div>
+            
+            <div class="col-md-3">
+              <label for="orderStoreCod" class="form-label">Store Cod</label>
+              <select name="order_sucursal" id="orderStoreCod" class="form-select">
+                <option value="">--First select a store--</option>
+              </select>
+            </div>
+            
+            <!-- <div class="col-md-3">
+              <label for="orderFinalFee" class="form-label">Final Fee</label>
+              <input type="number" name="order_final_fee" id="orderFinalFee" step="0.01" min="0" class="form-control">
+            </div>
+            
+            <div class="col-md-3">
+              <label for="orderFixedCharge" class="form-label">Fixed Charge</label>
+              <input type="number" name="order_fixed_charge" id="orderFixedCharge" step="0.01" min="0" class="form-control">
+            </div> -->
+          </div>
+        </div>
+      </div>
+
       <div class="">
         <table id="tableItems" class="">
           <thead>
@@ -470,11 +530,8 @@ $resultTiendas = $mysqli->query($queryTiendas);
               <!-- <th>Item</th> -->
               <th>UPC</th>
               <th>Quantity</th>
-              <th>Marketplace</th>
-              <th>Store Cod</th>
               <!-- <th>Brand</th> -->
-              <th>Final Fee</th>
-              <th>Fixed Charge</th>              <!-- <th>Date</th> -->
+              <!-- <th>Date</th> -->
               <th>Shipping Received</th>
               <th>Tax</th>
               <th>Withheld Tax</th>
@@ -487,6 +544,38 @@ $resultTiendas = $mysqli->query($queryTiendas);
           <tbody id="bodyTable">
             <!-- Aquí se agregarán las filas dinámicamente con JavaScript -->
           </tbody>
+          <tfoot id="tableTotals" style="display: none;">
+            <!-- Nueva fila para mostrar la información de la orden -->
+            <tr style="background-color: #e3f2fd; font-weight: bold; border-top: 2px solid var(--primary);">
+            
+              <td></td>
+            </tr>
+            <tr style="background-color: #f8f9fa; font-weight: bold; border-top: 2px solid #dee2e6;">
+              <td colspan="2" style="text-align: center; font-size: 1rem; color: var(--primary);">
+                <strong>TOTAL ALL ITEMS</strong>
+              </td>
+              <td colspan="5" style="text-align: right; font-size: 1rem;">
+                <strong id="totalAllItems">$0.00</strong>
+              </td>
+              <td></td>
+            </tr>
+            <tr style="background-color: #f0f0f0; font-weight: bold;">
+              <td colspan="2" style="text-align: center; font-size: 0.9rem; color: var(--primary);">
+                <strong>ORDER FEES</strong>
+              </td>
+              <td style="text-align: center; font-size: 0.8rem;">Final Fee</td>
+              <td style="text-align: center; font-size: 0.8rem;">Fixed Charge</td>
+              <td colspan="2" style="text-align: right; font-size: 1rem;">
+                <strong>FINAL TOTAL: <span id="finalOrderTotal" style="color: var(--success);">$0.00</span></strong>
+              </td>
+              <td style="text-align: center;">
+                <input type="number" id="footerFinalFee" step="0.01" min="0" class="form-control form-control-sm" style="font-weight: bold; text-align: center;" placeholder="0.00">
+              </td>
+              <td style="text-align: center;">
+                <input type="number" id="footerFixedCharge" step="0.01" min="0" class="form-control form-control-sm" style="font-weight: bold; text-align: center;" placeholder="0.00">
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
