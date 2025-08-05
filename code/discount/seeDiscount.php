@@ -11,12 +11,13 @@ $tipo_usu = $_SESSION['tipo_usuario'];
 $store_name = isset($_GET['store_name']) ? trim($_GET['store_name']) : '';
 $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : '';
 
+
 $queryTiendas = "SELECT id_store, store_name FROM store ORDER BY store_name ASC";
 $resultTiendas = $mysqli->query($queryTiendas);
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+<!-- ...existing code... -->
 
 <head>
   <meta charset="utf-8" />
@@ -474,17 +475,23 @@ $resultTiendas = $mysqli->query($queryTiendas);
           const id_sell = this.dataset.id_sell;
           console.log("Selected Sell Order:", sell_order, "UPC:", upc_item, "ID Sell:", id_sell);
           
-          fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}&upc_item=${encodeURIComponent(upc_item)}&id_sell=${encodeURIComponent(id_sell)}`)
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data);
-              if (data.error) {
-                document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${data.error}</p>`;
+          // Fetch both items and summary data
+          Promise.all([
+            fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}&upc_item=${encodeURIComponent(upc_item)}&id_sell=${encodeURIComponent(id_sell)}`).then(r => r.json()),
+            fetch(`../sells/getSellSummary.php?sell_order=${encodeURIComponent(sell_order)}`).then(r => r.json())
+          ])
+            .then(([itemsData, summaryData]) => {
+              console.log('Items data:', itemsData);
+              console.log('Summary data:', summaryData);
+              
+              if (itemsData.error) {
+                document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${itemsData.error}</p>`;
                 return;
               }
               
-              const items = data.items;
-              const discount = data.discount;
+              const items = itemsData.items;
+              const discount = itemsData.discount;
+              const summary = summaryData.summary || null;
 
               // Crear la tabla (mismo código que en returns.js)
               let tableHTML = `
@@ -495,8 +502,6 @@ $resultTiendas = $mysqli->query($queryTiendas);
                       <th>UPC</th>
                       <th>SKU</th>
                       <th>Quantity</th>
-                      <th>Final Fee</th>
-                      <th>Fixed Charge</th>
                       <th>Item Profit</th>
                       <th>Total Item</th>
                     </tr>
@@ -507,8 +512,6 @@ $resultTiendas = $mysqli->query($queryTiendas);
               let totalGeneral = 0;
               items.forEach((item) => {
                 const quantity = item.quantity || 0;
-                const comision_item = parseFloat(item.comision_item) || 0;
-                const cargo_fijo = parseFloat(item.cargo_fijo) || 0;
                 const item_profit = parseFloat(item.item_profit) || 0;
                 const total_item = parseFloat(item.total_item) || 0;
                 
@@ -517,8 +520,6 @@ $resultTiendas = $mysqli->query($queryTiendas);
                     <td>${item.upc_item}</td>
                     <td>${item.sku_item || "-"}</td>
                     <td>${quantity}</td>
-                    <td>$${comision_item.toFixed(2)}</td>
-                    <td>$${cargo_fijo.toFixed(2)}</td>
                     <td>$${item_profit.toFixed(2)}</td>
                     <td>$${total_item.toFixed(2)}</td>
                   </tr>
@@ -528,45 +529,72 @@ $resultTiendas = $mysqli->query($queryTiendas);
 
               tableHTML += `
                   <tr>
-                    <td colspan="6" class="text-end"><strong>Total General</strong></td>
+                    <td colspan="4" class="text-end"><strong>Total General</strong></td>
                     <td><strong>$${totalGeneral.toFixed(2)}</strong></td>
                   </tr>
+              `;
+              
+              // Add order-level fees if summary data exists
+              if (summary) {
+                const finalFee = parseFloat(summary.final_fee) || 0;
+                const fixedCharge = parseFloat(summary.fixed_charge) || 0;
+                const finalTotal = parseFloat(summary.final_total) || (totalGeneral - finalFee - fixedCharge);
+                
+                tableHTML += `
+                  <tr style="background-color: #f8f9fa;">
+                    <td colspan="4" class="text-end"><strong>Final Fee (Order Level)</strong></td>
+                    <td><strong>-$${finalFee.toFixed(2)}</strong></td>
+                  </tr>
+                  <tr style="background-color: #f8f9fa;">
+                    <td colspan="4" class="text-end"><strong>Fixed Charge (Order Level)</strong></td>
+                    <td><strong>-$${fixedCharge.toFixed(2)}</strong></td>
+                  </tr>
+                  <tr style="background-color: #e9ecef; font-weight: bold;">
+                    <td colspan="4" class="text-end"><strong>FINAL TOTAL</strong></td>
+                    <td><strong style="color: #28a745;">$${finalTotal.toFixed(2)}</strong></td>
+                  </tr>
+                `;
+              }
+              
+              tableHTML += `
                 </tbody>
-              </table>              <form method='post' action='saveDiscount.php' class='mt-4' id='discountForm'>
+              </table>
+              <form method='post' action='saveDiscount.php' class='mt-4' id='discountForm'>
                 <div class='row mb-3'>
                   <div class='col-md-4'>
                     <label for='price_discount' class='form-label'>Price Discount</label>
-                    <input type='number' step='0.01' name='price_discount' id='price_discount' class='form-control' value='${discount ? (discount.price_discount || '') : ''}' onchange='calculateNetMarkdown()'>
+                    <input type='number' step='0.01' name='price_discount' id='price_discount' class='form-control' value='${discount ? (discount.price_discount || "") : ""}' onchange='calculateNetMarkdown()'>
                   </div>
                   <div class='col-md-4'>
                     <label for='shipping_discount' class='form-label'>Shipping Discount</label>
-                    <input type='number' step='0.01' name='shipping_discount' id='shipping_discount' class='form-control' value='${discount ? (discount.shipping_discount || '') : ''}' onchange='calculateNetMarkdown()'>
+                    <input type='number' step='0.01' name='shipping_discount' id='shipping_discount' class='form-control' value='${discount ? (discount.shipping_discount || "") : ""}' onchange='calculateNetMarkdown()'>
                   </div>
                   <div class='col-md-4'>
                     <label for='discount_date' class='form-label'>Discount Date</label>
-                    <input type='date' name='discount_date' id='discount_date' class='form-control' value='${discount ? (discount.discount_date || '') : ''}'>
+                    <input type='date' name='discount_date' id='discount_date' class='form-control' value='${discount ? (discount.discount_date || "") : ""}'>
                   </div>
                 </div>
                 <div class='row mb-3'>
                   <div class='col-md-6'>
                     <label for='fee_credit' class='form-label'>Fee Credit</label>
-                    <input type='number' step='0.01' name='fee_credit' id='fee_credit' class='form-control' value='${discount ? (discount.fee_credit || '') : ''}' onchange='calculateNetMarkdown()'>
+                    <input type='number' step='0.01' name='fee_credit' id='fee_credit' class='form-control' value='${discount ? (discount.fee_credit || "") : ""}' onchange='calculateNetMarkdown()'>
                   </div>
                   <div class='col-md-6'>
                     <label for='tax_return' class='form-label'>Tax Return</label>
-                    <input type='number' step='0.01' name='tax_return' id='tax_return' class='form-control' value='${discount ? (discount.tax_return || '') : ''}'>
+                    <input type='number' step='0.01' name='tax_return' id='tax_return' class='form-control' value='${discount ? (discount.tax_return || "") : ""}'>
                   </div>
                 </div>
                 <div class='row mb-3'>
                   <div class='col-md-6'>
                     <label for='net_markdown' class='form-label'><strong>Net Markdown</strong></label>
-                    <input type='number' step='0.01' name='net_markdown' id='net_markdown' class='form-control bg-light' value='${discount ? (discount.net_markdown || '') : ''}' readonly>
+                    <input type='number' step='0.01' name='net_markdown' id='net_markdown' class='form-control bg-light' value='${discount ? (discount.net_markdown || "") : ""}' readonly>
                     <small class='text-muted'>Formula: Price Discount + Shipping Discount - Fee Credit</small>
                   </div>
                 </div>
                 <input type='hidden' name='sell_order' value='${items[0].sell_order}'>
                 <input type='hidden' name='id_sell' value='${items[0].id_sell}'>
-                <input type='hidden' name='upc_item' value='${upc_item}'>                <div class='text-end'>
+                <input type='hidden' name='upc_item' value='${upc_item}'>
+                <div class='text-end'>
                   <button type='submit' class='btn' style='background: linear-gradient(to bottom, var(--primary), var(--primary-light)); color: #fff; border: none; font-weight: 600; padding: 8px 20px; border-radius: 6px;'>Save</button>
                 </div>
               </form>

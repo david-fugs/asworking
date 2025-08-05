@@ -55,17 +55,22 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Selected Sell Order:", sell_order, "UPC:", upc_item, "ID Sell:", id_sell, "SKU:", sku_item);
         
         // Abrir el modal returnModal directamente con el formulario de cancelación para este item específico
-        fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}${upc_item ? '&upc_item=' + encodeURIComponent(upc_item) : ''}${id_sell ? '&id_sell=' + encodeURIComponent(id_sell) : ''}`)
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data);
-            if (data.error) {
-              document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${data.error}</p>`;
+        Promise.all([
+          fetch(`getSellToReturn.php?sell_order=${encodeURIComponent(sell_order)}${upc_item ? '&upc_item=' + encodeURIComponent(upc_item) : ''}${id_sell ? '&id_sell=' + encodeURIComponent(id_sell) : ''}`).then(r => r.json()),
+          fetch(`../sells/getSellSummary.php?sell_order=${encodeURIComponent(sell_order)}`).then(r => r.json())
+        ])
+          .then(([itemsData, summaryData]) => {
+            console.log('Items data:', itemsData);
+            console.log('Summary data:', summaryData);
+            
+            if (itemsData.error) {
+              document.getElementById("ventasTableContainer").innerHTML = `<p>Error: ${itemsData.error}</p>`;
               return;
             }
             
-            const items = data.items;
-            const cancellations = data.cancellations || {};
+            const items = itemsData.items;
+            const cancellations = itemsData.cancellations || {};
+            const summary = summaryData.summary || null;
             
             // Guardar datos en variable global para uso posterior
             window.lastCancellationsData = cancellations;
@@ -110,8 +115,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <th>UPC</th>
                     <th>SKU</th>
                     <th>Quantity</th>
-                    <th>Final Fee</th>
-                    <th>Fixed Charge</th>
                     <th>Item Profit</th>
                     <th>Total Item</th>
                     <th>Status</th>
@@ -123,8 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
             let totalGeneral = 0;
             items.forEach((item) => {
               const quantity = item.quantity || 0;
-              const comision_item = parseFloat(item.comision_item) || 0;
-              const cargo_fijo = parseFloat(item.cargo_fijo) || 0;
               const item_profit = parseFloat(item.item_profit) || 0;
               const total_item = parseFloat(item.total_item) || 0;
               
@@ -138,8 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
                   <td>${item.upc_item}</td>
                   <td>${item.sku_item || "-"}</td>
                   <td>${quantity}</td>
-                  <td>$${comision_item.toFixed(2)}</td>
-                  <td>$${cargo_fijo.toFixed(2)}</td>
                   <td>$${item_profit.toFixed(2)}</td>
                   <td>$${total_item.toFixed(2)}</td>
                   <td><strong>${statusText}</strong></td>

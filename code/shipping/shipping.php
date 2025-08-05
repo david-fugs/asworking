@@ -448,17 +448,23 @@ $resultTiendas = $mysqli->query($queryTiendas);
                     const sell_order = this.dataset.sell_order;
                     console.log("Selected Sell Order:", sell_order);
                     
-                    fetch(`getShippingDetails.php?sell_order=${encodeURIComponent(sell_order)}`)
-                        .then((response) => response.json())
-                        .then((data) => {
-                            console.log(data);
-                            if (data.error) {
-                                document.getElementById("shippingTableContainer").innerHTML = `<p>Error: ${data.error}</p>`;
+                    // Fetch both items and summary data
+                    Promise.all([
+                        fetch(`getShippingDetails.php?sell_order=${encodeURIComponent(sell_order)}`).then(r => r.json()),
+                        fetch(`../sells/getSellSummary.php?sell_order=${encodeURIComponent(sell_order)}`).then(r => r.json())
+                    ])
+                        .then(([itemsData, summaryData]) => {
+                            console.log('Items data:', itemsData);
+                            console.log('Summary data:', summaryData);
+                            
+                            if (itemsData.error) {
+                                document.getElementById("shippingTableContainer").innerHTML = `<p>Error: ${itemsData.error}</p>`;
                                 return;
                             }
                             
-                            const items = data.items;
-                            const shipping = data.shipping;                            // Crear la tabla de shipping
+                            const items = itemsData.items;
+                            const shipping = itemsData.shipping;
+                            const summary = summaryData.summary || null;                            // Crear la tabla de shipping
                             let tableHTML = `
                                 <h4>Sell Order: ${items[0].sell_order}</h4>
                                 <table class="table table-bordered">
@@ -467,8 +473,6 @@ $resultTiendas = $mysqli->query($queryTiendas);
                                             <th>UPC</th>
                                             <th>SKU</th>
                                             <th>Quantity</th>
-                                            <th>Final Fee</th>
-                                            <th>Fixed Charge</th>
                                             <th>Item Profit</th>
                                             <th>Total Item</th>
                                         </tr>
@@ -479,8 +483,6 @@ $resultTiendas = $mysqli->query($queryTiendas);
                             let totalGeneral = 0;
                             items.forEach((item) => {
                                 const quantity = item.quantity || 0;
-                                const comision_item = parseFloat(item.comision_item) || 0;
-                                const cargo_fijo = parseFloat(item.cargo_fijo) || 0;
                                 const item_profit = parseFloat(item.item_profit) || 0;
                                 const total_item = parseFloat(item.total_item) || 0;
                                 
@@ -489,14 +491,43 @@ $resultTiendas = $mysqli->query($queryTiendas);
                                         <td>${item.upc_item}</td>
                                         <td>${item.sku}</td>
                                         <td>${quantity}</td>
-                                        <td>$${comision_item.toFixed(2)}</td>
-                                        <td>$${cargo_fijo.toFixed(2)}</td>
                                         <td>$${item_profit.toFixed(2)}</td>
                                         <td>$${total_item.toFixed(2)}</td>
                                     </tr>
                                 `;
                                 totalGeneral += total_item;
-                            });                            tableHTML += `
+                            });
+
+                            tableHTML += `
+                                    <tr>
+                                        <td colspan="4" class="text-end"><strong>Total General</strong></td>
+                                        <td><strong>$${totalGeneral.toFixed(2)}</strong></td>
+                                    </tr>
+                            `;
+                            
+                            // Add order-level fees if summary data exists
+                            if (summary) {
+                                const finalFee = parseFloat(summary.final_fee) || 0;
+                                const fixedCharge = parseFloat(summary.fixed_charge) || 0;
+                                const finalTotal = parseFloat(summary.final_total) || (totalGeneral - finalFee - fixedCharge);
+                                
+                                tableHTML += `
+                                    <tr style="background-color: #f8f9fa;">
+                                        <td colspan="4" class="text-end"><strong>Final Fee (Order Level)</strong></td>
+                                        <td><strong>-$${finalFee.toFixed(2)}</strong></td>
+                                    </tr>
+                                    <tr style="background-color: #f8f9fa;">
+                                        <td colspan="4" class="text-end"><strong>Fixed Charge (Order Level)</strong></td>
+                                        <td><strong>-$${fixedCharge.toFixed(2)}</strong></td>
+                                    </tr>
+                                    <tr style="background-color: #e9ecef; font-weight: bold;">
+                                        <td colspan="4" class="text-end"><strong>FINAL TOTAL</strong></td>
+                                        <td><strong style="color: #28a745;">$${finalTotal.toFixed(2)}</strong></td>
+                                    </tr>
+                                `;
+                            }
+
+                            tableHTML += `
                                     </tbody>
                                     <tfoot class="table-custom-header">
                                         <tr>
