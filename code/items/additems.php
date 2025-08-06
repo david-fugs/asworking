@@ -614,8 +614,18 @@ header("Content-Type: text/html;charset=utf-8");
                                     var first = data.items[0];
                                     $('#brand_item').val(first.brand_item);
                                     $('#item_item').val(first.item_item);
-                                    $('#sku_item').val(first.sku_item);
+                                    if (first.sku_item && first.sku_item.trim() !== "") {
+                                        $('#sku_item').val(first.sku_item);
+                                    }
+                                    // Si el SKU está vacío, no lo sobrescribas, conserva el actual
                                     $('#quantity_inventory').val(first.quantity_inventory);
+                                    // Precargar color, size y category si existen en la respuesta
+                                    if (first.color_item) {
+                                        $('#color_item').val(first.color_item);
+                                    }
+                                    if (first.size_item) {
+                                        $('#size_item').val(first.size_item);
+                                    }
                                 }
 
                                 // Input para agregar cantidad
@@ -643,15 +653,44 @@ header("Content-Type: text/html;charset=utf-8");
                                 }).then((result) => {
                                     if (result.isConfirmed) {
                                         var addQty = result.value;
-                                        // Sumar la cantidad al campo de cantidad actual
                                         var currentQty = parseInt($('#quantity_inventory').val()) || 0;
                                         var newQty = currentQty + addQty;
                                         $('#quantity_inventory').val(newQty);
-                                        Swal.fire({
-                                            title: 'Quantity Updated',
-                                            text: 'The new quantity is: ' + newQty,
-                                            icon: 'success',
-                                            confirmButtonColor: '#632b8b'
+                                        // Llamada AJAX para actualizar en la base de datos
+                                        $.ajax({
+                                            url: 'update_quantity.php',
+                                            type: 'POST',
+                                            data: {
+                                                upc_item: $('#upc_item').val().toUpperCase(),
+                                                sku_item: $('#sku_item').val().toUpperCase(),
+                                                quantity_inventory: newQty
+                                            },
+                                            success: function(respuesta) {
+                                                var resp = JSON.parse(respuesta);
+                                                if (resp.status === 'success') {
+                                                    Swal.fire({
+                                                        title: 'Quantity Updated',
+                                                        text: 'The new quantity is: ' + newQty,
+                                                        icon: 'success',
+                                                        confirmButtonColor: '#632b8b'
+                                                    });
+                                                } else {
+                                                    Swal.fire({
+                                                        title: 'Error',
+                                                        text: resp.message || 'Failed to update quantity.',
+                                                        icon: 'error',
+                                                        confirmButtonColor: '#632b8b'
+                                                    });
+                                                }
+                                            },
+                                            error: function() {
+                                                Swal.fire({
+                                                    title: 'Error',
+                                                    text: 'Could not connect to server.',
+                                                    icon: 'error',
+                                                    confirmButtonColor: '#632b8b'
+                                                });
+                                            }
                                         });
                                     }
                                 });
