@@ -247,7 +247,7 @@ try {
             <form method="GET" class="d-flex justify-content-center align-items-end flex-wrap gap-3">
                 <div class="form-group">
                     <label for="month" class="form-label">Month</label>
-                    <select name="month" id="month" class="form-control" style="min-width: 140px;">
+                    <select name="month" id="month" class="form-control" style="min-width: 140px; height:44px;">
                         <?php
                         $months = [
                             '01' => 'January', '02' => 'February', '03' => 'March', '04' => 'April',
@@ -263,7 +263,7 @@ try {
                 </div>
                 <div class="form-group">
                     <label for="year" class="form-label">Year</label>
-                    <select name="year" id="year" class="form-control" style="min-width: 120px;">
+                    <select name="year" id="year" class="form-control" style="min-width: 120px;height:44px;">
                         <?php
                         $currentYear = date('Y');
                         for ($i = $currentYear; $i >= $currentYear - 5; $i--) {
@@ -283,6 +283,13 @@ try {
                     </a>
                 </div>
             </form>
+            <!-- Botón para volver atrás -->
+            <div class="d-flex justify-content-center mt-3">
+                <a href="../../access.php" class="btn btn-secondary" style="font-size: 1.2rem;">
+                    <i class="fas fa-folder-open"></i>
+                    Volver atrás
+                </a>
+            </div>
         </div>
 
         <!-- Summary Cards -->
