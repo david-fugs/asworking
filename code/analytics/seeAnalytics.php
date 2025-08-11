@@ -1,9 +1,9 @@
 <?php
 session_start();
 include "../../conexion.php";
-if (!isset($_SESSION['id'])) {
-  header("Location: ../../index.php");
-}
+// if (!isset($_SESSION['id'])) {
+//   header("Location: ../../index.php");
+// }
 $nombre = $_SESSION['nombre'];
 $tipo_usu = $_SESSION['tipo_usuario'];
 
@@ -303,6 +303,13 @@ $resultYears = $mysqli->query($queryYears);
     <h3 class="text-center mb-4"><i class="fas fa-chart-line"></i> Monthly Trend - Line Chart</h3>
     <div class="chart-wrapper">
       <canvas id="monthlyLineChart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-container">
+    <h3 class="text-center mb-4"><i class="fas fa-chart-line"></i> Last Year Trend - Comparison Chart</h3>
+    <div class="chart-wrapper">
+      <canvas id="lastYearLineChart"></canvas>
     </div>
   </div>
 

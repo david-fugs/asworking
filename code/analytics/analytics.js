@@ -77,9 +77,14 @@ function loadAnalyticsData() {
                     createBarChart(data.monthly);
                     createLineChart(data.monthly);
                     createPieChart(data.totals);
+                    
+                    // Load and create last year chart with a small delay for canvas rendering
+                    setTimeout(() => loadLastYearData(data.monthly), 500);
                 } else {
                     console.log('No monthly data available for charts');
                     clearCharts();
+                    // Show message for last year chart too
+                    showNoDataMessage('lastYearLineChart', 'No current data available');
                 }
                 
                 console.log('Data loaded successfully!');
@@ -161,6 +166,10 @@ function clearCharts() {
         monthlyLineChart.destroy();
         monthlyLineChart = null;
     }
+    if (lastYearLineChart) {
+        lastYearLineChart.destroy();
+        lastYearLineChart = null;
+    }
     if (categoryPieChart) {
         categoryPieChart.destroy();
         categoryPieChart = null;
@@ -170,6 +179,7 @@ function clearCharts() {
 // Chart variables
 let monthlyBarChart = null;
 let monthlyLineChart = null;
+let lastYearLineChart = null;
 let categoryPieChart = null;
 
 function createBarChart(monthlyData) {
@@ -389,4 +399,197 @@ function createPieChart(totals) {
     });
     
     console.log('Pie chart created successfully');
+}
+
+function loadLastYearData(currentMonthlyData) {
+    console.log('Loading last year data... Current data:', currentMonthlyData);
+    
+    // Clear any existing chart first
+    if (lastYearLineChart) {
+        lastYearLineChart.destroy();
+        lastYearLineChart = null;
+    }
+    
+    let targetYear = null;
+    
+    // Try to get year from current form selection
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        const formData = new FormData(filterForm);
+        if (formData.get('year') && formData.get('year').trim() !== '') {
+            targetYear = parseInt(formData.get('year')) - 1;
+            console.log('Using selected year minus 1:', targetYear);
+        }
+    }
+    
+    // If no year selected, try to get from current data
+    if (!targetYear && currentMonthlyData && currentMonthlyData.length > 0) {
+        const firstMonth = currentMonthlyData[0].month;
+        const currentYear = parseInt(firstMonth.split('-')[0]);
+        targetYear = currentYear - 1;
+        console.log('Using data year minus 1:', targetYear);
+    }
+    
+    // If still no year, use previous year from available years
+    if (!targetYear) {
+        const yearSelect = document.getElementById('year');
+        if (yearSelect && yearSelect.options.length > 2) {
+            // Try the second available year (index 2, since 0 is "All years" and 1 is most recent)
+            targetYear = parseInt(yearSelect.options[2].value);
+            console.log('Using second available year:', targetYear);
+        } else if (yearSelect && yearSelect.options.length > 1) {
+            // Use most recent year available
+            targetYear = parseInt(yearSelect.options[1].value);
+            console.log('Using most recent available year:', targetYear);
+        } else {
+            targetYear = 2023; // Fallback
+            console.log('Using fallback year:', targetYear);
+        }
+    }
+    
+    console.log('Target year for last year chart:', targetYear);
+    
+    // Build URL for target year data
+    let url = 'getAnalyticsData.php?year=' + targetYear;
+    
+    // Add other filters if they exist
+    if (filterForm) {
+        const formData = new FormData(filterForm);
+        
+        if (formData.get('month') && formData.get('month').trim() !== '') {
+            url += '&month=' + formData.get('month');
+        }
+        if (formData.get('sucursal') && formData.get('sucursal').trim() !== '') {
+            url += '&sucursal=' + formData.get('sucursal');
+        }
+    }
+    
+    console.log('Last year request URL:', url);
+    
+    fetch(url)
+        .then(response => {
+            console.log('Last year API response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Last year response data:', data);
+            
+            if (data.success && data.monthly && data.monthly.length > 0) {
+                console.log('Creating last year chart with', data.monthly.length, 'data points');
+                createLastYearLineChart(data.monthly, targetYear);
+            } else {
+                console.log('No data for target year:', targetYear);
+                showNoDataMessage('lastYearLineChart', `No data available for ${targetYear}`);
+            }
+        })
+        .catch(error => {
+            console.error('Last year fetch error:', error);
+            showNoDataMessage('lastYearLineChart', 'Error loading data');
+        });
+}
+
+function createLastYearLineChart(monthlyData, year) {
+    const ctx = document.getElementById('lastYearLineChart');
+    if (!ctx) {
+        console.error('lastYearLineChart canvas not found');
+        return;
+    }
+    
+    // Destroy existing chart
+    if (lastYearLineChart) {
+        lastYearLineChart.destroy();
+    }
+    
+    // Prepare data
+    const labels = monthlyData.map(item => {
+        const date = new Date(item.month + '-01');
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+    });
+    const profitData = monthlyData.map(item => parseFloat(item.net_profit) || 0);
+    
+    console.log('Last year chart data:', { labels, profitData });
+    
+    lastYearLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: `${year} Net Profit Trend`,
+                data: profitData,
+                borderColor: 'rgba(220, 53, 69, 1)', // Different color (red)
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: 'rgba(220, 53, 69, 1)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: `${year} Net Profit Trend (Previous Year)`
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${year} Net Profit: $` + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    console.log('Last year chart created successfully');
+}
+
+function showNoDataMessage(canvasId, message) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+        console.error('Canvas not found:', canvasId);
+        return;
+    }
+    
+    // Clear any existing chart
+    if (canvasId === 'lastYearLineChart' && lastYearLineChart) {
+        lastYearLineChart.destroy();
+        lastYearLineChart = null;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Get canvas dimensions
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width || 800;
+    canvas.height = rect.height || 400;
+    
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Style the text
+    ctx.font = 'bold 16px Arial';
+    ctx.fillStyle = '#999';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Draw the message
+    ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+    
+    console.log('No data message displayed:', message);
 }
