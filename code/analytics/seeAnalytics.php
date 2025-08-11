@@ -1,9 +1,9 @@
 <?php
 session_start();
 include "../../conexion.php";
-// if (!isset($_SESSION['id'])) {
-//   header("Location: ../../index.php");
-// }
+if (!isset($_SESSION['id'])) {
+  header("Location: ../../index.php");
+}
 $nombre = $_SESSION['nombre'];
 $tipo_usu = $_SESSION['tipo_usuario'];
 
@@ -32,7 +32,7 @@ $resultYears = $mysqli->query($queryYears);
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -110,7 +110,8 @@ $resultYears = $mysqli->query($queryYears);
     max-width: 1200px;
   }
 
-  .filter-form select, .filter-form input {
+  .filter-form select,
+  .filter-form input {
     border: 1px solid var(--secondary);
     border-radius: 6px;
     padding: 10px 15px;
@@ -118,7 +119,8 @@ $resultYears = $mysqli->query($queryYears);
     transition: all 0.3s ease;
   }
 
-  .filter-form select:focus, .filter-form input:focus {
+  .filter-form select:focus,
+  .filter-form input:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(99, 43, 139, 0.2);
     outline: none;
@@ -206,26 +208,28 @@ $resultYears = $mysqli->query($queryYears);
     .filter-form {
       padding: 15px;
     }
-    
+
     .chart-wrapper {
       height: 300px;
     }
-    
+
     .summary-card .amount {
       font-size: 1.5rem;
     }
   }
 </style>
 
-<body>  <div class="header-container">
+<body>
+  <div class="header-container">
     <img src="../../img/logo.png" alt="ASWWORKING Logo" class="logo">
     <h1 class="page-title"><i class="fa-solid fa-chart-line"></i> SALES ANALYTICS</h1>
   </div>
 
   <!-- Filter Form -->
   <div class="filter-form">
-    <form id="filterForm" class="row g-3 align-items-center">      <div class="col-md-3">
-        <label for="year" class="form-label">Year:</label>        <select name="year" id="year" class="form-select">
+    <form id="filterForm" class="row g-3 align-items-center">
+      <div class="col-md-3">
+        <label for="year" class="form-label">Year:</label> <select name="year" id="year" class="form-select">
           <option value="">All years</option>
           <?php
           while ($year = $resultYears->fetch_assoc()) {
@@ -318,7 +322,7 @@ $resultYears = $mysqli->query($queryYears);
     <div class="chart-wrapper">
       <canvas id="categoryPieChart"></canvas>
     </div>
-  </div>  <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
+  </div> <br /><a href="../../access.php"><img src='../../img/atras.png' width="72" height="72" title="back" /></a><br>
 
   <script src="analytics.js"></script>
 </body>
