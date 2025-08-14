@@ -580,31 +580,24 @@ header("Content-Type: text/html;charset=utf-8");
                     $.ajax({
                         url: 'verificar_upc.php',
                         type: 'POST',
+                        dataType: 'json',
                         data: {
                             upc_item: upc
                         },
-                        success: function(respuesta) {
-                            var data;
-                            try {
-                                data = (typeof respuesta === 'object') ? respuesta : JSON.parse(respuesta);
-                            } catch (e) {
-                                Swal.fire({
-                                    title: 'Error',
-                                    text: 'Respuesta inesperada del servidor. Contacta al administrador.',
-                                    icon: 'error',
-                                    confirmButtonColor: '#632b8b'
-                                });
-                                return;
-                            }
+                        success: function(data) {
+                            console.log('Respuesta del servidor:', data);
+                            console.log('Status recibido:', data.status);
                             if (data.status === 'existe') {
                                 // Mostrar la información en una tabla para mayor claridad
-                                var tableHtml = '<table class="table table-bordered"><thead><tr><th>Brand</th><th>Item</th><th>SKU</th><th>Quantity</th></tr></thead><tbody>';
+                                var tableHtml = '<table class="table table-bordered"><thead><tr><th>Select</th><th>Brand</th><th>Item</th><th>SKU</th><th>Quantity</th></tr></thead><tbody>';
                                 data.items.forEach(function(item, idx) {
+                                    var qty = item.quantity_inventory || 0; // Manejar null/undefined
                                     tableHtml += '<tr>' +
+                                        '<td><input type="radio" name="selected_item" value="' + idx + '" ' + (idx === 0 ? 'checked' : '') + '></td>' +
                                         '<td>' + item.brand_item + '</td>' +
                                         '<td>' + item.item_item + '</td>' +
                                         '<td>' + item.sku_item + '</td>' +
-                                        '<td>' + item.quantity_inventory + '</td>' +
+                                        '<td>' + qty + '</td>' +
                                         '</tr>';
                                 });
                                 tableHtml += '</tbody></table>';
@@ -614,11 +607,11 @@ header("Content-Type: text/html;charset=utf-8");
                                     var first = data.items[0];
                                     $('#brand_item').val(first.brand_item);
                                     $('#item_item').val(first.item_item);
-                                    if (first.sku_item && first.sku_item.trim() !== "") {
+                                    if (first.sku_item && String(first.sku_item).trim() !== "") {
                                         $('#sku_item').val(first.sku_item);
                                     }
                                     // Si el SKU está vacío, no lo sobrescribas, conserva el actual
-                                    $('#quantity_inventory').val(first.quantity_inventory);
+                                    $('#quantity_inventory').val(first.quantity_inventory || 0);
                                     // Precargar color, size y category si existen en la respuesta
                                     if (first.color_item) {
                                         $('#color_item').val(first.color_item);
@@ -648,25 +641,48 @@ header("Content-Type: text/html;charset=utf-8");
                                             Swal.showValidationMessage('Please enter a valid quantity to add.');
                                             return false;
                                         }
-                                        return addQty;
+                                        const selectedRadio = document.querySelector('input[name="selected_item"]:checked');
+                                        if (!selectedRadio) {
+                                            Swal.showValidationMessage('Please select an item to update.');
+                                            return false;
+                                        }
+                                        return {
+                                            addQty: addQty,
+                                            selectedIdx: parseInt(selectedRadio.value)
+                                        };
                                     }
                                 }).then((result) => {
                                     if (result.isConfirmed) {
-                                        var addQty = result.value;
-                                        var currentQty = parseInt($('#quantity_inventory').val()) || 0;
+                                        var addQty = result.value.addQty;
+                                        var selectedIdx = result.value.selectedIdx;
+                                        var selectedItem = data.items[selectedIdx];
+                                        var currentQty = parseInt(selectedItem.quantity_inventory) || 0;
                                         var newQty = currentQty + addQty;
+                                        
+                                        // Actualizar los campos con el item seleccionado
+                                        $('#brand_item').val(selectedItem.brand_item);
+                                        $('#item_item').val(selectedItem.item_item);
+                                        $('#sku_item').val(selectedItem.sku_item);
                                         $('#quantity_inventory').val(newQty);
+                                        if (selectedItem.color_item) {
+                                            $('#color_item').val(selectedItem.color_item);
+                                        }
+                                        if (selectedItem.size_item) {
+                                            $('#size_item').val(selectedItem.size_item);
+                                        }
+                                        
                                         // Llamada AJAX para actualizar en la base de datos
                                         $.ajax({
                                             url: 'update_quantity.php',
                                             type: 'POST',
+                                            dataType: 'json',
                                             data: {
                                                 upc_item: $('#upc_item').val().toUpperCase(),
-                                                sku_item: $('#sku_item').val().toUpperCase(),
+                                                sku_item: (selectedItem.sku_item || '').toUpperCase(),
                                                 quantity_inventory: newQty
                                             },
-                                            success: function(respuesta) {
-                                                var resp = JSON.parse(respuesta);
+                                            success: function(resp) {
+                                                console.log('Update response:', resp);
                                                 if (resp.status === 'success') {
                                                     Swal.fire({
                                                         title: 'Quantity Updated',
@@ -683,10 +699,11 @@ header("Content-Type: text/html;charset=utf-8");
                                                     });
                                                 }
                                             },
-                                            error: function() {
+                                            error: function(xhr, status, error) {
+                                                console.log('AJAX Error:', xhr.responseText);
                                                 Swal.fire({
                                                     title: 'Error',
-                                                    text: 'Could not connect to server.',
+                                                    text: 'Could not connect to server: ' + error,
                                                     icon: 'error',
                                                     confirmButtonColor: '#632b8b'
                                                 });
@@ -699,10 +716,13 @@ header("Content-Type: text/html;charset=utf-8");
                                 $('#mensaje-upc').text('This UPC already exists in the database.').css('color', 'red');
                                 $('#mensaje-upc').addClass('alert alert-danger');
                             } else if (data.status === 'no_existe') {
+                                console.log('UPC no existe - mostrando mensaje disponible');
                                 $('#mensaje-upc').removeClass('alert alert-danger');
                                 $('#mensaje-upc').addClass('alert alert-success');
                                 $('#mensaje-upc').text('This UPC is available.').css('color', 'green');
+                                $('#mensaje-upc').show();
                             } else {
+                                console.log('Status desconocido:', data.status);
                                 Swal.fire({
                                     title: 'Error',
                                     text: data.message || 'Error desconocido.',
