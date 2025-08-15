@@ -589,14 +589,18 @@ header("Content-Type: text/html;charset=utf-8");
                             console.log('Status recibido:', data.status);
                             if (data.status === 'existe') {
                                 // Mostrar la información en una tabla para mayor claridad
-                                var tableHtml = '<table class="table table-bordered"><thead><tr><th>Select</th><th>Brand</th><th>Item</th><th>SKU</th><th>Quantity</th></tr></thead><tbody>';
+                                var tableHtml = '<table class="table table-bordered"><thead><tr><th>Select</th><th>Brand</th><th>Item</th><th>SKU</th><th>REF</th><th>COST</th><th>Quantity</th></tr></thead><tbody>';
                                 data.items.forEach(function(item, idx) {
                                     var qty = item.quantity_inventory || 0; // Manejar null/undefined
+                                    var costDisplay = (typeof item.cost_item !== 'undefined' && item.cost_item !== null && item.cost_item !== '') ? '$' + parseFloat(item.cost_item).toFixed(2) : '';
+                                    var refDisplay = item.ref_item || '';
                                     tableHtml += '<tr>' +
                                         '<td><input type="radio" name="selected_item" value="' + idx + '" ' + (idx === 0 ? 'checked' : '') + '></td>' +
                                         '<td>' + item.brand_item + '</td>' +
                                         '<td>' + item.item_item + '</td>' +
                                         '<td>' + item.sku_item + '</td>' +
+                                        '<td>' + refDisplay + '</td>' +
+                                        '<td>' + costDisplay + '</td>' +
                                         '<td>' + qty + '</td>' +
                                         '</tr>';
                                 });
@@ -612,6 +616,16 @@ header("Content-Type: text/html;charset=utf-8");
                                     }
                                     // Si el SKU está vacío, no lo sobrescribas, conserva el actual
                                     $('#quantity_inventory').val(first.quantity_inventory || 0);
+                                    // Prefill ref, cost and batch (inventory_item)
+                                    if (first.ref_item) {
+                                        $('#ref_item').val(first.ref_item);
+                                    }
+                                    if (typeof first.cost_item !== 'undefined' && first.cost_item !== null && first.cost_item !== '') {
+                                        $('#cost_item').val(parseFloat(first.cost_item).toFixed(2));
+                                    }
+                                    if (first.inventory_item) {
+                                        $('#inventory_item').val(first.inventory_item);
+                                    }
                                     // Precargar color, size y category si existen en la respuesta
                                     if (first.color_item) {
                                         $('#color_item').val(first.color_item);
@@ -663,6 +677,16 @@ header("Content-Type: text/html;charset=utf-8");
                                         $('#brand_item').val(selectedItem.brand_item);
                                         $('#item_item').val(selectedItem.item_item);
                                         $('#sku_item').val(selectedItem.sku_item);
+                                        // Set ref, cost and batch from selected item
+                                        if (selectedItem.ref_item) {
+                                            $('#ref_item').val(selectedItem.ref_item);
+                                        } else { $('#ref_item').val(''); }
+                                        if (typeof selectedItem.cost_item !== 'undefined' && selectedItem.cost_item !== null && selectedItem.cost_item !== '') {
+                                            $('#cost_item').val(parseFloat(selectedItem.cost_item).toFixed(2));
+                                        } else { $('#cost_item').val(''); }
+                                        if (selectedItem.inventory_item) {
+                                            $('#inventory_item').val(selectedItem.inventory_item);
+                                        } else { $('#inventory_item').val(''); }
                                         $('#quantity_inventory').val(newQty);
                                         if (selectedItem.color_item) {
                                             $('#color_item').val(selectedItem.color_item);

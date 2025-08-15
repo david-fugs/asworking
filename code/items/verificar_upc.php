@@ -8,7 +8,8 @@ if (isset($_POST['upc_item'])) {
     // Consulta plana (escapando la entrada) con LEFT JOIN entre items e inventory por UPC
     // Si SKU está vacío, solo hacer JOIN por UPC
     $upc_esc = $mysqli->real_escape_string($upc_item);
-    $sql = "SELECT i.brand_item, i.item_item, i.sku_item, i.color_item, i.size_item, i.category_item, 
+    $sql = "SELECT i.brand_item, i.item_item, i.sku_item, i.color_item, i.size_item, i.category_item,
+                   i.ref_item, i.cost_item, i.inventory_item as item_inventory, 
                    COALESCE(inv.quantity_inventory, 0) as quantity_inventory
             FROM items i
             LEFT JOIN inventory inv ON i.upc_item = inv.upc_inventory 
@@ -31,7 +32,10 @@ if (isset($_POST['upc_item'])) {
                 'color_item' => $row['color_item'],
                 'size_item' => $row['size_item'],
                 'category_item' => $row['category_item'],
-                'quantity_inventory' => $row['quantity_inventory']
+                    'quantity_inventory' => $row['quantity_inventory'],
+                    'ref_item' => $row['ref_item'],
+                    'cost_item' => $row['cost_item'],
+                    'inventory_item' => $row['item_inventory']
             ];
         }
         echo json_encode(['status' => 'existe', 'items' => $items]);
