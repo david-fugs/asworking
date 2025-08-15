@@ -50,20 +50,28 @@ if (empty($stores_selected)) {
         <meta charset='utf-8'>
         <title>Error - ASWWORKING</title>
         <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+        <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
     </head>
     <body>
         <script>
-            Swal.fire({
-                title: 'Error',
-                text: 'You must select at least one store.',
-                icon: 'error',
-                confirmButtonText: 'Go back',
-                confirmButtonColor: '#632b8b'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.history.back();
+            (function(){
+                if (typeof Swal === 'undefined') {
+                    var s = document.createElement('script');
+                    s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+                    s.onload = showError;
+                    document.head.appendChild(s);
+                } else { showError(); }
+
+                function showError(){
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'You must select at least one store.',
+                        icon: 'error',
+                        confirmButtonText: 'Go back',
+                        confirmButtonColor: '#632b8b'
+                    }).then((result) => { window.history.back(); });
                 }
-            });
+            })();
         </script>
     </body>
     </html>";
@@ -126,63 +134,109 @@ if ($mysqli->query($sql)) {
         )";
         if ($mysqli->query($sql_report)) {
             // Todo OK, mostrar SweetAlert y redirigir
-            echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
-            echo "<script>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Item registered successfully!',
-                    confirmButtonText: 'Go to Edit Location',
-                    confirmButtonColor: '#632b8b'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '../report/editLocationFolder.php';
+            ?>
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Item registered</title>
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
+            </head>
+            <body>
+            <script>
+                // Ensure SweetAlert is available, then show the modal
+                (function(){
+                    if (typeof Swal === 'undefined') {
+                        // If CDN failed to load synchronously, try to load it dynamically
+                        var s = document.createElement('script');
+                        s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+                        s.onload = showAlert;
+                        document.head.appendChild(s);
+                    } else {
+                        showAlert();
                     }
-                });
-            </script>";
+
+                    function showAlert(){
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Item registered successfully!',
+                            confirmButtonText: 'Go to Edit Location',
+                            confirmButtonColor: '#632b8b',
+                            allowOutsideClick: false
+                        }).then((result) => {
+                            // Redirect regardless of confirm/close to the edit location page
+                            window.location.href = '../report/editLocationFolder.php';
+                        });
+                    }
+                })();
+            </script>
+            </body>
+            </html>
+            <?php
             exit();
         } else {
             // Error al insertar en daily_report
             $errorMsg = addslashes($mysqli->error);
-            echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
-            echo "<script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    html: 'Error inserting report: $errorMsg',
-                    confirmButtonText: 'Reload',
-                    confirmButtonColor: '#632b8b'
-                }).then(() => { window.location.reload(); });
-            </script>";
+            echo "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Error</title>
+                <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+                <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
+                </head><body>
+                <script>
+                (function(){
+                    if (typeof Swal === 'undefined') {
+                        var s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11'; s.onload = showErr;
+                        document.head.appendChild(s);
+                    } else { showErr(); }
+                    function showErr(){
+                        Swal.fire({icon:'error',title:'Error',html: 'Error inserting report: $errorMsg',confirmButtonText:'Reload',confirmButtonColor:'#632b8b'}).then(()=>{ window.location.reload(); });
+                    }
+                })();
+                </script>
+                </body></html>";
             exit();
         }
     } else {
         // Error al insertar en inventory
         $errorMsg = addslashes($mysqli->error);
-        echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
-        echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                html: 'Error inserting inventory: $errorMsg',
-                confirmButtonText: 'Reload',
-                confirmButtonColor: '#632b8b'
-            }).then(() => { window.location.reload(); });
-        </script>";
+        echo "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Error</title>
+            <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+            <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
+            </head><body>
+            <script>
+            (function(){
+                if (typeof Swal === 'undefined') {
+                    var s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11'; s.onload = showErr;
+                    document.head.appendChild(s);
+                } else { showErr(); }
+                function showErr(){
+                    Swal.fire({icon:'error',title:'Error',html: 'Error inserting inventory: $errorMsg',confirmButtonText:'Reload',confirmButtonColor:'#632b8b'}).then(()=>{ window.location.reload(); });
+                }
+            })();
+            </script>
+            </body></html>";
         exit();
     }
 } else {
     // Error al insertar en items
     $errorMsg = addslashes($mysqli->error);
-    echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
-    echo "<script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            html: 'Error inserting item: $errorMsg',
-            confirmButtonText: 'Reload',
-            confirmButtonColor: '#632b8b'
-        }).then(() => { window.location.reload(); });
-    </script>";
+    echo "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Error</title>
+        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+        <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
+        </head><body>
+        <script>
+        (function(){
+            if (typeof Swal === 'undefined') {
+                var s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11'; s.onload = showErr;
+                document.head.appendChild(s);
+            } else { showErr(); }
+            function showErr(){
+                Swal.fire({icon:'error',title:'Error',html: 'Error inserting item: $errorMsg',confirmButtonText:'Reload',confirmButtonColor:'#632b8b'}).then(()=>{ window.location.reload(); });
+            }
+        })();
+        </script>
+        </body></html>";
     exit();
 }
