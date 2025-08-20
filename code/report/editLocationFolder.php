@@ -472,13 +472,15 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                             <th>Select</th>
                                             <th>Date</th>
                                             <th>UPC Final</th>
+                                            <th>Quantity</th>
                                             <th>SKU</th>
                                             <th>Item</th>
                                             <th>Brand</th>
-                                            <th>Vendor</th>
+                                            <th>Style</th>
                                             <th>Color</th>
                                             <th>Size</th>
-                                            <th>Current Folder</th>                                            <th>New Folder</th>
+                                            <th>Current Folder</th>
+                                            <th>New Folder</th>
                                             <th>Current Location</th>
                                             <th>New Location</th>
                                         </tr>
@@ -491,6 +493,7 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                                 </td>
                                                 <td><?= htmlspecialchars($report['fecha_alta_reporte']) ?></td>
                                                 <td><?= htmlspecialchars($report['upc_final_report']) ?></td>
+                                                <td style="width:80px;"><input type="text" class="form-control form-control-sm" value="<?= htmlspecialchars($report['quantity_report']) ?>" readonly></td>
                                                 <td><?= htmlspecialchars($report['sku_report']) ?></td>
 
                                                 <!-- Item (solo lectura) -->

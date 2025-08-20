@@ -352,6 +352,8 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
 
                     if (upcFinal === "") return;
 
+                    console.log('validarUPCFinal called, upcFinal=', upcFinal);
+
                     $.ajax({
                         url: 'validar_upc_final.php',
                         type: 'POST',
@@ -361,12 +363,28 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                         },
                         success: function(data) {
                             if (data.exists) {
-                                alert("⚠️ Warning: This Final UPC already exists in the items table!");
-                                $('#upc_final_report').focus();
+                                // Use SweetAlert2 if available, otherwise fallback to native alert
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'Warning',
+                                        text: 'This Final UPC already exists in the items table!'
+                                    }).then(function() {
+                                        $('#upc_final_report').focus();
+                                    });
+                                } else {
+                                    alert("⚠️ Warning: This Final UPC already exists in the items table!");
+                                    $('#upc_final_report').focus();
+                                }
                             }
                         },
                         error: function() {
-                            console.log("Error validating Final UPC");
+                            console.log("Error validating Final UPC", arguments);
+                        },
+                        statusCode: {
+                            500: function(xhr) {
+                                console.error('Server error validating Final UPC');
+                            }
                         }
                     });
                 }
@@ -513,5 +531,16 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                             })
                             .catch(error => console.error("Error:", error));
                     });
+
+                    // Ensure validarUPCFinal runs reliably on multiple input events
+                    if (window.jQuery) {
+                        $(document).on('blur input change', '#upc_final_report', function() {
+                            try {
+                                validarUPCFinal();
+                            } catch (e) {
+                                console.error('Error calling validarUPCFinal()', e);
+                            }
+                        });
+                    }
                 });
             </script>

@@ -13,19 +13,39 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
 include("../../conexion.php");
 header("Content-Type: text/html;charset=utf-8");
 date_default_timezone_set("America/Bogota");
+// Suppress PHP error output and start output buffering to avoid contaminating AJAX JSON
+@ini_set('display_errors', '0');
+error_reporting(0);
+if (!ob_get_level()) ob_start();
 
-$upc_item       = mb_strtoupper($_POST['upc_item']);
-$sku_item       =  ($_POST['sku_item']) ?? '';
-$date_item          = $_POST['date_item'];
-$brand_item         = mb_strtoupper($_POST['brand_item']);
-$item_item          = ucfirst(strtolower($_POST['item_item'])); // Primera mayúscula, resto minúscula
-$ref_item           = mb_strtoupper($_POST['ref_item']);
-$color_item         = mb_strtoupper($_POST['color_item']);
-$size_item          = mb_strtoupper($_POST['size_item']);
-$category_item      = mb_strtoupper($_POST['category_item']);
-$cost_item          = $_POST['cost_item'];
-$weight_item        = mb_strtoupper($_POST['weight_item']);
-$inventory_item     = mb_strtoupper($_POST['inventory_item']);
+// Detect AJAX submission
+$isAjax = isset($_POST['ajax']) && $_POST['ajax'] == '1';
+if ($isAjax) {
+    header('Content-Type: application/json; charset=utf-8');
+}
+
+// Helper to send JSON and clear any buffered output
+function sendJson($arr) {
+    if (ob_get_length()) {
+        @ob_end_clean();
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($arr);
+    exit();
+}
+
+$upc_item       = mb_strtoupper($_POST['upc_item'] ?? '');
+$sku_item       = ($_POST['sku_item'] ?? '');
+$date_item      = ($_POST['date_item'] ?? '');
+$brand_item     = mb_strtoupper($_POST['brand_item'] ?? '');
+$item_item      = isset($_POST['item_item']) ? ucfirst(strtolower($_POST['item_item'])) : '';
+$ref_item       = mb_strtoupper($_POST['ref_item'] ?? '');
+$color_item     = mb_strtoupper($_POST['color_item'] ?? '');
+$size_item      = mb_strtoupper($_POST['size_item'] ?? '');
+$category_item  = mb_strtoupper($_POST['category_item'] ?? '');
+$cost_item      = ($_POST['cost_item'] ?? '');
+$weight_item    = mb_strtoupper($_POST['weight_item'] ?? '');
+$inventory_item = mb_strtoupper($_POST['inventory_item'] ?? '');
 $quantity_inventory = $_POST['quantity_inventory'] ?? 0;
 $observation_inventory = isset($_POST['observation_inventory']) ? trim($_POST['observation_inventory']) : '';
 
@@ -43,39 +63,43 @@ if (isset($_POST['stores']) && is_array($_POST['stores'])) {
 
 // Validar que se haya seleccionado al menos una tienda
 if (empty($stores_selected)) {
-    echo "
-    <!DOCTYPE html>
-    <html lang='es'>
-    <head>
-        <meta charset='utf-8'>
-        <title>Error - ASWWORKING</title>
-        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-        <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
-    </head>
-    <body>
-        <script>
-            (function(){
-                if (typeof Swal === 'undefined') {
-                    var s = document.createElement('script');
-                    s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
-                    s.onload = showError;
-                    document.head.appendChild(s);
-                } else { showError(); }
+    if ($isAjax) {
+        sendJson(['status' => 'error', 'message' => 'You must select at least one store.']);
+    } else {
+        echo "
+        <!DOCTYPE html>
+        <html lang='es'>
+        <head>
+            <meta charset='utf-8'>
+            <title>Error - ASWWORKING</title>
+            <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+            <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
+        </head>
+        <body>
+            <script>
+                (function(){
+                    if (typeof Swal === 'undefined') {
+                        var s = document.createElement('script');
+                        s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+                        s.onload = showError;
+                        document.head.appendChild(s);
+                    } else { showError(); }
 
-                function showError(){
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'You must select at least one store.',
-                        icon: 'error',
-                        confirmButtonText: 'Go back',
-                        confirmButtonColor: '#632b8b'
-                    }).then((result) => { window.history.back(); });
-                }
-            })();
-        </script>
-    </body>
-    </html>";
-    exit();
+                    function showError(){
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'You must select at least one store.',
+                            icon: 'error',
+                            confirmButtonText: 'Go back',
+                            confirmButtonColor: '#632b8b'
+                        }).then((result) => { window.history.back(); });
+                    }
+                })();
+            </script>
+        </body>
+        </html>";
+        exit();
+    }
 }
 
 // Convertir las tiendas a formato JSON para almacenar en la base de datos
@@ -133,7 +157,11 @@ if ($mysqli->query($sql)) {
             '$upc_item', '$upc_item', '$cons_report', '$folder_report', '$loc_report', $quantity_inventory, '$sku_item', '$brand_item', '$item_item', '$vendor_report', '$color_item', '$size_item', '$category_item', '$weight_item', '$inventory_item', '$observacion_report', '$stores_json_escaped', $estado_reporte, '$fecha_alta_reporte'
         )";
         if ($mysqli->query($sql_report)) {
-            // Todo OK, mostrar SweetAlert y redirigir
+            // Todo OK
+            if ($isAjax) {
+                sendJson(['status' => 'success', 'message' => 'Item registered successfully', 'redirect' => '../report/editLocationFolder.php']);
+            }
+            // Non-AJAX: show SweetAlert and redirect as before
             ?>
             <!DOCTYPE html>
             <html lang="es">
@@ -180,6 +208,9 @@ if ($mysqli->query($sql)) {
         } else {
             // Error al insertar en daily_report
             $errorMsg = addslashes($mysqli->error);
+            if ($isAjax) {
+                sendJson(['status' => 'error', 'message' => 'Error inserting report: ' . $errorMsg]);
+            }
             echo "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Error</title>
                 <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
                 <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
@@ -201,6 +232,9 @@ if ($mysqli->query($sql)) {
     } else {
         // Error al insertar en inventory
         $errorMsg = addslashes($mysqli->error);
+        if ($isAjax) {
+            sendJson(['status' => 'error', 'message' => 'Error inserting inventory: ' . $errorMsg]);
+        }
         echo "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Error</title>
             <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
             <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
@@ -222,6 +256,9 @@ if ($mysqli->query($sql)) {
 } else {
     // Error al insertar en items
     $errorMsg = addslashes($mysqli->error);
+    if ($isAjax) {
+        sendJson(['status' => 'error', 'message' => 'Error inserting item: ' . $errorMsg]);
+    }
     echo "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Error</title>
         <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
         <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>

@@ -646,13 +646,13 @@ function getStatus($estado)
                                         <th colspan="3">Specs</th>
 
                                         <th colspan="2">Inventory</th>
-                                        <th colspan="2">Stores</th>
+                                        <th colspan="1">Stores</th>
                                         <th>Observation</th>
                                     </tr>
-                                    <tr>
+                                        <tr>
                                         <th class=""></th>
                                         <th class=""></th>
-                                        <th>Assigned</th>
+                                        <th class="d-none">Assigned</th>
                                         <th>Final</th>
                                         <th>Cons</th>
                                         <th>Folder</th>
@@ -661,62 +661,84 @@ function getStatus($estado)
                                         <th class="">SKU</th>
                                         <th>Brand</th>
                                         <th class="">Item</th>
-                                        <th>Vendor</th>
+                                        <th>Style</th>
                                         <th>Color</th>
                                         <th>Size</th>
                                         <th>Cost</th>
                                         <th>Category</th>
                                         <th>Weight</th>
                                         <th>Inventory</th>
-                                        <th>Stores</th>
+                                        <th></th>
                                         <th>Observation</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($reports as $index => $report): ?>
+                                    <?php foreach ($reports as $index => $report): 
+                                        // Format fields: uppercase for all except item (first-letter uppercase, rest lowercase)
+                                        $fecha = mb_strtoupper($report['fecha_alta_reporte'] ?? '', 'UTF-8');
+                                        $upc_asignado = mb_strtoupper($report['upc_asignado_report'] ?? '', 'UTF-8');
+                                        $upc_final = mb_strtoupper($report['upc_final_report'] ?? '', 'UTF-8');
+                                        $cons = mb_strtoupper($report['cons_report'] ?? '', 'UTF-8');
+                                        $folder = mb_strtoupper($report['folder_report'] ?? '', 'UTF-8');
+                                        $loc = mb_strtoupper($report['loc_report'] ?? '', 'UTF-8');
+                                        $quantity = mb_strtoupper($report['quantity_report'] ?? '', 'UTF-8');
+                                        $sku = mb_strtoupper($report['sku_report'] ?? '', 'UTF-8');
+                                        $brand = mb_strtoupper($report['brand_report'] ?? '', 'UTF-8');
+                                        // item: first letter uppercase, rest lowercase
+                                        $item_raw = $report['item_report'] ?? '';
+                                        $item_lower = mb_strtolower($item_raw, 'UTF-8');
+                                        $item = $item_lower !== '' ? mb_strtoupper(mb_substr($item_lower, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($item_lower, 1, null, 'UTF-8') : $item_lower;
+                                        $vendor = mb_strtoupper($report['vendor_report'] ?? '', 'UTF-8');
+                                        $color = mb_strtoupper($report['color_report'] ?? '', 'UTF-8');
+                                        $size = mb_strtoupper($report['size_report'] ?? '', 'UTF-8');
+                                        $cost = mb_strtoupper($report['cost_report'] ?? '', 'UTF-8');
+                                        $category = mb_strtoupper($report['category_report'] ?? '', 'UTF-8');
+                                        $weight = mb_strtoupper($report['weight_report'] ?? '', 'UTF-8');
+                                        $inventory = mb_strtoupper($report['inventory_report'] ?? '', 'UTF-8');
+                                        $stores_json = $report['stores_report'] ?? '';
+                                        // Prepare stores display in uppercase
+                                        if (!empty($stores_json)) {
+                                            $stores_array = json_decode($stores_json, true);
+                                            if (is_array($stores_array)) {
+                                                $stores_array = array_map(function($s){ return mb_strtoupper($s, 'UTF-8'); }, $stores_array);
+                                                $stores_display = implode(', ', $stores_array);
+                                            } else {
+                                                $stores_display = mb_strtoupper($stores_json, 'UTF-8');
+                                            }
+                                        } else {
+                                            $stores_display = 'NOT ASSIGNED';
+                                        }
+                                        $observacion = $report['observacion_report'] ?? '';
+                                    ?>
                                         <tr>
-                                            <input type="hidden" name="id_report[]" value="<?= $report['id_report'] ?>">
+                                            <input type="hidden" name="id_report[]" value="<?= htmlspecialchars($report['id_report']) ?>">
                                             <td>
                                                 <input type="checkbox" name="seleccionados[]" value="<?= $index ?>">
                                             </td>
-                                            <td><input style="width: 120px;" type="text" name="fecha_alta_reporte[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['fecha_alta_reporte']) ?>"></td>
-                                            <td><input style="width: 140px;" type="text" name="upc_asignado_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['upc_asignado_report']) ?>"></td>
-                                            <td><input style="width: 140px;" type="text" name="upc_final_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['upc_final_report']) ?>"></td>
-                                            <td><input style="width: 80px;" type="text" name="cons_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['cons_report']) ?>"></td>
-                                            <td><input style="width: 90px;" type="text" name="folder_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['folder_report']) ?>"></td>
-                                            <td><input type="text" style="width: 90px;" name="loc_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['loc_report']) ?>"></td>
-                                            <td><input style="width: 60px;" type="text" name="quantity_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['quantity_report']) ?>"></td>
-                                            <td><input style="width: 160px;" type="text" name="sku_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['sku_report']) ?>"></td>
-                                            <td><input style="width: 160px;" type="text" name="brand_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['brand_report']) ?>"></td>
-                                            <td><input type="text" style="width: 240px;" name="item_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['item_report']) ?>"></td>
-                                            <td><input style="width: 80px;" type="text" name="vendor_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['vendor_report']) ?>"></td>
-                                            <td><input type="text" style="width: 110px;" name="color_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['color_report']) ?>"></td>
-                                            <td><input style="width: 110px;" type="text" name="size_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['size_report']) ?>"></td>
-                                            <td><input style="width: 110px;" type="text" name="cost_report[]" class="form-control form-control-sm"></td>
-                                            <td><input type="text" style="width: 100px;" name="category_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['category_report']) ?>"></td>
-                                            <td><input type="text" style="width: 140px;" name="weight_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['weight_report']) ?>"></td>
-                                            <td><input style="width: 140px;" type="text" name="inventory_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['inventory_report']) ?>"></td>
+                                            <td><input style="width: 120px;" type="text" name="fecha_alta_reporte[]" class="form-control form-control-sm" value="<?= htmlspecialchars($fecha) ?>"></td>
+                                            <td class="d-none"><input type="hidden" name="upc_asignado_report[]" value="<?= htmlspecialchars($upc_asignado) ?>"></td>
+                                            <td><input style="width: 140px;" type="text" name="upc_final_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($upc_final) ?>"></td>
+                                            <td><input style="width: 80px;" type="text" name="cons_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($cons) ?>"></td>
+                                            <td><input style="width: 90px;" type="text" name="folder_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($folder) ?>"></td>
+                                            <td><input type="text" style="width: 90px;" name="loc_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($loc) ?>"></td>
+                                            <td><input style="width: 60px;" type="text" name="quantity_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($quantity) ?>"></td>
+                                            <td><input style="width: 160px;" type="text" name="sku_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($sku) ?>"></td>
+                                            <td><input style="width: 160px;" type="text" name="brand_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($brand) ?>"></td>
+                                            <td><input type="text" style="width: 240px;" name="item_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($item) ?>"></td>
+                                            <td><input style="width: 80px;" type="text" name="vendor_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($vendor) ?>"></td>
+                                            <td><input type="text" style="width: 110px;" name="color_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($color) ?>"></td>
+                                            <td><input style="width: 110px;" type="text" name="size_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($size) ?>"></td>
+                                            <td><input style="width: 110px;" type="text" name="cost_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($cost) ?>"></td>
+                                            <td><input type="text" style="width: 100px;" name="category_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($category) ?>"></td>
+                                            <td><input type="text" style="width: 140px;" name="weight_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($weight) ?>"></td>
+                                            <td><input style="width: 140px;" type="text" name="inventory_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($inventory) ?>"></td>
                                             <td class="stores-cell">
-                                                <span class="stores-text <?= empty($report['stores_report']) ? 'stores-not-assigned' : '' ?>">
-                                                    <?php
-                                                    // Procesar stores_report para mostrar de manera legible
-                                                    $stores_display = '';
-                                                    if (!empty($report['stores_report'])) {
-                                                        $stores_array = json_decode($report['stores_report'], true);
-                                                        if (is_array($stores_array)) {
-                                                            $stores_display = implode(', ', $stores_array);
-                                                        } else {
-                                                            $stores_display = $report['stores_report'];
-                                                        }
-                                                    } else {
-                                                        $stores_display = 'Not assigned';
-                                                    }
-                                                    echo $stores_display;
-                                                    ?>
+                                                <span class="stores-text <?= empty($stores_json) ? 'stores-not-assigned' : '' ?>">
+                                                    <?= htmlspecialchars($stores_display) ?>
                                                 </span>
-                                                <input type="hidden" name="stores_report[]" value="<?= htmlspecialchars($report['stores_report']) ?>">
+                                                <input type="hidden" name="stores_report[]" value="<?= htmlspecialchars($stores_json) ?>">
                                             </td>
-                                            <td><input style="width: 180px;" type="text" name="observacion_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($report['observacion_report']) ?>"></td>
+                                            <td><input style="width: 180px;" type="text" name="observacion_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($observacion) ?>"></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -737,6 +759,8 @@ function getStatus($estado)
     </center>
 
     <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
+    <!-- SweetAlert2 for nicer alerts when validating UPCs -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"][name="seleccionados[]"]');
@@ -767,6 +791,119 @@ function getStatus($estado)
                 
                 // If validation passes, allow submission
                 return true;
+            });
+
+            // Debounced validation for Final UPC inputs on this page
+            function debounce(fn, wait) {
+                let t;
+                return function(...args) {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn.apply(this, args), wait);
+                };
+            }
+
+            const upcFinalInputs = document.querySelectorAll('input[name="upc_final_report[]"]');
+            upcFinalInputs.forEach((input) => {
+                // keep last good value to restore if duplicate is detected
+                let originalValue = input.value;
+
+                input.addEventListener('focus', function() {
+                    originalValue = input.value;
+                });
+
+                const runValidate = debounce(function() {
+                    const val = input.value.trim();
+                    if (!val) return;
+                    console.log('[seeReport] validating upc_final:', val);
+
+                    // Send POST to validar_upc_final.php
+                    fetch('validar_upc_final.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'upc_final=' + encodeURIComponent(val)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('[seeReport] validar_upc_final response:', data);
+                        if (data && data.exists) {
+                            if (typeof Swal === 'undefined') {
+                                console.warn('SweetAlert2 not found; expected Swal to be available. Reverting value.');
+                                input.value = originalValue;
+                                input.focus();
+                                return;
+                            }
+
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Warning',
+                                text: 'This Final UPC already exists in the items table!'
+                            }).then(function() {
+                                // restore previous value
+                                input.value = originalValue;
+                                input.focus();
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('[seeReport] error validating upc_final:', err);
+                    });
+                }, 350);
+
+                // Run on blur and on input (debounced)
+                input.addEventListener('blur', runValidate);
+                input.addEventListener('input', runValidate);
+            });
+
+            // --- Text normalization rules requested by user ---
+            // All text inputs -> UPPERCASE, except:
+            // - item_report[] -> Capitalize first letter (rest lowercase)
+            // - observacion_report[] -> leave as-is (free format)
+
+            function toUpperTrim(s) {
+                return s == null ? s : s.trim().toUpperCase();
+            }
+
+            function capitalizeFirst(s) {
+                if (s == null) return s;
+                s = s.trim().toLowerCase();
+                if (s.length === 0) return s;
+                return s.charAt(0).toUpperCase() + s.slice(1);
+            }
+
+            // Select all text inputs inside the reports table body rows (scoped to the table beginning at line ~682)
+            const reportForm = document.querySelector('form[action="procesar_articulos.php"]');
+            const reportTable = reportForm ? reportForm.querySelector('table') : document.querySelector('table');
+            console.log('[seeReport] reportTable found:', !!reportTable);
+            const textInputs = reportTable ? reportTable.querySelectorAll('tbody input[type="text"]') : document.querySelectorAll('input[type="text"]');
+            textInputs.forEach(inp => {
+                const name = inp.getAttribute('name') || '';
+                // Skip observation field
+                if (name === 'observacion_report[]') return;
+
+                console.log('[seeReport] attaching normalization to', name);
+
+                // For item_report[] apply capitalize first on blur
+                if (name === 'item_report[]') {
+                    inp.addEventListener('blur', function() {
+                        this.value = capitalizeFirst(this.value);
+                    });
+                } else {
+                    // apply uppercase live on input and final trim+uppercase on blur
+                    inp.addEventListener('input', function() {
+                        // transform live to uppercase while preserving cursor roughly
+                        const start = this.selectionStart;
+                        const end = this.selectionEnd;
+                        this.value = toUpperTrim(this.value);
+                        try {
+                            this.setSelectionRange(start, end);
+                        } catch (e) {
+                            // ignore if not supported
+                        }
+                    });
+                    inp.addEventListener('blur', function() {
+                        this.value = toUpperTrim(this.value);
+                    });
+                }
             });
         });
     </script>

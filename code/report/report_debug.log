@@ -1,0 +1,60 @@
+[2025-08-20T21:15:08+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 8686
+    [upc_final_report] => 8686
+    [cons_report] => folder cons 1
+    [folder_report] => folder
+    [loc_report] => location
+    [quantity_report] => 50
+    [sku_report] => 
+    [brand_report] => brand
+    [item_report] => item
+    [vendor_report] => styl
+    [color_report] => color
+    [size_report] => size
+    [category_report] => category
+    [weight_report] => weight
+    [inventory_report] => batch
+    [stores] => Array
+        (
+            [0] => EB001
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[folder cons 1] sku=[LT4RXAJD] folder=[folder]
+
+[2025-08-20T21:24:24+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 12
+    [upc_final_report] => 12
+    [cons_report] => folder cons 1
+    [folder_report] => folder
+    [loc_report] => location
+    [quantity_report] => 40
+    [sku_report] => 
+    [brand_report] => brand
+    [item_report] => item
+    [vendor_report] => style
+    [color_report] => color
+    [size_report] => size
+    [category_report] => category
+    [weight_report] => weight
+    [inventory_report] => batch
+    [stores] => Array
+        (
+            [0] => AM002
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[folder cons 1] sku=[T9RC99LQJW] folder=[folder]
+
+[2025-08-20T21:24:24+02:00] cons_report column type detected: int(11)
+[2025-08-20T21:24:24+02:00] ALTER succeeded: cons_report set to VARCHAR(255)
+[2025-08-20T21:24:24+02:00] sku_report column type detected: bigint(20)
+[2025-08-20T21:24:24+02:00] ALTER succeeded: sku_report set to VARCHAR(255)

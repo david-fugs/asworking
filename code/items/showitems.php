@@ -581,9 +581,18 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         require_once("../../zebra.php");
 
         // Inicializa la consulta base
-        $queryBase = "SELECT items.*, inventory.quantity_inventory , inventory.observation_inventory
-        FROM items 
-        LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
+        // Usamos un LEFT JOIN contra un subquery agrupado para evitar duplicados
+        // cuando la tabla inventory tiene múltiples filas por UPC.
+    $queryBase = "SELECT items.*, inv.quantity_inventory, inv.inv_inventory_item AS inv_inventory_item, inv.observation_inventory
+        FROM items
+        LEFT JOIN (
+         SELECT upc_inventory,
+             SUM(quantity_inventory) AS quantity_inventory,
+             GROUP_CONCAT(DISTINCT item_inventory SEPARATOR ', ') AS inv_inventory_item,
+             MAX(observation_inventory) AS observation_inventory
+         FROM inventory
+            GROUP BY upc_inventory
+        ) AS inv ON items.upc_item = inv.upc_inventory
         WHERE 1=1";
 
         // Agrega filtros si existen
@@ -600,14 +609,11 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             $queryBase .= " AND ref_item = '$reference'";
         }
 
-        // Ordenar por cantidad en inventory
-        $queryBase .= " ORDER BY inventory.quantity_inventory DESC";
+    // Ordenar por cantidad agregada en inventory (subquery alias inv)
+    $queryBase .= " ORDER BY inv.quantity_inventory DESC";
 
-        // Consulta para conteo (sin duplicados)
-        $countQuery = "SELECT COUNT(DISTINCT items.id_item) as total 
-                       FROM items 
-                       LEFT JOIN inventory ON items.upc_item = inventory.upc_inventory 
-                       WHERE 1=1";
+        // Consulta para conteo (no necesita JOIN a inventory)
+        $countQuery = "SELECT COUNT(*) as total FROM items WHERE 1=1";
 
         // Aplicar mismos filtros a countQuery
         if (!empty($_GET['upc_item'])) {
@@ -625,7 +631,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         $countRow = $countResult->fetch_assoc();
         $num_registros = $countRow['total'];
 
-        $resul_x_pagina = 20;
+        $resul_x_pagina = 50;
 
         if ($num_registros > 0) {
             // Configuración de Zebra_Pagination
@@ -667,6 +673,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <th style="min-width: 70px; text-align: center;">WEIGHT</th>
                                 <th style="min-width: 70px; text-align: center;">STOCK</th>
                                 <th style="min-width: 70px; text-align: center;">BATCH</th>
+                                <th style="min-width: 100px; text-align: center;">LOCATION</th>
                                 <th style="min-width: 110px; text-align: center;">STORES</th>
                                 <th style="min-width: 140px; text-align: center;">OBSERVATION</th>
                                 <th style="min-width: 50px; text-align: center;">EDIT</th>
@@ -704,7 +711,8 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <td>' . $row['cost_item'] . '</td>
                                 <td>' . $row['weight_item'] . '</td>
                                 <td>' . $row['quantity_inventory'] . '</td>
-                                <td>' . $row['inventory_item'] . '</td>
+                                <td>' . ($row['inv_inventory_item'] ?? '') . '</td>
+                                <td>' . ($row['inventory_item'] ?? '') . '</td>
                                 <td>' . $stores_display . '</td>
                                 <td>' . (isset($row['observation_inventory']) && $row['observation_inventory'] !== '' ? htmlspecialchars($row['observation_inventory']) : '<span class="text-muted">-</span>') . '</td>
                                 <td>

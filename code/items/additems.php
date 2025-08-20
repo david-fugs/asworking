@@ -589,11 +589,12 @@ header("Content-Type: text/html;charset=utf-8");
                             console.log('Status recibido:', data.status);
                             if (data.status === 'existe') {
                                 // Mostrar la información en una tabla para mayor claridad
-                                var tableHtml = '<table class="table table-bordered"><thead><tr><th>Select</th><th>Brand</th><th>Item</th><th>SKU</th><th>REF</th><th>COST</th><th>Quantity</th></tr></thead><tbody>';
+                                var tableHtml = '<div style="overflow:auto;max-width:100%;"><table class="table table-bordered"><thead><tr><th>Select</th><th>Brand</th><th>Item</th><th>SKU</th><th>REF</th><th>COST</th><th>Batch</th><th>Quantity</th></tr></thead><tbody>';
                                 data.items.forEach(function(item, idx) {
                                     var qty = item.quantity_inventory || 0; // Manejar null/undefined
                                     var costDisplay = (typeof item.cost_item !== 'undefined' && item.cost_item !== null && item.cost_item !== '') ? '$' + parseFloat(item.cost_item).toFixed(2) : '';
                                     var refDisplay = item.ref_item || '';
+                                    var batchDisplay = item.inventory_item || '';
                                     tableHtml += '<tr>' +
                                         '<td><input type="radio" name="selected_item" value="' + idx + '" ' + (idx === 0 ? 'checked' : '') + '></td>' +
                                         '<td>' + item.brand_item + '</td>' +
@@ -601,37 +602,37 @@ header("Content-Type: text/html;charset=utf-8");
                                         '<td>' + item.sku_item + '</td>' +
                                         '<td>' + refDisplay + '</td>' +
                                         '<td>' + costDisplay + '</td>' +
+                                        '<td>' + batchDisplay + '</td>' +
                                         '<td>' + qty + '</td>' +
                                         '</tr>';
                                 });
-                                tableHtml += '</tbody></table>';
+                                tableHtml += '</tbody></table></div>';
 
-                                // Llenar los campos con los primeros valores encontrados
+                                // Llenar solo algunos campos con los primeros valores encontrados.
+                                // NOTA: no precargaremos COST, BATCH (inventory_item), ni QUANTITY aquí.
                                 if (data.items.length > 0) {
                                     var first = data.items[0];
                                     $('#brand_item').val(first.brand_item);
                                     $('#item_item').val(first.item_item);
-                                    if (first.sku_item && String(first.sku_item).trim() !== "") {
-                                        $('#sku_item').val(first.sku_item);
-                                    }
-                                    // Si el SKU está vacío, no lo sobrescribas, conserva el actual
-                                    $('#quantity_inventory').val(first.quantity_inventory || 0);
-                                    // Prefill ref, cost and batch (inventory_item)
+                                    // No sobrescribimos el SKU automáticamente aquí; si el usuario
+                                    // confirma una fila en el modal, el SKU se copiará entonces.
+                                    // No precargamos quantity, cost ni inventory(batch) en este punto.
+                                    // Prefill ref (si existe)
                                     if (first.ref_item) {
                                         $('#ref_item').val(first.ref_item);
                                     }
-                                    if (typeof first.cost_item !== 'undefined' && first.cost_item !== null && first.cost_item !== '') {
-                                        $('#cost_item').val(parseFloat(first.cost_item).toFixed(2));
-                                    }
-                                    if (first.inventory_item) {
-                                        $('#inventory_item').val(first.inventory_item);
-                                    }
-                                    // Precargar color, size y category si existen en la respuesta
+                                    // Precargar color, size, category y weight si existen en la respuesta
                                     if (first.color_item) {
                                         $('#color_item').val(first.color_item);
                                     }
                                     if (first.size_item) {
                                         $('#size_item').val(first.size_item);
+                                    }
+                                    if (first.category_item) {
+                                        $('#category_item').val(first.category_item);
+                                    }
+                                    if (first.weight_item) {
+                                        $('#weight_item').val(first.weight_item);
                                     }
                                 }
 
@@ -645,6 +646,7 @@ header("Content-Type: text/html;charset=utf-8");
                                     title: 'UPC already exists!',
                                     html: '<div style="text-align:left">' + tableHtml + addQtyHtml + '</div>',
                                     icon: 'warning',
+                                    width: '90%',
                                     showCancelButton: true,
                                     confirmButtonText: 'Add Quantity',
                                     cancelButtonText: 'Cancel',
@@ -676,6 +678,7 @@ header("Content-Type: text/html;charset=utf-8");
                                         // Actualizar los campos con el item seleccionado
                                         $('#brand_item').val(selectedItem.brand_item);
                                         $('#item_item').val(selectedItem.item_item);
+                                        // Copiar el SKU del item seleccionado
                                         $('#sku_item').val(selectedItem.sku_item);
                                         // Set ref, cost and batch from selected item
                                         if (selectedItem.ref_item) {
@@ -694,6 +697,13 @@ header("Content-Type: text/html;charset=utf-8");
                                         if (selectedItem.size_item) {
                                             $('#size_item').val(selectedItem.size_item);
                                         }
+                                        // Set category and weight from selected item if present
+                                        if (selectedItem.category_item) {
+                                            $('#category_item').val(selectedItem.category_item);
+                                        } else { $('#category_item').val(''); }
+                                        if (selectedItem.weight_item) {
+                                            $('#weight_item').val(selectedItem.weight_item);
+                                        } else { $('#weight_item').val(''); }
                                         
                                         // Llamada AJAX para actualizar en la base de datos
                                         $.ajax({
@@ -733,6 +743,11 @@ header("Content-Type: text/html;charset=utf-8");
                                                 });
                                             }
                                         });
+                                    } else {
+                                        // Usuario canceló el modal: no queremos conservar un SKU existente.
+                                        // Generamos un SKU nuevo (función ya definida) para evitar que quede el SKU
+                                        // del registro existente.
+                                        generateUniqueSKU();
                                     }
                                 });
 

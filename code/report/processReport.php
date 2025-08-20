@@ -40,8 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     function generateUniqueSKU($mysqli) {
         $max_attempts = 100;
         $attempts = 0;
-        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        $length = 8;
+    $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    $length = 10; // changed to 10 characters as requested
         do {
             $sku = '';
             for ($i = 0; $i < $length; $i++) {
@@ -63,15 +63,39 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         return ($attempts < $max_attempts) ? $sku : false;
     }
 
-    $sku_generated = generateUniqueSKU($mysqli);
-    if (!$sku_generated) {
-        echo "<script>
-            alert('❌ Error: Could not generate a unique SKU. Please try again.');
-            window.history.back();
-          </script>";
-        exit();
-    }
-    $sku = $sku_generated;
+    // Respect client-provided SKU if present; otherwise generate one server-side.
+        $sku_post = isset($_POST['sku_report']) ? trim($_POST['sku_report']) : '';
+        if (!empty($sku_post)) {
+            // Verify the provided SKU is unique in items and inventory
+            $sku_post_esc = $mysqli->real_escape_string($sku_post);
+            $check_items = "SELECT COUNT(*) as count FROM items WHERE sku_item = '$sku_post_esc'";
+            $result_items = $mysqli->query($check_items);
+            $exists_items = $result_items ? $result_items->fetch_assoc()['count'] > 0 : false;
+
+            $check_inventory = "SELECT COUNT(*) as count FROM inventory WHERE sku_inventory = '$sku_post_esc'";
+            $result_inventory = $mysqli->query($check_inventory);
+            $exists_inventory = $result_inventory ? $result_inventory->fetch_assoc()['count'] > 0 : false;
+
+            if ($exists_items || $exists_inventory) {
+                echo "<script>
+                    alert('❌ Error: The provided SKU (" . htmlspecialchars($sku_post_esc) . ") already exists. Please choose another.');
+                    window.history.back();
+                  </script>";
+                exit();
+            }
+
+            $sku = $sku_post_esc;
+        } else {
+            $sku_generated = generateUniqueSKU($mysqli);
+            if (!$sku_generated) {
+                echo "<script>
+                    alert('❌ Error: Could not generate a unique SKU. Please try again.');
+                    window.history.back();
+                  </script>";
+                exit();
+            }
+            $sku = $sku_generated;
+        }
 
     // Procesar las tiendas seleccionadas
     $stores_selected = [];
@@ -97,6 +121,73 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Convertir las tiendas a formato JSON
     $stores_json = json_encode($stores_selected);
     $stores_json_escaped = $mysqli->real_escape_string($stores_json);// Insertar nuevo reporte con estado_reporte = 1 para que aparezca en seeReport
+
+    // Debug: log incoming POST and computed values to help trace why CONS/SKU may be saved as 0
+    $debug_log = __DIR__ . '/report_debug.log';
+    $dbg = "[" . date('c') . "] processReport POST snapshot:\n" . print_r($_POST, true) . "\n";
+    $dbg .= "Computed values before INSERT: cons=[$cons] sku=[$sku] folder=[$folder]" . "\n\n";
+    // Append safely
+    @file_put_contents($debug_log, $dbg, FILE_APPEND | LOCK_EX);
+
+    // Ensure cons_report column can store textual CONS (not numeric). If it's numeric, attempt to alter it to VARCHAR.
+    $colType = null;
+    $colRes = $mysqli->query("SHOW COLUMNS FROM daily_report LIKE 'cons_report'");
+    if ($colRes && $colRes->num_rows > 0) {
+        $colRow = $colRes->fetch_assoc();
+        $colType = $colRow['Type'];
+    }
+    @file_put_contents($debug_log, "[".date('c')."] cons_report column type detected: " . ($colType ?? 'NOT FOUND') . "\n", FILE_APPEND | LOCK_EX);
+    if ($colType !== null) {
+        // If column type starts with int/decimal/float etc., change to varchar(255)
+        if (preg_match('/^(tinyint|smallint|mediumint|int|bigint|decimal|float|double)/i', $colType)) {
+            $alterSql = "ALTER TABLE daily_report MODIFY cons_report VARCHAR(255) NULL";
+            if ($mysqli->query($alterSql)) {
+                @file_put_contents($debug_log, "[".date('c')."] ALTER succeeded: cons_report set to VARCHAR(255)\n", FILE_APPEND | LOCK_EX);
+            } else {
+                @file_put_contents($debug_log, "[".date('c')."] ALTER failed: " . $mysqli->error . "\n", FILE_APPEND | LOCK_EX);
+            }
+        }
+    } else {
+        @file_put_contents($debug_log, "[".date('c')."] cons_report column not found in daily_report\n", FILE_APPEND | LOCK_EX);
+    }
+    // Also ensure sku_report column can store strings
+    $skuColType = null;
+    $skuRes = $mysqli->query("SHOW COLUMNS FROM daily_report LIKE 'sku_report'");
+    if ($skuRes && $skuRes->num_rows > 0) {
+        $skuRow = $skuRes->fetch_assoc();
+        $skuColType = $skuRow['Type'];
+    }
+    @file_put_contents($debug_log, "[".date('c')."] sku_report column type detected: " . ($skuColType ?? 'NOT FOUND') . "\n", FILE_APPEND | LOCK_EX);
+    if ($skuColType !== null) {
+        if (preg_match('/^(tinyint|smallint|mediumint|int|bigint|decimal|float|double)/i', $skuColType)) {
+            $alterSql2 = "ALTER TABLE daily_report MODIFY sku_report VARCHAR(255) NULL";
+            if ($mysqli->query($alterSql2)) {
+                @file_put_contents($debug_log, "[".date('c')."] ALTER succeeded: sku_report set to VARCHAR(255)\n", FILE_APPEND | LOCK_EX);
+            } else {
+                @file_put_contents($debug_log, "[".date('c')."] ALTER failed (sku_report): " . $mysqli->error . "\n", FILE_APPEND | LOCK_EX);
+            }
+        }
+    } else {
+        @file_put_contents($debug_log, "[".date('c')."] sku_report column not found in daily_report\n", FILE_APPEND | LOCK_EX);
+    }
+
+    // If CONS is empty, attempt to generate it server-side based on folder to avoid race conditions
+    if (empty($cons) && !empty($folder)) {
+        $folder_esc = $mysqli->real_escape_string($folder);
+        $q = "SELECT cons_report FROM daily_report WHERE cons_report LIKE '$folder_esc cons %' ORDER BY cons_report DESC LIMIT 1";
+        $res = $mysqli->query($q);
+        $next_cons = 1;
+        if ($res && $res->num_rows > 0) {
+            $row = $res->fetch_assoc();
+            $last_cons = $row['cons_report'];
+            if (preg_match('/cons (\d+)$/', $last_cons, $m)) {
+                $next_cons = intval($m[1]) + 1;
+            }
+        }
+        $cons = $folder . ' cons ' . $next_cons;
+        // escape for insert
+        $cons = $mysqli->real_escape_string($cons);
+    }
     $query = "INSERT INTO daily_report (
         upc_asignado_report, upc_final_report, cons_report, folder_report, 
         loc_report, quantity_report, sku_report, brand_report, item_report, 
