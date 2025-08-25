@@ -13,39 +13,19 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
 include("../../conexion.php");
 header("Content-Type: text/html;charset=utf-8");
 date_default_timezone_set("America/Bogota");
-// Suppress PHP error output and start output buffering to avoid contaminating AJAX JSON
-@ini_set('display_errors', '0');
-error_reporting(0);
-if (!ob_get_level()) ob_start();
 
-// Detect AJAX submission
-$isAjax = isset($_POST['ajax']) && $_POST['ajax'] == '1';
-if ($isAjax) {
-    header('Content-Type: application/json; charset=utf-8');
-}
-
-// Helper to send JSON and clear any buffered output
-function sendJson($arr) {
-    if (ob_get_length()) {
-        @ob_end_clean();
-    }
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($arr);
-    exit();
-}
-
-$upc_item       = mb_strtoupper($_POST['upc_item'] ?? '');
-$sku_item       = ($_POST['sku_item'] ?? '');
-$date_item      = ($_POST['date_item'] ?? '');
-$brand_item     = mb_strtoupper($_POST['brand_item'] ?? '');
-$item_item      = isset($_POST['item_item']) ? ucfirst(strtolower($_POST['item_item'])) : '';
-$ref_item       = mb_strtoupper($_POST['ref_item'] ?? '');
-$color_item     = mb_strtoupper($_POST['color_item'] ?? '');
-$size_item      = mb_strtoupper($_POST['size_item'] ?? '');
-$category_item  = mb_strtoupper($_POST['category_item'] ?? '');
-$cost_item      = ($_POST['cost_item'] ?? '');
-$weight_item    = mb_strtoupper($_POST['weight_item'] ?? '');
-$inventory_item = mb_strtoupper($_POST['inventory_item'] ?? '');
+$upc_item       = mb_strtoupper($_POST['upc_item']);
+$sku_item       =  ($_POST['sku_item']) ?? '';
+$date_item          = $_POST['date_item'];
+$brand_item         = mb_strtoupper($_POST['brand_item']);
+$item_item          = ucfirst(strtolower($_POST['item_item'])); // Primera mayúscula, resto minúscula
+$ref_item           = mb_strtoupper($_POST['ref_item']);
+$color_item         = mb_strtoupper($_POST['color_item']);
+$size_item          = mb_strtoupper($_POST['size_item']);
+$category_item      = mb_strtoupper($_POST['category_item']);
+$cost_item          = $_POST['cost_item'];
+$weight_item        = mb_strtoupper($_POST['weight_item']);
+$inventory_item     = mb_strtoupper($_POST['inventory_item']);
 $quantity_inventory = $_POST['quantity_inventory'] ?? 0;
 $observation_inventory = isset($_POST['observation_inventory']) ? trim($_POST['observation_inventory']) : '';
 
@@ -63,43 +43,39 @@ if (isset($_POST['stores']) && is_array($_POST['stores'])) {
 
 // Validar que se haya seleccionado al menos una tienda
 if (empty($stores_selected)) {
-    if ($isAjax) {
-        sendJson(['status' => 'error', 'message' => 'You must select at least one store.']);
-    } else {
-        echo "
-        <!DOCTYPE html>
-        <html lang='es'>
-        <head>
-            <meta charset='utf-8'>
-            <title>Error - ASWWORKING</title>
-            <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
-            <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
-        </head>
-        <body>
-            <script>
-                (function(){
-                    if (typeof Swal === 'undefined') {
-                        var s = document.createElement('script');
-                        s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
-                        s.onload = showError;
-                        document.head.appendChild(s);
-                    } else { showError(); }
+    echo "
+    <!DOCTYPE html>
+    <html lang='es'>
+    <head>
+        <meta charset='utf-8'>
+        <title>Error - ASWWORKING</title>
+        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+        <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
+    </head>
+    <body>
+        <script>
+            (function(){
+                if (typeof Swal === 'undefined') {
+                    var s = document.createElement('script');
+                    s.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+                    s.onload = showError;
+                    document.head.appendChild(s);
+                } else { showError(); }
 
-                    function showError(){
-                        Swal.fire({
-                            title: 'Error',
-                            text: 'You must select at least one store.',
-                            icon: 'error',
-                            confirmButtonText: 'Go back',
-                            confirmButtonColor: '#632b8b'
-                        }).then((result) => { window.history.back(); });
-                    }
-                })();
-            </script>
-        </body>
-        </html>";
-        exit();
-    }
+                function showError(){
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'You must select at least one store.',
+                        icon: 'error',
+                        confirmButtonText: 'Go back',
+                        confirmButtonColor: '#632b8b'
+                    }).then((result) => { window.history.back(); });
+                }
+            })();
+        </script>
+    </body>
+    </html>";
+    exit();
 }
 
 // Convertir las tiendas a formato JSON para almacenar en la base de datos
@@ -116,19 +92,65 @@ $check_duplicate_result = $mysqli->query($check_duplicate_sql);
 
 // La clave no existe, realizar la inserción
 // Construir el SQL para items
-$sql = "INSERT INTO items (
-    upc_item, sku_item, date_item, brand_item, item_item, ref_item, 
-    color_item, size_item, category_item, cost_item, weight_item, 
-    inventory_item, stores_item, estado_item, fecha_alta_item, fecha_edit_item, id_usu
-) VALUES (
-    '$upc_item', '$sku_item', '$date_item', '$brand_item', '$item_item', '$ref_item',
-    '$color_item', '$size_item', '$category_item', '$cost_item', '$weight_item',
-    '$inventory_item', '$stores_json', '$estado_item', '$fecha_alta_item', '$fecha_edit_item', '$id_usu'
-)";
 
-if ($mysqli->query($sql)) {
+// Escape values to prevent SQL syntax errors (e.g., quotes inside JSON)
+$upc_item_esc = $mysqli->real_escape_string($upc_item);
+$sku_item_esc = $mysqli->real_escape_string($sku_item);
+$date_item_esc = $mysqli->real_escape_string($date_item);
+$brand_item_esc = $mysqli->real_escape_string($brand_item);
+$item_item_esc = $mysqli->real_escape_string($item_item);
+$ref_item_esc = $mysqli->real_escape_string($ref_item);
+$color_item_esc = $mysqli->real_escape_string($color_item);
+$size_item_esc = $mysqli->real_escape_string($size_item);
+$category_item_esc = $mysqli->real_escape_string($category_item);
+$cost_item_esc = $mysqli->real_escape_string($cost_item);
+$weight_item_esc = $mysqli->real_escape_string($weight_item);
+$inventory_item_esc = $mysqli->real_escape_string($inventory_item);
+$stores_json_escaped = $mysqli->real_escape_string($stores_json);
+$observation_inventory_escaped = $mysqli->real_escape_string($observation_inventory);
+
+// Use a prepared statement to avoid SQL injection and escaping issues (e.g. backslashes)
+$stmt = $mysqli->prepare("INSERT INTO items (
+    upc_item, sku_item, date_item, brand_item, item_item, ref_item,
+    color_item, size_item, category_item, cost_item, weight_item,
+    batch_item, stores_item, estado_item, fecha_alta_item, fecha_edit_item, id_usu, observation_item
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+if (!$stmt) {
+    // Prepare error
+    die('Prepare failed: ' . $mysqli->error);
+}
+
+// Bind parameters: 13 strings, 1 int (estado), 2 strings (fechas), 1 int (id_usu), 1 string (observation) => types
+$estado_val = 0;
+$id_usu_int = intval($id_usu);
+$types = 'sssssssssssssissis';
+$stmt->bind_param($types,
+    $upc_item,
+    $sku_item,
+    $date_item,
+    $brand_item,
+    $item_item,
+    $ref_item,
+    $color_item,
+    $size_item,
+    $category_item,
+    $cost_item,
+    $weight_item,
+    $inventory_item,
+    $stores_json,
+    $estado_val,
+    $fecha_alta_item,
+    $fecha_edit_item,
+    $id_usu_int,
+    $observation_inventory
+);
+
+if ($stmt->execute()) {
+    // Close the prepared statement early so it always runs on successful execute
+    $stmt->close();
     // Insertar en la tabla inventory
-    $sql_inventory = "INSERT INTO inventory (upc_inventory, sku_inventory, quantity_inventory, observation_inventory) VALUES ('$upc_item', '$sku_item', $quantity_inventory, '" . $mysqli->real_escape_string($observation_inventory) . "')";
+    $sql_inventory = "INSERT INTO inventory (upc_inventory, sku_inventory, quantity_inventory, observation_inventory) VALUES ('{$upc_item_esc}', '{$sku_item_esc}', $quantity_inventory, '{$observation_inventory_escaped}')";
     if ($mysqli->query($sql_inventory)) {
         // Insertar en la tabla daily_report para el flujo de reportes
         $estado_reporte = 0;
@@ -154,14 +176,10 @@ if ($mysqli->query($sql)) {
             vendor_report, color_report, size_report, category_report, 
             weight_report, inventory_report, observacion_report, stores_report, estado_reporte, fecha_alta_reporte
         ) VALUES (
-            '$upc_item', '$upc_item', '$cons_report', '$folder_report', '$loc_report', $quantity_inventory, '$sku_item', '$brand_item', '$item_item', '$vendor_report', '$color_item', '$size_item', '$category_item', '$weight_item', '$inventory_item', '$observacion_report', '$stores_json_escaped', $estado_reporte, '$fecha_alta_reporte'
+            '{$upc_item_esc}', '{$upc_item_esc}', '$cons_report', '$folder_report', '$loc_report', $quantity_inventory, '{$sku_item_esc}', '{$brand_item_esc}', '{$item_item_esc}', '$vendor_report', '{$color_item_esc}', '{$size_item_esc}', '{$category_item_esc}', '{$weight_item_esc}', '{$inventory_item_esc}', '$observacion_report', '{$stores_json_escaped}', $estado_reporte, '$fecha_alta_reporte'
         )";
         if ($mysqli->query($sql_report)) {
-            // Todo OK
-            if ($isAjax) {
-                sendJson(['status' => 'success', 'message' => 'Item registered successfully', 'redirect' => '../report/editLocationFolder.php']);
-            }
-            // Non-AJAX: show SweetAlert and redirect as before
+            // Todo OK, mostrar SweetAlert y redirigir
             ?>
             <!DOCTYPE html>
             <html lang="es">
@@ -191,12 +209,12 @@ if ($mysqli->query($sql)) {
                             icon: 'success',
                             title: 'Success!',
                             text: 'Item registered successfully!',
-                            confirmButtonText: 'Go to Edit Location',
+                            confirmButtonText: 'OK',
                             confirmButtonColor: '#632b8b',
                             allowOutsideClick: false
                         }).then((result) => {
-                            // Redirect regardless of confirm/close to the edit location page
-                            window.location.href = '../report/editLocationFolder.php';
+                            // Open the additems.php view in the same folder instead of reloading
+                            window.location.href = 'additems.php';
                         });
                     }
                 })();
@@ -208,9 +226,6 @@ if ($mysqli->query($sql)) {
         } else {
             // Error al insertar en daily_report
             $errorMsg = addslashes($mysqli->error);
-            if ($isAjax) {
-                sendJson(['status' => 'error', 'message' => 'Error inserting report: ' . $errorMsg]);
-            }
             echo "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Error</title>
                 <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
                 <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
@@ -232,9 +247,6 @@ if ($mysqli->query($sql)) {
     } else {
         // Error al insertar en inventory
         $errorMsg = addslashes($mysqli->error);
-        if ($isAjax) {
-            sendJson(['status' => 'error', 'message' => 'Error inserting inventory: ' . $errorMsg]);
-        }
         echo "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Error</title>
             <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
             <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>
@@ -256,9 +268,6 @@ if ($mysqli->query($sql)) {
 } else {
     // Error al insertar en items
     $errorMsg = addslashes($mysqli->error);
-    if ($isAjax) {
-        sendJson(['status' => 'error', 'message' => 'Error inserting item: ' . $errorMsg]);
-    }
     echo "<!DOCTYPE html><html lang='es'><head><meta charset='utf-8'><title>Error</title>
         <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
         <style>body{background:#f5f3f7;font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:0}</style>

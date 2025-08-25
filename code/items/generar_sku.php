@@ -2,7 +2,7 @@
 // Include database connection
 include_once '../../conexion.php';
 
-function generateRandomSKU($length = 8) {
+function generateRandomSKU($length = 10) {
     $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     $charactersLength = strlen($characters);
     $randomString = '';
@@ -28,7 +28,7 @@ function generateUniqueSKU($mysqli) {
     $maxAttempts = 100; // Prevent infinite loop
     $attempts = 0;
     do {
-        $sku = generateRandomSKU(8); // 8 caracteres alfanuméricos
+        $sku = generateRandomSKU(10); // 10 caracteres alfanuméricos
         $attempts++;
         if ($attempts >= $maxAttempts) {
             // Fallback: timestamp + random

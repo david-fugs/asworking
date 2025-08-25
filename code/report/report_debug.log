@@ -58,3 +58,127 @@ Computed values before INSERT: cons=[folder cons 1] sku=[T9RC99LQJW] folder=[fol
 [2025-08-20T21:24:24+02:00] ALTER succeeded: cons_report set to VARCHAR(255)
 [2025-08-20T21:24:24+02:00] sku_report column type detected: bigint(20)
 [2025-08-20T21:24:24+02:00] ALTER succeeded: sku_report set to VARCHAR(255)
+[2025-08-24T20:23:25+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 7878
+    [upc_final_report] => 7878
+    [cons_report] => folder cons 1
+    [folder_report] => folder
+    [loc_report] => location
+    [quantity_report] => 40
+    [sku_report] => 
+    [brand_report] => brand
+    [item_report] => item
+    [vendor_report] => style
+    [color_report] => color
+    [size_report] => size
+    [category_report] => category
+    [weight_report] => weight
+    [inventory_report] => batch
+    [stores] => Array
+        (
+            [0] => EB002
+        )
+
+    [observacion_report] => obser
+)
+
+Computed values before INSERT: cons=[folder cons 1] sku=[72FTEXR6IC] folder=[folder]
+
+[2025-08-24T20:23:25+02:00] cons_report column type detected: int(11)
+[2025-08-24T20:23:25+02:00] ALTER succeeded: cons_report set to VARCHAR(255)
+[2025-08-24T20:23:25+02:00] sku_report column type detected: bigint(20)
+[2025-08-24T20:23:25+02:00] ALTER succeeded: sku_report set to VARCHAR(255)
+[2025-08-24T20:29:09+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 0909
+    [upc_final_report] => 0909
+    [cons_report] => folder cons 2
+    [folder_report] => folder
+    [loc_report] => location
+    [quantity_report] => 40
+    [sku_report] => 
+    [brand_report] => brand
+    [item_report] => item
+    [vendor_report] => style
+    [color_report] => color
+    [size_report] => size
+    [category_report] => category
+    [weight_report] => weight
+    [inventory_report] => batch
+    [stores] => Array
+        (
+            [0] => EB002
+            [1] => AM002
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[folder cons 2] sku=[2HYJVCQF5K] folder=[folder]
+
+[2025-08-24T20:29:09+02:00] cons_report column type detected: varchar(255)
+[2025-08-24T20:29:09+02:00] sku_report column type detected: varchar(255)
+[2025-08-24T20:35:48+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 6565
+    [upc_final_report] => 6565
+    [cons_report] => folder cons 3
+    [folder_report] => folder
+    [loc_report] => location 
+    [quantity_report] => 40
+    [sku_report] => 
+    [brand_report] => brand
+    [item_report] => item
+    [vendor_report] => style
+    [color_report] => color
+    [size_report] => size
+    [category_report] => category
+    [weight_report] => weight
+    [inventory_report] => batch
+    [stores] => Array
+        (
+            [0] => EB002
+            [1] => AM002
+        )
+
+    [observacion_report] => observa
+)
+
+Computed values before INSERT: cons=[folder cons 3] sku=[1824YRIDM8] folder=[folder]
+
+[2025-08-24T20:35:48+02:00] cons_report column type detected: varchar(255)
+[2025-08-24T20:35:48+02:00] sku_report column type detected: varchar(255)
+[2025-08-24T21:40:27+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 050505
+    [upc_final_report] => 050505
+    [cons_report] => folder cons 4
+    [folder_report] => folder
+    [loc_report] => location
+    [quantity_report] => 49
+    [sku_report] => 
+    [brand_report] => brand
+    [item_report] => item
+    [vendor_report] => vendor
+    [color_report] => color
+    [size_report] => size
+    [category_report] => category
+    [weight_report] => weight
+    [inventory_report] => inventory
+    [stores] => Array
+        (
+            [0] => EB001
+        )
+
+    [observacion_report] => obs
+)
+
+Computed values before INSERT: cons=[folder cons 4] sku=[1T1O91RYMO] folder=[folder]
+
+[2025-08-24T21:40:27+02:00] cons_report column type detected: varchar(255)
+[2025-08-24T21:40:27+02:00] sku_report column type detected: varchar(255)

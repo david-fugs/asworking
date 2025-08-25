@@ -44,6 +44,7 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         .btn-add-store {
@@ -486,14 +487,34 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($reports as $index => $report): ?>
+                                        <?php foreach ($reports as $index => $report): 
+                                            // Determine current location: prefer report loc_report, but if empty or '0' try to read from items.inventory_item using upc_final_report
+                                            $current_loc = isset($report['loc_report']) ? trim($report['loc_report']) : '';
+                                            if ($current_loc === '' || $current_loc === '0') {
+                                                $upc_lookup = isset($report['upc_final_report']) ? $report['upc_final_report'] : '';
+                                                if ($upc_lookup !== '') {
+                                                    $stmt = $mysqli->prepare("SELECT inventory_item FROM items WHERE upc_item = ? LIMIT 1");
+                                                    if ($stmt) {
+                                                        $stmt->bind_param('s', $upc_lookup);
+                                                        $stmt->execute();
+                                                        $stmt->bind_result($inv_item);
+                                                        if ($stmt->fetch()) {
+                                                            if (!empty($inv_item)) $current_loc = $inv_item;
+                                                        }
+                                                        $stmt->close();
+                                                    }
+                                                }
+                                            }
+                                        ?>
                                             <tr>
                                                 <td>
                                                     <input type="checkbox" name="selected_reports[]" value="<?= $report['id_report'] ?>">
                                                 </td>
                                                 <td><?= htmlspecialchars($report['fecha_alta_reporte']) ?></td>
                                                 <td><?= htmlspecialchars($report['upc_final_report']) ?></td>
-                                                <td style="width:80px;"><input type="text" class="form-control form-control-sm" value="<?= htmlspecialchars($report['quantity_report']) ?>" readonly></td>
+                                                <td style="width:120px;">
+                                                    <input type="text" name="edited_quantity[<?= $report['id_report'] ?>]" class="form-control form-control-sm edited-quantity" placeholder="<?= htmlspecialchars($report['quantity_report']) ?>" value="">
+                                                </td>
                                                 <td><?= htmlspecialchars($report['sku_report']) ?></td>
 
                                                 <!-- Item (solo lectura) -->
@@ -509,13 +530,14 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                                     <span class="badge bg-secondary"><?= htmlspecialchars($report['brand_report']) ?></span>
                                                 </td>
 
-                                                <!-- Vendor (editable) -->
+                                                <!-- Vendor (solo lectura) -->
+                                                
                                                 <td>
                                                     <input style="width: 120px;" type="text"
                                                         name="new_vendor[<?= $report['id_report'] ?>]"
                                                         class="form-control form-control-sm"
                                                         value="<?= isset($report['vendor_report']) ? htmlspecialchars($report['vendor_report']) : '' ?>"
-                                                        placeholder="Vendor">
+                                                        placeholder="Style" readonly>
                                                 </td>
 
                                                 <!-- Color (solo lectura) -->
@@ -542,7 +564,7 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
 
                                                 <!-- Current Location -->
                                                 <td>
-                                                    <span class="badge bg-secondary"><?= htmlspecialchars($report['loc_report']) ?></span>
+                                                    <span class="badge bg-secondary"><?= htmlspecialchars($current_loc) ?></span>
                                                 </td>                                                <!-- New Location (editable, sin validación) -->
                                                 <td>
                                                     <input style="width: 120px;" type="text"
@@ -750,13 +772,50 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                     return false;
                 }
 
+                // Require that each selected report has a quantity typed (cannot be empty)
+                for (const cb of selectedCheckboxes) {
+                    const row = cb.closest('tr');
+                    const reportId = cb.value;
+                    const qtyInput = row.querySelector('.edited-quantity');
+                    if (!qtyInput || qtyInput.value.trim() === '') {
+                        e.preventDefault();
+                        alert('Please type the quantity for each selected report (enter the daily report quantity or a new value).');
+                        return false;
+                    }
+                }
+
                 // Confirm before submitting
                 const confirmUpdate = confirm(`Are you sure you want to update ${selectedCheckboxes.length} report(s)?`);
                 if (!confirmUpdate) {
                     e.preventDefault();
                     return false;
                 }
-            });        });
+            });
+
+            // Show alert if edited quantity differs from daily report quantity (one-time per field)
+            const qtyInputs = document.querySelectorAll('.edited-quantity');
+            qtyInputs.forEach(function(input) {
+                let alerted = false;
+                input.addEventListener('blur', function() {
+                    const placeholder = input.getAttribute('placeholder') || '';
+                    const val = input.value.trim();
+                    if (!alerted && val !== '' && val !== placeholder) {
+                        alerted = true;
+                        const message = 'The daily report quantity was ' + placeholder + '.';
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({
+                                title: 'Quantity differs',
+                                text: message,
+                                icon: 'info',
+                                confirmButtonText: 'OK'
+                            });
+                        } else {
+                            alert(message);
+                        }
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

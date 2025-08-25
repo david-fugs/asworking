@@ -583,7 +583,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         // Inicializa la consulta base
         // Usamos un LEFT JOIN contra un subquery agrupado para evitar duplicados
         // cuando la tabla inventory tiene múltiples filas por UPC.
-    $queryBase = "SELECT items.*, inv.quantity_inventory, inv.inv_inventory_item AS inv_inventory_item, inv.observation_inventory
+        $queryBase = "SELECT items.*, inv.quantity_inventory, inv.inv_inventory_item AS inv_inventory_item, inv.observation_inventory
         FROM items
         LEFT JOIN (
          SELECT upc_inventory,
@@ -593,7 +593,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
          FROM inventory
             GROUP BY upc_inventory
         ) AS inv ON items.upc_item = inv.upc_inventory
-        WHERE 1=1";
+            WHERE 1=1 AND items.estado_item = 1";
 
         // Agrega filtros si existen
         if (!empty($_GET['upc_item'])) {
@@ -609,11 +609,11 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             $queryBase .= " AND ref_item = '$reference'";
         }
 
-    // Ordenar por cantidad agregada en inventory (subquery alias inv)
-    $queryBase .= " ORDER BY inv.quantity_inventory DESC";
+        // Ordenar por cantidad agregada en inventory (subquery alias inv)
+        $queryBase .= " ORDER BY inv.quantity_inventory DESC";
 
         // Consulta para conteo (no necesita JOIN a inventory)
-        $countQuery = "SELECT COUNT(*) as total FROM items WHERE 1=1";
+        $countQuery = "SELECT COUNT(*) as total FROM items WHERE 1=1 AND estado_item = 1";
 
         // Aplicar mismos filtros a countQuery
         if (!empty($_GET['upc_item'])) {
@@ -666,6 +666,7 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <th style="min-width: 90px; text-align: center;">BRAND</th>
                                 <th style="min-width: 140px; text-align: center;">ITEM</th>
                                 <th style="min-width: 70px; text-align: center;">REF</th>
+                                <th style="min-width: 70px; text-align: center;">FOLDER</th>
                                 <th style="min-width: 70px; text-align: center;">COLOR</th>
                                 <th style="min-width: 70px; text-align: center;">SIZE</th>
                                 <th style="min-width: 90px; text-align: center;">CATEGORY</th>
@@ -705,16 +706,17 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <td style="text-transform:uppercase;">' . $row['brand_item'] . '</td>
                                 <td>' . $row['item_item'] . '</td>
                                 <td>' . $row['ref_item'] . '</td>
+                                <td>' . $row['folder_item'] . '</td>
                                 <td>' . $row['color_item'] . '</td>
                                 <td>' . $row['size_item'] . '</td>
                                 <td>' . $row['category_item'] . '</td>
                                 <td>' . $row['cost_item'] . '</td>
                                 <td>' . $row['weight_item'] . '</td>
                                 <td>' . $row['quantity_inventory'] . '</td>
-                                <td>' . ($row['inv_inventory_item'] ?? '') . '</td>
+                                <td>' . ($row['batch_item'] ?? '') . '</td>
                                 <td>' . ($row['inventory_item'] ?? '') . '</td>
                                 <td>' . $stores_display . '</td>
-                                <td>' . (isset($row['observation_inventory']) && $row['observation_inventory'] !== '' ? htmlspecialchars($row['observation_inventory']) : '<span class="text-muted">-</span>') . '</td>
+                                <td>' . (isset($row['observation_item']) && $row['observation_item'] !== '' ? htmlspecialchars($row['observation_item']) : '<span class="text-muted">-</span>') . '</td>
                                 <td>
                                     <button type="button" class="btn-action btn-edit" 
                                         data-bs-toggle="modal" data-bs-target="#modalEdicion"

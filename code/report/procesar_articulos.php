@@ -25,32 +25,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['seleccionados'])) {
         $color = $mysqli->real_escape_string($_POST['color_report'][$i]);
         $size = $mysqli->real_escape_string($_POST['size_report'][$i]);
         $cost = floatval($_POST['cost_report'][$i] ?? 0.0);
-        $category = $mysqli->real_escape_string($_POST['category_report'][$i]);        $weight = $mysqli->real_escape_string($_POST['weight_report'][$i]);
-        $inventory = $mysqli->real_escape_string($_POST['inventory_report'][$i]);
-        $observacion = $mysqli->real_escape_string($_POST['observacion_report'][$i]);
+    $category = $mysqli->real_escape_string($_POST['category_report'][$i]);
+    $weight = $mysqli->real_escape_string($_POST['weight_report'][$i]);
+    // The previous single inventory field in the UI is now split: batch_report holds the old value,
+    // and inventory_report is a new (possibly empty) inventory field. We capture both.
+    $batch = $mysqli->real_escape_string($_POST['batch_report'][$i] ?? '');
+    $inventory = $mysqli->real_escape_string($_POST['inventory_report'][$i] ?? '');
+    $observacion = $mysqli->real_escape_string($_POST['observacion_report'][$i]);
         
         // Procesar stores data
         $stores_json = isset($_POST['stores_report'][$i]) ? $_POST['stores_report'][$i] : '';
-        $stores_json_escaped = $mysqli->real_escape_string($stores_json);        $sql_insert = "INSERT INTO items (
-            sku_item,  upc_item, date_item , brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, stores_item, id_usu
+        $stores_json_escaped = $mysqli->real_escape_string($stores_json);
+        // Insert into items, including batch_items. inventory_item keeps the value of $loc as before.
+        $sql_insert = "INSERT INTO items (
+            sku_item, upc_item, date_item, brand_item, item_item, folder_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, batch_item, stores_item, id_usu
         ) VALUES (
-            '$sku', '$upcFinal', '$fecha', '$brand', '$item', '$cons', '$color', '$size', '$category', '$cost', '$weight', '$loc', '$stores_json_escaped', '$id_usu'
+            '$sku', '$upcFinal', '$fecha', '$brand', '$item', '$cons', '$color', '$size', '$category', '$cost', '$weight', '$loc', '$batch', '$stores_json_escaped', '$id_usu'
         ) ON DUPLICATE KEY UPDATE
             sku_item = '$sku',
             upc_item = '$upcFinal',
             date_item = '$fecha',
             brand_item = '$brand',
             item_item = '$item',
-            ref_item = '$cons',
+            folder_item = '$cons',
             color_item = '$color',
             size_item = '$size',
             category_item = '$category',
             cost_item = '$cost',
             weight_item = '$weight',
             inventory_item = '$loc',
+            batch_item = '$batch',
             stores_item = '$stores_json_escaped',
             id_usu = '$id_usu'
-
             ";
         // Ejecutar consulta
         if ($mysqli->query($sql_insert)) {

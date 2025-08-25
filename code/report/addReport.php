@@ -72,6 +72,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <style>
             /* Checkbox styles for stores */
@@ -315,6 +316,38 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
 
             <script src="https://www.jose-aguilar.com/scripts/fontawesome/js/all.min.js" data-auto-replace-svg="nest"></script>
             <script>
+                $(document).ready(function() {
+                    // Función para convertir texto a mayúsculas para campos específicos (excepto item)
+                    function convertToUppercase() {
+                        $('#folder_report, #loc_report, #brand_report, #vendor_report, #color_report, #size_report, #category_report, #weight_report, #inventory_report').on('input', function() {
+                            var cursorPosition = this.selectionStart;
+                            var value = $(this).val().toUpperCase();
+                            $(this).val(value);
+                            this.setSelectionRange(cursorPosition, cursorPosition);
+                        });
+                    }
+
+                    // Función especial para el campo ITEM (primera letra mayúscula, resto minúscula)
+                    function handleItemField() {
+                        $('#item_report').on('input', function() {
+                            var cursorPosition = this.selectionStart;
+                            var value = $(this).val();
+                            
+                            // Convertir a formato correcto: primera letra mayúscula, resto minúscula
+                            if (value.length > 0) {
+                                value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+                            }
+                            
+                            $(this).val(value);
+                            this.setSelectionRange(cursorPosition, cursorPosition);
+                        });
+                    }
+
+                    // Inicializar las funciones
+                    convertToUppercase();
+                    handleItemField();
+                });
+
                 function buscarUPC() {
                     let upc = $('#upc_asignado_report').val();
 
@@ -329,12 +362,116 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                         },
                         success: function(data) {
                             if (data.success) {
-                                if (data.multiple) {
-                                    mostrarOpcionesUPC(data.data);
-                                } else {
-                                    llenarFormulario(data.data[0]);
-                                    alert("✅ UPC Found.");
+                                var items = data.data || [];
+                                if (!items || items.length === 0) {
+                                    limpiarCampos();
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire({ icon: 'info', title: 'No items', text: 'No matching items found.' });
+                                    } else {
+                                        alert('No matching items found.');
+                                    }
+                                    return;
                                 }
+
+                                // Build table HTML
+                                var tableHtml = '<div style="overflow:auto;max-width:100%;"><table class="table table-bordered"><thead><tr><th>Select</th><th>Brand</th><th>Item</th><th>SKU</th><th>REF</th><th>COST</th><th>Batch</th><th>Quantity</th></tr></thead><tbody>';
+                                items.forEach(function(item, idx) {
+                                    var qty = item.quantity_inventory || 0;
+                                    var costDisplay = (typeof item.cost_item !== 'undefined' && item.cost_item !== null && item.cost_item !== '') ? '$' + parseFloat(item.cost_item).toFixed(2) : '';
+                                    var refDisplay = item.ref_item || '';
+                                    var batchDisplay = item.inventory_item || '';
+                                    tableHtml += '<tr>' +
+                                        '<td><input type="radio" name="selected_item" value="' + idx + '" ' + (idx === 0 ? 'checked' : '') + '></td>' +
+                                        '<td>' + (item.brand_item || '') + '</td>' +
+                                        '<td>' + (item.item_item || '') + '</td>' +
+                                        '<td>' + (item.sku_item || '') + '</td>' +
+                                        '<td>' + refDisplay + '</td>' +
+                                        '<td>' + costDisplay + '</td>' +
+                                        '<td>' + batchDisplay + '</td>' +
+                                        '<td>' + qty + '</td>' +
+                                        '</tr>';
+                                });
+                                tableHtml += '</tbody></table></div>';
+
+                                var addQtyHtml = '<div class="form-group text-left">' +
+                                    '<label for="add-qty-input">Add Quantity:</label>' +
+                                    '<input type="number" min="1" id="add-qty-input" class="form-control" style="width:120px;display:inline-block;" />' +
+                                    '</div>';
+
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({
+                                        title: 'UPC references found',
+                                        html: '<div style="text-align:left">' + tableHtml + addQtyHtml + '</div>',
+                                        icon: 'info',
+                                        width: '90%',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Add Quantity & Select',
+                                        cancelButtonText: 'Cancel',
+                                        confirmButtonColor: '#632b8b',
+                                        preConfirm: () => {
+                                            const addQty = parseInt(document.getElementById('add-qty-input').value);
+                                            if (isNaN(addQty) || addQty <= 0) {
+                                                Swal.showValidationMessage('Please enter a valid quantity to add.');
+                                                return false;
+                                            }
+                                            const selectedRadio = document.querySelector('input[name="selected_item"]:checked');
+                                            if (!selectedRadio) {
+                                                Swal.showValidationMessage('Please select an item to update.');
+                                                return false;
+                                            }
+                                            return {
+                                                addQty: addQty,
+                                                selectedIdx: parseInt(selectedRadio.value)
+                                            };
+                                        }
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            var addQty = result.value.addQty;
+                                            var selectedIdx = result.value.selectedIdx;
+                                            var selectedItem = items[selectedIdx];
+                                            var currentQty = parseInt(selectedItem.quantity_inventory) || 0;
+                                            var newQty = currentQty + addQty;
+
+                                            // Fill the report form fields with selected item
+                                            $('#brand_report').val(selectedItem.brand_item || '');
+                                            $('#item_report').val(selectedItem.item_item || '');
+                                            $('#sku_report').val(selectedItem.sku_item || '');
+                                            if (selectedItem.ref_item) { $('#vendor_report').val(selectedItem.ref_item); } else { $('#vendor_report').val(''); }
+                                            if (selectedItem.inventory_item) { $('#inventory_report').val(selectedItem.inventory_item); } else { $('#inventory_report').val(''); }
+                                            $('#quantity_report').val(newQty);
+                                            if (selectedItem.color_item) { $('#color_report').val(selectedItem.color_item); }
+                                            if (selectedItem.size_item) { $('#size_report').val(selectedItem.size_item); }
+                                            if (selectedItem.category_item) { $('#category_report').val(selectedItem.category_item); } else { $('#category_report').val(''); }
+                                            if (selectedItem.weight_item) { $('#weight_report').val(selectedItem.weight_item); } else { $('#weight_report').val(''); }
+
+                                            // Update inventory via AJAX
+                                            $.ajax({
+                                                url: '../items/update_quantity.php',
+                                                type: 'POST',
+                                                dataType: 'json',
+                                                data: {
+                                                    upc_item: $('#upc_asignado_report').val().toUpperCase(),
+                                                    sku_item: (selectedItem.sku_item || '').toUpperCase(),
+                                                    quantity_inventory: newQty
+                                                },
+                                                success: function(resp) {
+                                                    if (resp.status === 'success') {
+                                                        Swal.fire({ title: 'Quantity Updated', text: 'The new quantity is: ' + newQty, icon: 'success', confirmButtonColor: '#632b8b' });
+                                                    } else {
+                                                        Swal.fire({ title: 'Error', text: resp.message || 'Failed to update quantity.', icon: 'error', confirmButtonColor: '#632b8b' });
+                                                    }
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    Swal.fire({ title: 'Error', text: 'Could not connect to server: ' + error, icon: 'error', confirmButtonColor: '#632b8b' });
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    // Fallback: original modal list
+                                    mostrarOpcionesUPC(items);
+                                }
+
                             } else {
                                 limpiarCampos();
                                 alert("❌ UPC not found.");

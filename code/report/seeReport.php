@@ -96,6 +96,52 @@ function getStatus($estado)
             max-height: 600px;
         }
 
+        /* Top scroll bar styles (mirror) */
+        .top-scroll-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 34px;
+            border: none;
+            background: transparent; /* removed purple background */
+            border-radius: 6px;
+            margin-bottom: 12px;
+            box-shadow: none;
+        }
+
+        .top-scroll-content {
+            height: 30px;
+            width: 1000px; /* will be adjusted by JS */
+            background: transparent;
+            display: block;
+        }
+
+        /* Custom scrollbar for the top scroll container (WebKit) */
+        .top-scroll-container::-webkit-scrollbar {
+            height: 12px;
+        }
+
+        .top-scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 10px;
+        }
+
+        .top-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(113,63,148,0.95);
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.12);
+            background-clip: padding-box;
+        }
+
+        .top-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(90,44,118,0.98);
+        }
+
+        /* Firefox scrollbar color */
+        .top-scroll-container {
+            scrollbar-color: rgba(113,63,148,0.95) rgba(245,241,248,0.6);
+            scrollbar-width: thin;
+        }
+
         .fixed-save-button {
             position: fixed;
             bottom: 20px;
@@ -634,6 +680,12 @@ function getStatus($estado)
                                 </div>
                             </div>
 
+                            <!-- Top synchronized scrollbar (mirrors horizontal scroll of the table) -->
+                            <div class="top-scroll-container" style="margin-bottom:10px;">
+                                <div class="top-scroll-content" aria-hidden="true"></div>
+                            </div>
+
+                            <div class="table-responsive">
                             <table class="">
                                 <thead class="">
                                     <tr>
@@ -642,10 +694,10 @@ function getStatus($estado)
                                         <th colspan="2">UPC</th>
                                         <th colspan="4">Info</th>
 
-                                        <th colspan="4">Product Info</th>
+                                        <th colspan="5">Product Info</th>
                                         <th colspan="3">Specs</th>
 
-                                        <th colspan="2">Inventory</th>
+                                        <th colspan="3">Batch / Inventory</th>
                                         <th colspan="1">Stores</th>
                                         <th>Observation</th>
                                     </tr>
@@ -667,8 +719,9 @@ function getStatus($estado)
                                         <th>Cost</th>
                                         <th>Category</th>
                                         <th>Weight</th>
+                                        <th>Batch</th>
                                         <th>Inventory</th>
-                                        <th></th>
+                                        <th>Stores</th>
                                         <th>Observation</th>
                                     </tr>
                                 </thead>
@@ -694,7 +747,10 @@ function getStatus($estado)
                                         $cost = mb_strtoupper($report['cost_report'] ?? '', 'UTF-8');
                                         $category = mb_strtoupper($report['category_report'] ?? '', 'UTF-8');
                                         $weight = mb_strtoupper($report['weight_report'] ?? '', 'UTF-8');
-                                        $inventory = mb_strtoupper($report['inventory_report'] ?? '', 'UTF-8');
+                                        // The old 'inventory_report' now becomes the batch value in the UI
+                                        $batch = mb_strtoupper($report['inventory_report'] ?? '', 'UTF-8');
+                                        // New inventory input is left empty by default
+                                        $inventory = '';
                                         $stores_json = $report['stores_report'] ?? '';
                                         // Prepare stores display in uppercase
                                         if (!empty($stores_json)) {
@@ -731,6 +787,7 @@ function getStatus($estado)
                                             <td><input style="width: 110px;" type="text" name="cost_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($cost) ?>"></td>
                                             <td><input type="text" style="width: 100px;" name="category_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($category) ?>"></td>
                                             <td><input type="text" style="width: 140px;" name="weight_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($weight) ?>"></td>
+                                            <td><input style="width: 140px;" type="text" name="batch_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($batch) ?>"></td>
                                             <td><input style="width: 140px;" type="text" name="inventory_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($inventory) ?>"></td>
                                             <td class="stores-cell">
                                                 <span class="stores-text <?= empty($stores_json) ? 'stores-not-assigned' : '' ?>">
@@ -743,6 +800,7 @@ function getStatus($estado)
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
+                            </div>
                             <div class="text-center mt-3">
                                 <button type="submit" class="btn-add-store" id="saveSelectedBtn">Save Selected</button>
                             </div>
@@ -863,6 +921,11 @@ function getStatus($estado)
                 return s == null ? s : s.trim().toUpperCase();
             }
 
+            // Uppercase without trimming (used while typing so trailing spaces are preserved)
+            function toUpperNoTrim(s) {
+                return s == null ? s : s.toUpperCase();
+            }
+
             function capitalizeFirst(s) {
                 if (s == null) return s;
                 s = s.trim().toLowerCase();
@@ -891,9 +954,11 @@ function getStatus($estado)
                     // apply uppercase live on input and final trim+uppercase on blur
                     inp.addEventListener('input', function() {
                         // transform live to uppercase while preserving cursor roughly
+                        // Use non-trimming uppercase here so the user can type a space
+                        // at the end while composing the next word.
                         const start = this.selectionStart;
                         const end = this.selectionEnd;
-                        this.value = toUpperTrim(this.value);
+                        this.value = toUpperNoTrim(this.value);
                         try {
                             this.setSelectionRange(start, end);
                         } catch (e) {
@@ -905,6 +970,32 @@ function getStatus($estado)
                     });
                 }
             });
+
+            // --- Top scrollbar synchronization (mirror horizontal scroll) ---
+            (function() {
+                const topScroll = document.querySelector('.top-scroll-container');
+                const mainTable = document.querySelector('.table-container .table-responsive');
+                if (!topScroll || !mainTable) return;
+
+                const topScrollContent = topScroll.querySelector('.top-scroll-content');
+                const table = mainTable.querySelector('table');
+
+                function syncTopWidth() {
+                    if (!table || !topScrollContent) return;
+                    topScrollContent.style.width = table.scrollWidth + 'px';
+                }
+
+                topScroll.addEventListener('scroll', function() { mainTable.scrollLeft = topScroll.scrollLeft; });
+                mainTable.addEventListener('scroll', function() { topScroll.scrollLeft = mainTable.scrollLeft; });
+
+                syncTopWidth();
+                window.addEventListener('resize', function(){ setTimeout(syncTopWidth, 120); });
+                if (window.ResizeObserver && table) {
+                    const ro = new ResizeObserver(function(){ setTimeout(syncTopWidth, 80); });
+                    ro.observe(table);
+                }
+                setTimeout(syncTopWidth, 300);
+            })();
         });
     </script>
 </body>
