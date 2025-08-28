@@ -594,7 +594,8 @@ header("Content-Type: text/html;charset=utf-8");
                                     var qty = item.quantity_inventory || 0; // Manejar null/undefined
                                     var costDisplay = (typeof item.cost_item !== 'undefined' && item.cost_item !== null && item.cost_item !== '') ? '$' + parseFloat(item.cost_item).toFixed(2) : '';
                                     var refDisplay = item.ref_item || '';
-                                    var batchDisplay = item.inventory_item || '';
+                                    // Prefer explicit batch_item (from items.batch_item). Fallback to inventory_item if not present.
+                                    var batchDisplay = (typeof item.batch_item !== 'undefined' && item.batch_item !== null && item.batch_item !== '') ? item.batch_item : (item.inventory_item || '');
                                     tableHtml += '<tr>' +
                                         '<td><input type="radio" name="selected_item" value="' + idx + '" ' + (idx === 0 ? 'checked' : '') + '></td>' +
                                         '<td>' + item.brand_item + '</td>' +

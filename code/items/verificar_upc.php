@@ -9,7 +9,7 @@ if (isset($_POST['upc_item'])) {
     // Si SKU está vacío, solo hacer JOIN por UPC
     $upc_esc = $mysqli->real_escape_string($upc_item);
     $sql = "SELECT i.brand_item, i.item_item, i.sku_item, i.color_item, i.size_item, i.category_item,
-                   i.ref_item, i.cost_item, i.inventory_item as item_inventory, i.weight_item,
+                   i.ref_item, i.cost_item, i.inventory_item as item_inventory, i.batch_item as batch_item, i.weight_item,
                    COALESCE(inv.quantity_inventory, 0) as quantity_inventory
             FROM items i
             LEFT JOIN inventory inv ON i.upc_item = inv.upc_inventory 
@@ -25,19 +25,20 @@ if (isset($_POST['upc_item'])) {
     if ($result && $result->num_rows > 0) {
         $items = [];
         while ($row = $result->fetch_assoc()) {
-        $items[] = [
-                'brand_item' => $row['brand_item'],
-                'item_item' => $row['item_item'],
-                'sku_item' => $row['sku_item'],
-                'color_item' => $row['color_item'],
-                'size_item' => $row['size_item'],
-                'category_item' => $row['category_item'],
-                    'quantity_inventory' => $row['quantity_inventory'],
-                    'ref_item' => $row['ref_item'],
-                    'cost_item' => $row['cost_item'],
-            'inventory_item' => $row['item_inventory'],
-            'weight_item' => $row['weight_item']
-            ];
+    $items[] = [
+        'brand_item' => $row['brand_item'],
+        'item_item' => $row['item_item'],
+        'sku_item' => $row['sku_item'],
+        'color_item' => $row['color_item'],
+        'size_item' => $row['size_item'],
+        'category_item' => $row['category_item'],
+            'quantity_inventory' => $row['quantity_inventory'],
+            'ref_item' => $row['ref_item'],
+            'cost_item' => $row['cost_item'],
+        'inventory_item' => $row['item_inventory'],
+        'batch_item' => $row['batch_item'],
+        'weight_item' => $row['weight_item']
+        ];
         }
         echo json_encode(['status' => 'existe', 'items' => $items]);
         $result->free();
