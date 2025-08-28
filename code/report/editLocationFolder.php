@@ -505,6 +505,9 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                                     }
                                                 }
                                             }
+                                            // Normalize display: treat '0' as empty for both current and new location
+                                            $current_loc_display = ($current_loc === '0' ? '' : $current_loc);
+                                            $new_loc_value = (isset($report['loc_report']) && trim($report['loc_report']) !== '0') ? $report['loc_report'] : '';
                                         ?>
                                             <tr>
                                                 <td>
@@ -564,13 +567,15 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
 
                                                 <!-- Current Location -->
                                                 <td>
-                                                    <span class="badge bg-secondary"><?= htmlspecialchars($current_loc) ?></span>
-                                                </td>                                                <!-- New Location (editable, sin validación) -->
+                                                    <span class="badge bg-secondary"><?= htmlspecialchars($current_loc_display) ?></span>
+                                                </td>
+                                                <!-- New Location (editable, sin validación) -->
                                                 <td>
                                                     <input style="width: 120px;" type="text"
                                                         name="new_location[<?= $report['id_report'] ?>]"
-                                                        class="form-control form-control-sm"
-                                                        value="<?= htmlspecialchars($report['loc_report']) ?>"
+                                                        class="form-control form-control-sm new-location-input"
+                                                        data-report-id="<?= $report['id_report'] ?>"
+                                                        value="<?= htmlspecialchars($new_loc_value) ?>"
                                                         placeholder="New location">
                                                 </td>
                                             </tr>
@@ -662,6 +667,66 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                     displayError('Error searching UPC. Please try again.');
                 });
         }
+
+        // Toggle required on new location when a row is selected
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form[action="updateLocationFolder.php"]');
+            if (!form) return;
+
+            // Attach change listeners to checkboxes
+            const checkboxes = form.querySelectorAll('input[type="checkbox"][name="selected_reports[]"]');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const reportId = this.value;
+                    // new location input
+                    const input = form.querySelector('input.new-location-input[data-report-id="' + reportId + '"]');
+                    // quantity input
+                    const qtyInput = form.querySelector('input.edited-quantity[name="edited_quantity[' + reportId + ']"]');
+                    if (input) {
+                        if (this.checked) {
+                            input.setAttribute('required', 'required');
+                            input.classList.add('required-highlight');
+                        } else {
+                            input.removeAttribute('required');
+                            input.classList.remove('required-highlight');
+                        }
+                    }
+                    if (qtyInput) {
+                        if (this.checked) {
+                            qtyInput.setAttribute('required', 'required');
+                            qtyInput.classList.add('required-highlight');
+                        } else {
+                            qtyInput.removeAttribute('required');
+                            qtyInput.classList.remove('required-highlight');
+                        }
+                    }
+                });
+            });
+
+            // Before submit validate selected rows have new location
+            form.addEventListener('submit', function(e) {
+                const selected = form.querySelectorAll('input[type="checkbox"][name="selected_reports[]"]:checked');
+                let invalid = false;
+                selected.forEach(cb => {
+                    const reportId = cb.value;
+                    const input = form.querySelector('input.new-location-input[data-report-id="' + reportId + '"]');
+                    const qtyInput = form.querySelector('input.edited-quantity[name="edited_quantity[' + reportId + ']"]');
+                    if (input && input.value.trim() === '') {
+                        invalid = true;
+                        input.classList.add('is-invalid');
+                    }
+                    if (qtyInput && qtyInput.value.trim() === '') {
+                        invalid = true;
+                        qtyInput.classList.add('is-invalid');
+                    }
+                });
+                if (invalid) {
+                    e.preventDefault();
+                    Swal.fire({ icon: 'warning', title: 'Validation', text: 'Please provide New Location for every selected row.' });
+                    return false;
+                }
+            });
+        });
 
         // Function to display item information
         function displayItemInfo(item) {

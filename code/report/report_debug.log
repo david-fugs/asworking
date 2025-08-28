@@ -182,3 +182,94 @@ Computed values before INSERT: cons=[folder cons 4] sku=[1T1O91RYMO] folder=[fol
 
 [2025-08-24T21:40:27+02:00] cons_report column type detected: varchar(255)
 [2025-08-24T21:40:27+02:00] sku_report column type detected: varchar(255)
+[2025-08-28T16:59:55+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 
+    [upc_final_report] => 2452455
+    [cons_report] => FOLDER cons 1
+    [folder_report] => FOLDER
+    [loc_report] => LOCATION
+    [quantity_report] => 50
+    [sku_report] => 
+    [brand_report] => BRAND
+    [item_report] => Item
+    [vendor_report] => STYLE
+    [color_report] => COLOR
+    [size_report] => SIZE
+    [category_report] => CATEGORY
+    [weight_report] => WEIGHT
+    [inventory_report] => BATCH
+    [stores] => Array
+        (
+            [0] => EB002
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[FOLDER cons 1] sku=[2KXCE8BDWM] folder=[FOLDER]
+
+[2025-08-28T16:59:55+02:00] cons_report column type detected: varchar(255)
+[2025-08-28T16:59:55+02:00] sku_report column type detected: varchar(255)
+[2025-08-28T17:31:05+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 
+    [upc_final_report] => 733002669813
+    [cons_report] => FOLDER cons 2
+    [folder_report] => FOLDER
+    [loc_report] => LOCATION
+    [quantity_report] => 4
+    [sku_report] => 
+    [brand_report] => BRAND
+    [item_report] => Item
+    [vendor_report] => STYLE
+    [color_report] => COLOR
+    [size_report] => SIZE
+    [category_report] => CATEGORY
+    [weight_report] => WEIGHT
+    [inventory_report] => BATCH
+    [stores] => Array
+        (
+            [0] => EB001
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[FOLDER cons 2] sku=[MAIIMXQ3QS] folder=[FOLDER]
+
+[2025-08-28T17:31:05+02:00] cons_report column type detected: varchar(255)
+[2025-08-28T17:31:05+02:00] sku_report column type detected: varchar(255)
+[2025-08-28T21:29:05+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 651651
+    [upc_final_report] => 651651
+    [cons_report] => FOLDER cons 3
+    [folder_report] => FOLDER
+    [loc_report] => LOCATION
+    [quantity_report] => 5
+    [sku_report] => 
+    [brand_report] => BRAND
+    [item_report] => Test de folder cons 3 
+    [vendor_report] => STYLE
+    [color_report] => COLOR
+    [size_report] => SIZE
+    [category_report] => CATEGORY
+    [weight_report] => WEIGHT
+    [inventory_report] => BATCH
+    [stores] => Array
+        (
+            [0] => EB002
+            [1] => AM002
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[FOLDER cons 3] sku=[GIPYGHQGMW] folder=[FOLDER]
+
+[2025-08-28T21:29:05+02:00] cons_report column type detected: varchar(255)
+[2025-08-28T21:29:05+02:00] sku_report column type detected: varchar(255)

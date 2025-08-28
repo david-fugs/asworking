@@ -444,7 +444,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                             if (selectedItem.category_item) { $('#category_report').val(selectedItem.category_item); } else { $('#category_report').val(''); }
                                             if (selectedItem.weight_item) { $('#weight_report').val(selectedItem.weight_item); } else { $('#weight_report').val(''); }
 
-                                            // Update inventory via AJAX
+                                            // Update inventory via AJAX (increment by addQty)
                                             $.ajax({
                                                 url: '../items/update_quantity.php',
                                                 type: 'POST',
@@ -452,7 +452,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                                 data: {
                                                     upc_item: $('#upc_asignado_report').val().toUpperCase(),
                                                     sku_item: (selectedItem.sku_item || '').toUpperCase(),
-                                                    quantity_inventory: newQty
+                                                    addQty: addQty
                                                 },
                                                 success: function(resp) {
                                                     if (resp.status === 'success') {
@@ -500,17 +500,26 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                         },
                         success: function(data) {
                             if (data.exists) {
+                                var folderMsg = '';
+                                if (data.folder_item && data.folder_item.trim() !== '') {
+                                    // Prefill folder input with the folder_item value
+                                    $('#folder_report').val(data.folder_item);
+                                    folderMsg = '\n\nThis article is currently in the items table in the column folder_item: ' + data.folder_item;
+                                }
+
+                                var fullMessage = 'This Final UPC already exists in the items table!' + folderMsg;
+
                                 // Use SweetAlert2 if available, otherwise fallback to native alert
                                 if (typeof Swal !== 'undefined') {
                                     Swal.fire({
                                         icon: 'warning',
                                         title: 'Warning',
-                                        text: 'This Final UPC already exists in the items table!'
+                                        text: fullMessage
                                     }).then(function() {
                                         $('#upc_final_report').focus();
                                     });
                                 } else {
-                                    alert("⚠️ Warning: This Final UPC already exists in the items table!");
+                                    alert('⚠️ ' + fullMessage);
                                     $('#upc_final_report').focus();
                                 }
                             }

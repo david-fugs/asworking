@@ -61,7 +61,8 @@ try {
                       AND estado_reporte = 0";
         if ($mysqli->query($update_sql) && $mysqli->affected_rows > 0) {
             // 2. Obtener el upc_final_report de este reporte
-            $get_upc_sql = "SELECT upc_final_report FROM daily_report WHERE id_report = ?";
+                    // Also obtain sku_report so we can target the correct items row
+                    $get_upc_sql = "SELECT upc_final_report, sku_report FROM daily_report WHERE id_report = ?";
             $get_upc_stmt = $mysqli->prepare($get_upc_sql);
             if ($get_upc_stmt) {
                 $get_upc_stmt->bind_param("i", $report_id);
@@ -69,11 +70,19 @@ try {
                     $upc_result = $get_upc_stmt->get_result();
                     if ($upc_row = $upc_result->fetch_assoc()) {
                         $upc_final = $upc_row['upc_final_report'];
+                        $sku_report = isset($upc_row['sku_report']) ? $upc_row['sku_report'] : '';
                         // 3. Actualizar solo el campo inventory_item en la tabla items (consulta plana)
                         $new_location_esc = $mysqli->real_escape_string($new_location);
                         $new_folder_esc = $mysqli->real_escape_string($new_folder);
                         $upc_final_esc = $mysqli->real_escape_string($upc_final);
-                        $update_items_sql = "UPDATE items SET inventory_item = '$new_location_esc', estado_item = $estado_item, folder_item= '$new_folder_esc' WHERE upc_item = '$upc_final_esc'";
+                        // If sku_report is provided, include it in the WHERE clause to avoid updating other SKUs with same UPC
+                        if (!empty($sku_report)) {
+                            $sku_report_esc = $mysqli->real_escape_string($sku_report);
+                            $update_items_sql = "UPDATE items SET inventory_item = '$new_location_esc', estado_item = $estado_item, folder_item= '$new_folder_esc' WHERE upc_item = '$upc_final_esc' AND sku_item = '$sku_report_esc'";
+                        } else {
+                            // Fallback: no sku available, update by UPC only (legacy behavior)
+                            $update_items_sql = "UPDATE items SET inventory_item = '$new_location_esc', estado_item = $estado_item, folder_item= '$new_folder_esc' WHERE upc_item = '$upc_final_esc'";
+                        }
                         
                         if ($mysqli->query($update_items_sql)) {
                             if ($mysqli->affected_rows > 0) {
@@ -105,7 +114,22 @@ try {
                                                         $orig_qty = isset($row['quantity_report']) ? $row['quantity_report'] : '';
                                                         if ((string)$edited_qty !== (string)$orig_qty) {
                                                             $upc_inv_esc = $mysqli->real_escape_string($upc_final);
-                                                            $sku_inv_esc = $mysqli->real_escape_string($sku_report);
+                                                            // Determine SKU to use for inventory update: prefer sku_report, else try to lookup sku_item in items table
+                                                            $sku_to_use = trim((string)$sku_report);
+                                                            if ($sku_to_use === '') {
+                                                                $lookup_stmt = $mysqli->prepare("SELECT sku_item FROM items WHERE upc_item = ? LIMIT 1");
+                                                                if ($lookup_stmt) {
+                                                                    $lookup_stmt->bind_param('s', $upc_final);
+                                                                    if ($lookup_stmt->execute()) {
+                                                                        $lookup_res = $lookup_stmt->get_result();
+                                                                        if ($lookup_row = $lookup_res->fetch_assoc()) {
+                                                                            $sku_to_use = isset($lookup_row['sku_item']) ? $lookup_row['sku_item'] : '';
+                                                                        }
+                                                                    }
+                                                                    $lookup_stmt->close();
+                                                                }
+                                                            }
+                                                            $sku_inv_esc = $mysqli->real_escape_string($sku_to_use);
                                                             $edited_qty_esc = $mysqli->real_escape_string($edited_qty);
                                                             $update_inventory_sql = "UPDATE inventory SET quantity_inventory = '$edited_qty_esc' WHERE upc_inventory = '$upc_inv_esc' AND sku_inventory = '$sku_inv_esc'";
                                                             if ($mysqli->query($update_inventory_sql)) {

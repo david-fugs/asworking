@@ -44,6 +44,9 @@ $item = isset($_GET['item']) ? trim($_GET['item']) : '';
 $reference = isset($_GET['ref']) ? trim($_GET['ref']) : '';
 $plan = isset($_GET['plan_cta']) ? trim($_GET['plan_cta']) : '';
 $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
+// Nuevos filtros solicitados
+$brand_filter = isset($_GET['brand']) ? trim($_GET['brand']) : '';
+$size_filter = isset($_GET['size']) ? trim($_GET['size']) : '';
 ?>
 
 <!DOCTYPE html>
@@ -417,32 +420,32 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
+            width: 48px;
             height: 36px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: all 0.18s ease;
             border: none;
-            background: transparent;
+            background: rgba(0,0,0,0.04);
             cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
 
         .btn-edit {
-            color: var(--primary);
+            color: #ffffff;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border: 1px solid rgba(40,167,69,0.15);
         }
-
-        .btn-edit:hover {
-            background-color: rgba(99, 43, 139, 0.1);
-            transform: scale(1.1);
-        }
+        .btn-edit svg { width: 18px; height: 18px; }
+        .btn-edit:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(40,167,69,0.18); }
 
         .btn-delete {
-            color: #dc3545;
+            color: #ffffff;
+            background: linear-gradient(90deg, #dc3545, #e55353);
+            border: 1px solid rgba(220,53,69,0.15);
         }
-
-        .btn-delete:hover {
-            background-color: rgba(220, 53, 69, 0.1);
-            transform: scale(1.1);
-        }
+        .btn-delete svg { width: 18px; height: 18px; }
+        .btn-delete:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(220,53,69,0.18); }
 
         /* Back button */
         .back-btn {
@@ -561,17 +564,23 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         <!-- Search Form -->
         <div class="search-form">
             <form action="showitems.php" method="get" class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" name="upc_item" class="form-control" placeholder="UPC" value="<?= htmlspecialchars($upc_item) ?>">
+                <div class="col-6 col-md-2">
+                    <input type="text" name="upc_item" class="form-control form-control-sm" placeholder="UPC" value="<?= htmlspecialchars($upc_item) ?>">
                 </div>
-                <div class="col-md-4">
-                    <input type="text" name="item" class="form-control" placeholder="Item" value="<?= htmlspecialchars($item) ?>">
+                <div class="col-6 col-md-3">
+                    <input type="text" name="item" class="form-control form-control-sm" placeholder="Item" value="<?= htmlspecialchars($item) ?>">
                 </div>
-                <div class="col-md-3">
-                    <input type="text" name="ref" class="form-control" placeholder="Reference" value="<?= htmlspecialchars($reference) ?>">
+                <div class="col-6 col-md-2">
+                    <input type="text" name="brand" class="form-control form-control-sm" placeholder="Brand" value="<?= htmlspecialchars($brand_filter) ?>">
                 </div>
-                <div class="col-md-1">
-                    <input type="submit" value="Search" class="btn btn-primary w-100">
+                <div class="col-4 col-md-1">
+                    <input type="text" name="size" class="form-control form-control-sm" placeholder="Size" value="<?= htmlspecialchars($size_filter) ?>">
+                </div>
+                <div class="col-6 col-md-2">
+                    <input type="text" name="ref" class="form-control form-control-sm" placeholder="Reference" value="<?= htmlspecialchars($reference) ?>">
+                </div>
+                <div class="col-6 col-md-2 d-grid">
+                    <input type="submit" value="Search" class="btn btn-primary">
                 </div>
             </form>
         </div>
@@ -583,16 +592,17 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         // Inicializa la consulta base
         // Usamos un LEFT JOIN contra un subquery agrupado para evitar duplicados
         // cuando la tabla inventory tiene múltiples filas por UPC.
+        // Aggregate inventory by UPC and SKU so stock is associated to the specific SKU_item
         $queryBase = "SELECT items.*, inv.quantity_inventory, inv.inv_inventory_item AS inv_inventory_item, inv.observation_inventory
         FROM items
         LEFT JOIN (
-         SELECT upc_inventory,
+         SELECT upc_inventory, sku_inventory,
              SUM(quantity_inventory) AS quantity_inventory,
              GROUP_CONCAT(DISTINCT item_inventory SEPARATOR ', ') AS inv_inventory_item,
              MAX(observation_inventory) AS observation_inventory
          FROM inventory
-            GROUP BY upc_inventory
-        ) AS inv ON items.upc_item = inv.upc_inventory
+            GROUP BY upc_inventory, sku_inventory
+        ) AS inv ON items.upc_item = inv.upc_inventory AND items.sku_item = inv.sku_inventory
             WHERE 1=1 AND items.estado_item = 1";
 
         // Agrega filtros si existen
@@ -603,6 +613,16 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         if (!empty($_GET['item'])) {
             $item = $mysqli->real_escape_string($_GET['item']);
             $queryBase .= " AND item_item LIKE '%$item%'";
+        }
+        // Filtro por brand
+        if (!empty($_GET['brand'])) {
+            $brand = $mysqli->real_escape_string($_GET['brand']);
+            $queryBase .= " AND brand_item LIKE '%$brand%'";
+        }
+        // Filtro por size
+        if (!empty($_GET['size'])) {
+            $size = $mysqli->real_escape_string($_GET['size']);
+            $queryBase .= " AND size_item LIKE '%$size%'";
         }
         if (!empty($_GET['ref'])) {
             $reference = $mysqli->real_escape_string($_GET['ref']);
@@ -621,6 +641,14 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
         }
         if (!empty($_GET['item'])) {
             $countQuery .= " AND items.item_item LIKE '%$item%'";
+        }
+        if (!empty($_GET['brand'])) {
+            $brand = $mysqli->real_escape_string($_GET['brand']);
+            $countQuery .= " AND items.brand_item LIKE '%$brand%'";
+        }
+        if (!empty($_GET['size'])) {
+            $size = $mysqli->real_escape_string($_GET['size']);
+            $countQuery .= " AND items.size_item LIKE '%$size%'";
         }
         if (!empty($_GET['ref'])) {
             $countQuery .= " AND items.ref_item = '$reference'";
@@ -669,7 +697,6 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <th style="min-width: 70px; text-align: center;">FOLDER</th>
                                 <th style="min-width: 70px; text-align: center;">COLOR</th>
                                 <th style="min-width: 70px; text-align: center;">SIZE</th>
-                                <th style="min-width: 90px; text-align: center;">CATEGORY</th>
                                 <th style="min-width: 70px; text-align: center;">COST</th>
                                 <th style="min-width: 70px; text-align: center;">WEIGHT</th>
                                 <th style="min-width: 70px; text-align: center;">STOCK</th>
@@ -709,7 +736,6 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                 <td>' . $row['folder_item'] . '</td>
                                 <td>' . $row['color_item'] . '</td>
                                 <td>' . $row['size_item'] . '</td>
-                                <td>' . $row['category_item'] . '</td>
                                 <td>' . $row['cost_item'] . '</td>
                                 <td>' . $row['weight_item'] . '</td>
                                 <td>' . $row['quantity_inventory'] . '</td>
@@ -737,12 +763,20 @@ $estado = isset($_GET['estado']) ? trim($_GET['estado']) : '';
                                         data-batch="' . $row['inventory_item'] . '"
                                         data-observation="' . htmlspecialchars($row['observation_inventory']) . '"
                                         data-stores=\'' . htmlspecialchars($row['stores_item']) . '\'>
-                                        <i class="fas fa-edit"></i>
+                                        <!-- Inline edit SVG icon + label for visibility -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                            <path d="M12.146.854a.5.5 0 0 1 .708 0l2.292 2.292a.5.5 0 0 1 0 .708l-9.193 9.193a.5.5 0 0 1-.168.11l-4 1.5a.5.5 0 0 1-.65-.65l1.5-4a.5.5 0 0 1 .11-.168l9.193-9.193zM11.207 2L3 10.207V12h1.793L14 3.793 11.207 2z"/>
+                                        </svg>
+                                        <span class="visually-hidden">Edit</span>
                                     </button>     
                                 </td>
                                 <td>
-                                    <a href="?delete=' . $row['id_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');" class="btn-action btn-delete">
-                                        <i class="fas fa-trash-alt"></i>
+                                    <a href="?delete=' . $row['id_item'] . '" onclick="return confirm(\'¿Are you sure to Delete this item?\');" class="btn-action btn-delete" title="Delete item" aria-label="Delete item">
+                                        <!-- Inline delete SVG icon + visible label -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-7zM4.118 4 4 4.059V5h8V4.059L11.882 4H4.118zM2.5 3a1 1 0 0 1 1-1H6l.5-.5A1 1 0 0 1 7.5 1h1a1 1 0 0 1 .866.5L9.5 2h2.999a1 1 0 0 1 1 1v1H2.5V3z"/>
+                                        </svg>
+                                        <span class="visually-hidden">Delete</span>
                                     </a>
                                 </td>
                             </tr>';

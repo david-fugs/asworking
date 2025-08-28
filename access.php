@@ -144,6 +144,21 @@ if ($current_month_orders > 0) {
       --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
+    /* Dark theme variables */
+    [data-theme="dark"] {
+      --primary-dark: #6a3c8b;
+      --primary: #8b5a9f;
+      --primary-light: #9966b3;
+      --secondary: #b399cc;
+      --secondary-light: #4a4a4a;
+      --text-dark: #e0e0e0;
+      --text-light: #1a1a1a;
+      --bg-light: #1a1a1a;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -229,6 +244,35 @@ if ($current_month_orders > 0) {
     .profile:hover {
       transform: scale(1.1);
       border-color: white;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 6px;
+      color: white;
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      font-size: 14px;
+    }
+
+    .theme-toggle:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+    }
+
+    .theme-toggle svg {
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover svg {
+      transform: rotate(20deg);
     }
 
     /* Sidebar */
@@ -398,12 +442,15 @@ if ($current_month_orders > 0) {
 
     .card {
       background: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      transition: var(--transition);
-      border-left: 4px solid var(--primary);
+      }
+
+    /* Dark navbar variant */
+    .navbar.navbar--dark {
+      background: #111 !important;
+      color: #fff;
     }
+    .navbar.navbar--dark .logo_item img { filter: none; }
+    .navbar.navbar--dark .navbar_content a, .navbar.navbar--dark .navbar_content button { color: #fff; }
 
     .card:hover {
       transform: translateY(-5px);
@@ -586,6 +633,62 @@ if ($current_month_orders > 0) {
     .arrow-left.rotate {
       transform: rotate(90deg);
     }
+
+    /* Dark theme specific styles */
+    [data-theme="dark"] .sidebar {
+      background: #2d2d2d;
+      border-right: 1px solid #404040;
+    }
+
+    [data-theme="dark"] .menu_content {
+      background: #2d2d2d;
+    }
+
+    [data-theme="dark"] .menu_title {
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] .menu_items li a {
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] .menu_items li a:hover {
+      background: #404040;
+    }
+
+    [data-theme="dark"] .main-content {
+      background: var(--bg-light);
+    }
+
+    [data-theme="dark"] .card,
+    [data-theme="dark"] .statistics-card {
+      background: #2d2d2d;
+      border: 1px solid #404040;
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] .card h3,
+    [data-theme="dark"] .statistics-card h3 {
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] table {
+      background: #2d2d2d;
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] table th {
+      background: #404040;
+      color: var(--text-dark);
+    }
+
+    [data-theme="dark"] table td {
+      border-bottom: 1px solid #404040;
+    }
+
+    [data-theme="dark"] table tr:hover {
+      background: #404040;
+    }
   </style>
 </head>
 
@@ -599,8 +702,28 @@ if ($current_month_orders > 0) {
 
     <div class="navbar_content">
       <i class="bi bi-grid"></i>
-      <i class="fa-solid fa-sun" id="darkLight"></i>
-      <a href="logout.php"> <i class="fa-solid fa-door-open"></i></a>
+
+      <!-- Theme Toggle Button -->
+      <button class="theme-toggle" onclick="toggleTheme()" title="Change theme" aria-label="Change theme">
+        <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <span class="btn-text">Theme</span>
+      </button>
+
+      <!-- Logout button -->
+  <a href="logout.php" class="btn-logout" title="Logout" aria-label="Logout" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(255,255,255,0.12);border-radius:6px;color:white;text-decoration:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="btn-text">Logout</span>
+      </a>
       <img src="img/logo.png" alt="" class="profile" />
     </div>
   </nav>
@@ -992,17 +1115,78 @@ if ($current_month_orders > 0) {
     // Dark/Light Mode Toggle
     const darkLight = document.querySelector('#darkLight');
 
-    darkLight.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
+    if (darkLight) {
+      darkLight.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
 
-      if (document.body.classList.contains('dark-mode')) {
-        darkLight.classList.remove('fa-sun');
-        darkLight.classList.add('fa-moon');
+        if (document.body.classList.contains('dark-mode')) {
+          darkLight.classList.remove('fa-sun');
+          darkLight.classList.add('fa-moon');
+        } else {
+          darkLight.classList.remove('fa-moon');
+          darkLight.classList.add('fa-sun');
+        }
+      });
+    }
+
+    // New Theme Toggle Function
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      
+      updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+      const themeIcon = document.getElementById('theme-icon');
+      if (theme === 'dark') {
+        // Moon icon
+        themeIcon.innerHTML = `
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        `;
       } else {
-        darkLight.classList.remove('fa-moon');
-        darkLight.classList.add('fa-sun');
+        // Sun icon
+        themeIcon.innerHTML = `
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        `;
       }
-    });
+    }
+
+    // Initialize theme from localStorage or default to light
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+    }
+
+    // Initialize theme on page load
+    initializeTheme();
+
+    // Navbar dark toggle (moon button)
+    const toggleDarkNav = document.getElementById('toggleDarkNav');
+    const navbar = document.querySelector('.navbar');
+    // Initialize from localStorage
+    if (localStorage.getItem('navbarDark') === '1') {
+      navbar.classList.add('navbar--dark');
+    }
+    if (toggleDarkNav) {
+      toggleDarkNav.addEventListener('click', function() {
+        navbar.classList.toggle('navbar--dark');
+        const isDark = navbar.classList.contains('navbar--dark');
+        localStorage.setItem('navbarDark', isDark ? '1' : '0');
+      });
+    }
 
     // Rotate arrow when submenu is opened
     document.querySelectorAll('.submenu_item').forEach(item => {

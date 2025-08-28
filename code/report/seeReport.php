@@ -697,7 +697,7 @@ function getStatus($estado)
                                         <th colspan="5">Product Info</th>
                                         <th colspan="3">Specs</th>
 
-                                        <th colspan="3">Batch / Inventory</th>
+                                        <th colspan="1">Batch </th>
                                         <th colspan="1">Stores</th>
                                         <th>Observation</th>
                                     </tr>
@@ -720,7 +720,6 @@ function getStatus($estado)
                                         <th>Category</th>
                                         <th>Weight</th>
                                         <th>Batch</th>
-                                        <th>Inventory</th>
                                         <th>Stores</th>
                                         <th>Observation</th>
                                     </tr>
@@ -788,7 +787,6 @@ function getStatus($estado)
                                             <td><input type="text" style="width: 100px;" name="category_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($category) ?>"></td>
                                             <td><input type="text" style="width: 140px;" name="weight_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($weight) ?>"></td>
                                             <td><input style="width: 140px;" type="text" name="batch_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($batch) ?>"></td>
-                                            <td><input style="width: 140px;" type="text" name="inventory_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($inventory) ?>"></td>
                                             <td class="stores-cell">
                                                 <span class="stores-text <?= empty($stores_json) ? 'stores-not-assigned' : '' ?>">
                                                     <?= htmlspecialchars($stores_display) ?>
