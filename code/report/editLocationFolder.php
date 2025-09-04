@@ -1,12 +1,20 @@
 <?php
 session_start();
 include("../../conexion.php");
+
+// Debug log
+error_log("editLocationFolder.php - Starting page load");
+error_log("Session ID: " . (isset($_SESSION['id']) ? $_SESSION['id'] : 'NOT SET'));
+
 if (!isset($_SESSION['id'])) {
+    error_log("editLocationFolder.php - No session ID, redirecting to index");
     header("Location: ../../index.php");
     exit();
 }
 $nombre = isset($_SESSION['nombre']) ? $_SESSION['nombre'] : 'Usuario';
 $tipo_usu = isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : 'user';
+
+error_log("editLocationFolder.php - User logged in: " . $nombre);
 
 /*
  * FLUJO DE ESTADOS DE REPORTES:
@@ -20,11 +28,16 @@ $tipo_usu = isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : 'user
 $sql = "SELECT * FROM daily_report
         WHERE estado_reporte = 0
         ORDER BY fecha_alta_reporte DESC";
+
+error_log("editLocationFolder.php - SQL Query: " . $sql);
+
 $result = $mysqli->query($sql);
 if (!$result) {
+    error_log("editLocationFolder.php - Query error: " . $mysqli->error);
     die("Error en la consulta: " . $mysqli->error);
 }
 $reports = $result->fetch_all(MYSQLI_ASSOC);
+error_log("editLocationFolder.php - Found " . count($reports) . " reports with estado_reporte = 0");
 ?>
 
 <!DOCTYPE html>
@@ -35,10 +48,10 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>ASWWORKING | Edit Product Details</title>
-    <script src="js/64d58efce2.js"></script>
+    <script src="../../js/64d58efce2.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
-    <link href="../../../fontawesome/css/all.css" rel="stylesheet">
+    <link href="../../fontawesome/css/all.css" rel="stylesheet">
     <script src="https://kit.fontawesome.com/fed2435e21.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -474,6 +487,7 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                             <th>Date</th>
                                             <th>UPC Final</th>
                                             <th>Quantity</th>
+                                            <th>Observation</th>
                                             <th>SKU</th>
                                             <th>Item</th>
                                             <th>Brand</th>
@@ -518,6 +532,14 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                                 <td style="width:120px;">
                                                     <input type="text" name="edited_quantity[<?= $report['id_report'] ?>]" class="form-control form-control-sm edited-quantity" placeholder="<?= htmlspecialchars($report['quantity_report']) ?>" value="">
                                                 </td>
+                                                
+                                                <!-- Observation (para observaciones generales, no cantidad agregada) -->
+                                                <td style="max-width: 200px;">
+                                                    <span class="badge bg-info" style="font-size: 0.7rem; white-space: normal;">
+                                                        <?= isset($report['observacion_report']) && !empty($report['observacion_report']) ? htmlspecialchars($report['observacion_report']) : 'No observation' ?>
+                                                    </span>
+                                                </td>
+                                                
                                                 <td><?= htmlspecialchars($report['sku_report']) ?></td>
 
                                                 <!-- Item (solo lectura) -->
@@ -533,13 +555,12 @@ $reports = $result->fetch_all(MYSQLI_ASSOC);
                                                     <span class="badge bg-secondary"><?= htmlspecialchars($report['brand_report']) ?></span>
                                                 </td>
 
-                                                <!-- Vendor (solo lectura) -->
-                                                
+                                                <!-- Vendor/Style (solo lectura) -->
                                                 <td>
                                                     <input style="width: 120px;" type="text"
                                                         name="new_vendor[<?= $report['id_report'] ?>]"
                                                         class="form-control form-control-sm"
-                                                        value="<?= isset($report['vendor_report']) ? htmlspecialchars($report['vendor_report']) : '' ?>"
+                                                        value="<?= htmlspecialchars($report['vendor_report'] ?? '') ?>"
                                                         placeholder="Style" readonly>
                                                 </td>
 

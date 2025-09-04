@@ -567,9 +567,9 @@ $size_filter = isset($_GET['size']) ? trim($_GET['size']) : '';
                 <div class="col-6 col-md-2">
                     <input type="text" name="upc_item" class="form-control form-control-sm" placeholder="UPC" value="<?= htmlspecialchars($upc_item) ?>">
                 </div>
-                <div class="col-6 col-md-3">
+                <!-- <div class="col-6 col-md-3">
                     <input type="text" name="item" class="form-control form-control-sm" placeholder="Item" value="<?= htmlspecialchars($item) ?>">
-                </div>
+                </div> -->
                 <div class="col-6 col-md-2">
                     <input type="text" name="brand" class="form-control form-control-sm" placeholder="Brand" value="<?= htmlspecialchars($brand_filter) ?>">
                 </div>

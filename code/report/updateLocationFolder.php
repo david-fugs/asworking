@@ -55,7 +55,7 @@ try {
         $update_sql = "UPDATE daily_report 
                       SET folder_report = '$new_folder_esc', 
                           loc_report = '$new_location_esc',
-                          estado_reporte = -1,
+                          estado_reporte = 1,
                           fecha_modificacion = NOW()
                       WHERE id_report = $report_id 
                       AND estado_reporte = 0";
@@ -84,14 +84,30 @@ try {
                             $update_items_sql = "UPDATE items SET inventory_item = '$new_location_esc', estado_item = $estado_item, folder_item= '$new_folder_esc' WHERE upc_item = '$upc_final_esc'";
                         }
                         
+                        // Debug: Check if the item exists before updating
+                        if (!empty($sku_report)) {
+                            $check_sql = "SELECT COUNT(*) as count FROM items WHERE upc_item = '$upc_final_esc' AND sku_item = '$sku_report_esc'";
+                        } else {
+                            $check_sql = "SELECT COUNT(*) as count FROM items WHERE upc_item = '$upc_final_esc'";
+                        }
+                        $check_result = $mysqli->query($check_sql);
+                        $check_row = $check_result->fetch_assoc();
+                        $item_count = $check_row['count'];
+                        
+                        if ($item_count == 0) {
+                            $errors[] = "Reporte ID $report_id: No se encontró item en tabla items (UPC: $upc_final, SKU: $sku_report). Verifica que el item exista.";
+                            $error_count++;
+                            continue;
+                        }
+                        
                         if ($mysqli->query($update_items_sql)) {
                             if ($mysqli->affected_rows > 0) {
                                 $success_count++;
                                 if (isset($_GET['debug']) || isset($_POST['debug'])) {
-                                    error_log("SUCCESS - Updated inventory_item in items table for UPC: $upc_final");
+                                    error_log("SUCCESS - Updated inventory_item in items table for UPC: $upc_final, SKU: $sku_report");
                                 }
                             } else {
-                                $errors[] = "Reporte ID $report_id: Actualizado en daily_report pero no se encontró en tabla items (UPC: $upc_final).";
+                                $errors[] = "Reporte ID $report_id: Actualizado en daily_report pero no se encontró en tabla items (UPC: $upc_final, SKU: $sku_report). Item count: $item_count";
                                 $error_count++;
                             }
                         } else {

@@ -1,6 +1,8 @@
 <?php
 include("../../conexion.php");
 session_start();
+// current user id for FK on items.id_usu
+$user_id = isset($_SESSION['id']) ? intval($_SESSION['id']) : 0;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
@@ -120,9 +122,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Convertir las tiendas a formato JSON
     $stores_json = json_encode($stores_selected);
-    $stores_json_escaped = $mysqli->real_escape_string($stores_json);// Insertar nuevo reporte con estado_reporte = 1 para que aparezca en seeReport
-
-    // Debug: log incoming POST and computed values to help trace why CONS/SKU may be saved as 0
+    $stores_json_escaped = $mysqli->real_escape_string($stores_json);    // Insertar nuevo reporte con estado_reporte = 0 para que aparezca en editLocationFolder
+   // Debug: log incoming POST and computed values to help trace why CONS/SKU may be saved as 0
     $debug_log = __DIR__ . '/report_debug.log';
     $dbg = "[" . date('c') . "] processReport POST snapshot:\n" . print_r($_POST, true) . "\n";
     $dbg .= "Computed values before INSERT: cons=[$cons] sku=[$sku] folder=[$folder]" . "\n\n";
@@ -197,7 +198,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         '$upc_asignado', '$upc_final', '$cons', '$folder',
         '$loc', '$quantity', '$sku', '$brand', '$item',
         '$vendor', '$color', '$size', '$category',
-        '$weight', '$inventory', '$observacion', '$stores_json_escaped', 1
+        '$weight', '$inventory', '$observacion', '$stores_json_escaped', 0
     )";
 
 // Ejecutar consulta del reporte
@@ -207,7 +208,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // Si se proporcionó un UPC asignado, intentar actualizar la tabla items
         $item_update_success = true;
         $item_update_message = "";
-          if (!empty($upc_asignado)) {
+        if (!empty($upc_asignado)) {
             // Verificar si el UPC existe en la tabla items
             $check_query = "SELECT upc_item FROM items WHERE upc_item = '$upc_asignado'";
             $check_result = $mysqli->query($check_query);
@@ -223,20 +224,142 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $item_update_message = "\\n⚠️ Warning: Could not update item stores.";
                 }
             } else {
-                $item_update_message = "\\n📝 Note: UPC not found in items table.";
+                // El UPC no existe, crear nuevo item en tabla items
+                // Note: include id_usu to satisfy FK constraint on items.id_usu and remove quantity_inventory from items
+                $create_item_query = "INSERT INTO items (upc_item, sku_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, batch_item, stores_item, id_usu) VALUES ('$upc_asignado', '$sku', '$brand', '$item', '$vendor', '$color', '$size', '$category', '0', '$weight', '$inventory', '', '$stores_json_escaped', $user_id)";
+
+                // Log the query for debugging
+                @file_put_contents($debug_log, "[".date('c')."] create_item_query: " . $create_item_query . "\n", FILE_APPEND | LOCK_EX);
+
+                if ($mysqli->query($create_item_query)) {
+                    $item_update_message = "\\n✅ New item created in items table.";
+
+                    // También crear entrada en tabla inventory si no existe
+                    $check_inventory = "SELECT id_inventory FROM inventory WHERE upc_inventory = '$upc_asignado' AND sku_inventory = '$sku'";
+                    $check_inv_result = $mysqli->query($check_inventory);
+
+                    if ($check_inv_result && $check_inv_result->num_rows == 0) {
+                        $create_inventory_query = "INSERT INTO inventory (upc_inventory, sku_inventory, quantity_inventory) VALUES ('$upc_asignado', '$sku', '$quantity')";
+                        if ($mysqli->query($create_inventory_query)) {
+                            $item_update_message .= "\\n✅ Inventory entry created.";
+                        } else {
+                            $item_update_message .= "\\n⚠️ Warning: Could not create inventory entry. Error: " . $mysqli->error;
+                            @file_put_contents($debug_log, "[".date('c')."] inventory insert error: " . $mysqli->error . "\n", FILE_APPEND | LOCK_EX);
+                        }
+                    } else {
+                        // Actualizar inventario existente
+                        $update_inventory_query = "UPDATE inventory SET quantity_inventory = '$quantity' WHERE upc_inventory = '$upc_asignado' AND sku_inventory = '$sku'";
+                        if ($mysqli->query($update_inventory_query)) {
+                            $item_update_message .= "\\n✅ Inventory updated.";
+                        } else {
+                            $item_update_message .= "\\n⚠️ Warning: Could not update inventory. Error: " . $mysqli->error;
+                            @file_put_contents($debug_log, "[".date('c')."] inventory update error: " . $mysqli->error . "\n", FILE_APPEND | LOCK_EX);
+                        }
+                    }
+                } else {
+                    $item_update_success = false;
+                    $item_update_message = "\\n⚠️ Warning: Could not create new item in items table. Error: " . $mysqli->error;
+                    @file_put_contents($debug_log, "[".date('c')."] items insert error: " . $mysqli->error . "\n", FILE_APPEND | LOCK_EX);
+                }
             }
         }
           $stores_list = implode(', ', $stores_selected);
-        echo "<script>
-            alert('✅ Report inserted successfully!\\n📍 Stores: $stores_list\\n🔢 Generated SKU: $sku$item_update_message');
-            window.location.href = 'addReport.php';
-          </script>";
-        
+    // Prepare HTML message for SweetAlert (convert any literal \n sequences to real newlines)
+    $item_update_message = str_replace('\\n', "\n", $item_update_message);
+    $swal_html = "<p><strong>📍 Stores:</strong> " . htmlspecialchars($stores_list) . "</p>" .
+                 "<p><strong>🔢 Generated SKU:</strong> " . htmlspecialchars($sku) . "</p>" .
+                 "<div style='text-align:left; margin-top:8px;'>" . nl2br(htmlspecialchars($item_update_message)) . "</div>";
+
+    // Return a minimal HTML page that loads SweetAlert2 and shows a modal, then reloads the page
+    ?>
+    <!doctype html>
+    <html>
+    <head>
+        <meta charset='utf-8'>
+        <title>Report result</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 30px; }
+            .success-message { background: #d4edda; color: #155724; padding: 20px; border-radius: 5px; margin: 20px; }
+            .redirect-info { margin: 20px; color: #666; }
+            a { color: #007bff; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+        </style>
+        <!-- SweetAlert2 CDN -->
+        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    </head>
+    <body>
+        <div class='success-message'>
+            <h2>✅ Report Processed Successfully!</h2>
+            <p><strong>📍 Stores:</strong> <?= htmlspecialchars($stores_list) ?></p>
+            <p><strong>🔢 Generated SKU:</strong> <?= htmlspecialchars($sku) ?></p>
+            <div style='white-space:pre-wrap; text-align:left; margin: 10px auto; max-width:600px;'><?= nl2br(htmlspecialchars($item_update_message)) ?></div>
+        </div>
+        <div class='redirect-info'>
+            <p>La página se recargará automáticamente.</p>
+            <p>If auto-reload doesn't work, <a href='editLocationFolder_test.php'>test page</a> or <a href='editLocationFolder.php'>main page</a></p>
+        </div>
+        <script>
+            // Use SweetAlert2 to show the result and then reload the page when the user confirms
+            const swalHtml = <?= json_encode($swal_html) ?>;
+            Swal.fire({
+                title: '✅ Report Processed Successfully!',
+                html: swalHtml,
+                icon: 'success',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                confirmButtonText: 'OK'
+            }).then(function() {
+                // Redirect to addReport.php using GET to avoid re-submitting the POST
+                window.location.replace('addReport.php');
+            });
+            // As a fallback, force a redirect after 6 seconds
+            setTimeout(function() { try { window.location.replace('addReport.php'); } catch(e){} }, 6000);
+        </script>
+    </body>
+    </html>
+    <?php
+    
     } else {
-        echo "<script>
-            alert('❌ Error inserting report: " . $mysqli->error . "');
-            window.location.href = 'addReport.php';
-          </script>";
+    $err_msg = "❌ Error inserting report: " . $mysqli->error;
+    ?>
+    <!doctype html>
+    <html>
+    <head>
+        <meta charset='utf-8'>
+        <title>Error</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+            .error-message { background: #f8d7da; color: #721c24; padding: 20px; border-radius: 5px; margin: 20px; }
+            .redirect-info { margin: 20px; color: #666; }
+            a { color: #007bff; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+        </style>
+        <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    </head>
+    <body>
+        <div class='error-message'>
+            <h2>❌ Error Processing Report</h2>
+            <p><?= htmlspecialchars($mysqli->error) ?></p>
+        </div>
+        <div class='redirect-info'>
+            <p>Vuelva a intentar o pulse OK para recargar.</p>
+            <p>If you are not redirected automatically, <a href='addReport.php'>click here</a></p>
+        </div>
+        <script>
+            const errMsg = <?= json_encode($err_msg) ?>;
+            Swal.fire({
+                title: '❌ Error',
+                html: '<pre style="text-align:left; white-space:pre-wrap;">' + Swal.escapeHtml(errMsg) + '</pre>',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            }).then(function() {
+                // Redirect to addReport.php using GET to avoid re-submitting the POST
+                window.location.replace('addReport.php');
+            });
+        </script>
+    </body>
+    </html>
+    <?php
     }
 } else {
     echo "<script>

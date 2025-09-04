@@ -15,7 +15,6 @@ header("Content-Type: text/html;charset=utf-8");
 <html lang="es">
 
 <head>
-    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>ASWWORKING</title>
@@ -332,6 +331,10 @@ header("Content-Type: text/html;charset=utf-8");
                                 <label for="ref_item" class="form-label required-field">REF</label>
                                 <input type='text' name='ref_item' class='form-control' style="text-transform:uppercase;" id="ref_item" required />
                             </div>
+                            <!-- <div class="col-12 col-sm-3">
+                                <label for="style_item" class="form-label">STYLE</label>
+                                <input type='text' name='style_item' class='form-control' style="text-transform:uppercase;" id="style_item" />
+                            </div> -->
                             <div class="col-12 col-sm-3">
                                 <label for="color_item" class="form-label required-field">COLOR</label>
                                 <input type='text' name='color_item' class='form-control' style="text-transform:uppercase;" id="color_item" required />
@@ -639,7 +642,7 @@ header("Content-Type: text/html;charset=utf-8");
 
                                 // Input para agregar cantidad
                                 var addQtyHtml = '<div class="form-group text-left">' +
-                                    '<label for="add-qty-input">Add Quantity:</label>' +
+                                    '<label for="add-qty-input">Add Quantity (will redirect to edit location):</label>' +
                                     '<input type="number" min="1" id="add-qty-input" class="form-control" style="width:120px;display:inline-block;" />' +
                                     '</div>';
 
@@ -649,7 +652,7 @@ header("Content-Type: text/html;charset=utf-8");
                                     icon: 'warning',
                                     width: '90%',
                                     showCancelButton: true,
-                                    confirmButtonText: 'Add Quantity',
+                                    confirmButtonText: 'Add Quantity & Edit Location',
                                     cancelButtonText: 'Cancel',
                                     confirmButtonColor: '#632b8b',
                                     preConfirm: () => {
@@ -707,29 +710,46 @@ header("Content-Type: text/html;charset=utf-8");
                                             $('#weight_item').val(selectedItem.weight_item);
                                         } else { $('#weight_item').val(''); }
                                         
-                                        // Llamada AJAX para actualizar en la base de datos
+                                        // Instead of just updating quantity, create a daily_report entry and redirect to editLocationFolder
                                         $.ajax({
-                                            url: 'update_quantity.php',
+                                            url: 'create_report_simple.php',
                                             type: 'POST',
                                             dataType: 'json',
                                             data: {
                                                 upc_item: $('#upc_item').val().toUpperCase(),
                                                 sku_item: (selectedItem.sku_item || '').toUpperCase(),
-                                                quantity_inventory: newQty
+                                                brand_item: selectedItem.brand_item,
+                                                item_item: selectedItem.item_item,
+                                                ref_item: selectedItem.ref_item || '',
+                                                color_item: selectedItem.color_item || '',
+                                                size_item: selectedItem.size_item || '',
+                                                category_item: selectedItem.category_item || '',
+                                                weight_item: selectedItem.weight_item || '',
+                                                cost_item: selectedItem.cost_item || '',
+                                                batch_item: selectedItem.batch_item || '',
+                                                current_quantity: currentQty,
+                                                new_quantity: newQty,
+                                                added_quantity: addQty
                                             },
                                             success: function(resp) {
-                                                console.log('Update response:', resp);
+                                                console.log('Create report response:', resp);
                                                 if (resp.status === 'success') {
                                                     Swal.fire({
-                                                        title: 'Quantity Updated',
-                                                        text: 'The new quantity is: ' + newQty,
+                                                        title: 'Success!',
+                                                        text: 'Item quantity updated. You will now be redirected to edit the location.',
                                                         icon: 'success',
-                                                        confirmButtonColor: '#632b8b'
+                                                        confirmButtonColor: '#632b8b',
+                                                        confirmButtonText: 'Go to Edit Location'
+                                                    }).then((result) => {
+                                                        if (result.isConfirmed) {
+                                                            // Redirect to editLocationFolder.php
+                                                            window.location.href = '../report/editLocationFolder.php';
+                                                        }
                                                     });
                                                 } else {
                                                     Swal.fire({
                                                         title: 'Error',
-                                                        text: resp.message || 'Failed to update quantity.',
+                                                        text: resp.message || 'Failed to create report entry.',
                                                         icon: 'error',
                                                         confirmButtonColor: '#632b8b'
                                                     });

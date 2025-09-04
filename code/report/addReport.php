@@ -394,7 +394,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                 tableHtml += '</tbody></table></div>';
 
                                 var addQtyHtml = '<div class="form-group text-left">' +
-                                    '<label for="add-qty-input">Add Quantity:</label>' +
+                                    '<label for="add-qty-input">Add Quantity (will redirect to edit location):</label>' +
                                     '<input type="number" min="1" id="add-qty-input" class="form-control" style="width:120px;display:inline-block;" />' +
                                     '</div>';
 
@@ -405,7 +405,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                         icon: 'info',
                                         width: '90%',
                                         showCancelButton: true,
-                                        confirmButtonText: 'Add Quantity & Select',
+                                        confirmButtonText: 'Add Quantity & Edit Location',
                                         cancelButtonText: 'Cancel',
                                         confirmButtonColor: '#632b8b',
                                         preConfirm: () => {
@@ -444,25 +444,59 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                             if (selectedItem.category_item) { $('#category_report').val(selectedItem.category_item); } else { $('#category_report').val(''); }
                                             if (selectedItem.weight_item) { $('#weight_report').val(selectedItem.weight_item); } else { $('#weight_report').val(''); }
 
-                                            // Update inventory via AJAX (increment by addQty)
+                                            // Update inventory via AJAX (use the new system for location editing)
                                             $.ajax({
-                                                url: '../items/update_quantity.php',
+                                                url: '../items/create_report_simple.php',
                                                 type: 'POST',
                                                 dataType: 'json',
                                                 data: {
                                                     upc_item: $('#upc_asignado_report').val().toUpperCase(),
                                                     sku_item: (selectedItem.sku_item || '').toUpperCase(),
-                                                    addQty: addQty
+                                                    brand_item: selectedItem.brand_item,
+                                                    item_item: selectedItem.item_item,
+                                                    ref_item: selectedItem.ref_item || '',
+                                                    color_item: selectedItem.color_item || '',
+                                                    size_item: selectedItem.size_item || '',
+                                                    category_item: selectedItem.category_item || '',
+                                                    weight_item: selectedItem.weight_item || '',
+                                                    cost_item: selectedItem.cost_item || '',
+                                                    batch_item: selectedItem.inventory_item || '',
+                                                    current_quantity: currentQty,
+                                                    new_quantity: newQty,
+                                                    added_quantity: addQty
                                                 },
                                                 success: function(resp) {
+                                                    console.log('Create report response:', resp);
                                                     if (resp.status === 'success') {
-                                                        Swal.fire({ title: 'Quantity Updated', text: 'The new quantity is: ' + newQty, icon: 'success', confirmButtonColor: '#632b8b' });
+                                                        Swal.fire({
+                                                            title: 'Success!',
+                                                            text: 'Item quantity updated. You will now be redirected to edit the location.',
+                                                            icon: 'success',
+                                                            confirmButtonColor: '#632b8b',
+                                                            confirmButtonText: 'Go to Edit Location'
+                                                        }).then((result) => {
+                                                            if (result.isConfirmed) {
+                                                                // Redirect to editLocationFolder.php
+                                                                window.location.href = 'editLocationFolder.php';
+                                                            }
+                                                        });
                                                     } else {
-                                                        Swal.fire({ title: 'Error', text: resp.message || 'Failed to update quantity.', icon: 'error', confirmButtonColor: '#632b8b' });
+                                                        Swal.fire({
+                                                            title: 'Error',
+                                                            text: resp.message || 'Failed to create report entry.',
+                                                            icon: 'error',
+                                                            confirmButtonColor: '#632b8b'
+                                                        });
                                                     }
                                                 },
                                                 error: function(xhr, status, error) {
-                                                    Swal.fire({ title: 'Error', text: 'Could not connect to server: ' + error, icon: 'error', confirmButtonColor: '#632b8b' });
+                                                    console.log('AJAX Error:', xhr.responseText);
+                                                    Swal.fire({
+                                                        title: 'Error',
+                                                        text: 'Could not connect to server: ' + error,
+                                                        icon: 'error',
+                                                        confirmButtonColor: '#632b8b'
+                                                    });
                                                 }
                                             });
                                         }

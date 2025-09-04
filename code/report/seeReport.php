@@ -729,10 +729,52 @@ function getStatus($estado)
                                         // Format fields: uppercase for all except item (first-letter uppercase, rest lowercase)
                                         $fecha = mb_strtoupper($report['fecha_alta_reporte'] ?? '', 'UTF-8');
                                         $upc_asignado = mb_strtoupper($report['upc_asignado_report'] ?? '', 'UTF-8');
-                                        $upc_final = mb_strtoupper($report['upc_final_report'] ?? '', 'UTF-8');
+                                        $upc_final_raw = $report['upc_final_report'] ?? '';
+                                        // If upc_final empty, try to prefill from items using sku
+                                        if (trim($upc_final_raw) === '') {
+                                            $found_upc = '';
+                                            $sku_lookup = $report['sku_report'] ?? '';
+                                            if (!empty($sku_lookup)) {
+                                                $stmt_upc = $mysqli->prepare("SELECT upc_item FROM items WHERE sku_item = ? LIMIT 1");
+                                                if ($stmt_upc) {
+                                                    $stmt_upc->bind_param('s', $sku_lookup);
+                                                    $stmt_upc->execute();
+                                                    $stmt_upc->bind_result($upc_item_row);
+                                                    if ($stmt_upc->fetch()) {
+                                                        $found_upc = $upc_item_row;
+                                                    }
+                                                    $stmt_upc->close();
+                                                }
+                                            }
+                                            $upc_final = mb_strtoupper((string)($found_upc ?? ''), 'UTF-8');
+                                        } else {
+                                            $upc_final = mb_strtoupper($upc_final_raw, 'UTF-8');
+                                        }
                                         $cons = mb_strtoupper($report['cons_report'] ?? '', 'UTF-8');
                                         $folder = mb_strtoupper($report['folder_report'] ?? '', 'UTF-8');
-                                        $loc = mb_strtoupper($report['loc_report'] ?? '', 'UTF-8');
+                                        // Prefill location from report, or from items.inventory_item if empty/'0'
+                                        $loc_raw = $report['loc_report'] ?? '';
+                                        if (trim($loc_raw) === '' || $loc_raw === '0') {
+                                            $inv_val = '';
+                                            $upc_for_loc = $report['upc_final_report'] ?? '';
+                                            // prefer upc_final if present, otherwise try upc we've looked up above
+                                            if (empty($upc_for_loc)) $upc_for_loc = $upc_final_raw;
+                                            if (!empty($upc_for_loc)) {
+                                                $stmt_loc = $mysqli->prepare("SELECT inventory_item FROM items WHERE upc_item = ? LIMIT 1");
+                                                if ($stmt_loc) {
+                                                    $stmt_loc->bind_param('s', $upc_for_loc);
+                                                    $stmt_loc->execute();
+                                                    $stmt_loc->bind_result($inv_item_row);
+                                                    if ($stmt_loc->fetch()) {
+                                                        $inv_val = $inv_item_row;
+                                                    }
+                                                    $stmt_loc->close();
+                                                }
+                                            }
+                                            $loc = mb_strtoupper((string)($inv_val ?? ''), 'UTF-8');
+                                        } else {
+                                            $loc = mb_strtoupper($loc_raw, 'UTF-8');
+                                        }
                                         $quantity = mb_strtoupper($report['quantity_report'] ?? '', 'UTF-8');
                                         $sku = mb_strtoupper($report['sku_report'] ?? '', 'UTF-8');
                                         $brand = mb_strtoupper($report['brand_report'] ?? '', 'UTF-8');
@@ -743,7 +785,27 @@ function getStatus($estado)
                                         $vendor = mb_strtoupper($report['vendor_report'] ?? '', 'UTF-8');
                                         $color = mb_strtoupper($report['color_report'] ?? '', 'UTF-8');
                                         $size = mb_strtoupper($report['size_report'] ?? '', 'UTF-8');
-                                        $cost = mb_strtoupper($report['cost_report'] ?? '', 'UTF-8');
+                                        // If cost_report is empty, try to prefill from items.cost_item using upc_final_report
+                                        $cost_raw = $report['cost_report'] ?? '';
+                                        if (trim($cost_raw) === '' || $cost_raw === '0') {
+                                            $cost_item_val = '';
+                                            $upc_lookup_cost = $report['upc_final_report'] ?? '';
+                                            if (!empty($upc_lookup_cost)) {
+                                                $stmt_cost = $mysqli->prepare("SELECT cost_item FROM items WHERE upc_item = ? LIMIT 1");
+                                                if ($stmt_cost) {
+                                                    $stmt_cost->bind_param('s', $upc_lookup_cost);
+                                                    $stmt_cost->execute();
+                                                    $stmt_cost->bind_result($cost_item_row);
+                                                    if ($stmt_cost->fetch()) {
+                                                        $cost_item_val = $cost_item_row;
+                                                    }
+                                                    $stmt_cost->close();
+                                                }
+                                            }
+                                            $cost = mb_strtoupper((string)($cost_item_val ?? ''), 'UTF-8');
+                                        } else {
+                                            $cost = mb_strtoupper($cost_raw, 'UTF-8');
+                                        }
                                         $category = mb_strtoupper($report['category_report'] ?? '', 'UTF-8');
                                         $weight = mb_strtoupper($report['weight_report'] ?? '', 'UTF-8');
                                         // The old 'inventory_report' now becomes the batch value in the UI
@@ -818,6 +880,52 @@ function getStatus($estado)
     <!-- SweetAlert2 for nicer alerts when validating UPCs -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // --- Make Cost required for selected rows and validate on submit ---
+        (function(){
+            const form = document.querySelector('form[action="procesar_articulos.php"]');
+            if (!form) return;
+
+            // When a checkbox is toggled, mark corresponding cost input required
+            form.querySelectorAll('input[type="checkbox"][name="seleccionados[]"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const row = cb.closest('tr');
+                    if (!row) return;
+                    const idx = Array.from(row.parentNode.children).indexOf(row);
+                    // Find cost input within the row
+                    const costInput = row.querySelector('input[name="cost_report[]"]');
+                    if (costInput) {
+                        if (cb.checked) {
+                            costInput.setAttribute('required','required');
+                            costInput.classList.add('required-highlight');
+                        } else {
+                            costInput.removeAttribute('required');
+                            costInput.classList.remove('required-highlight');
+                        }
+                    }
+                });
+            });
+
+            // On submit, ensure selected rows have cost filled
+            form.addEventListener('submit', function(e) {
+                const selected = form.querySelectorAll('input[type="checkbox"][name="seleccionados[]"]:checked');
+                const missing = [];
+                selected.forEach(cb => {
+                    const row = cb.closest('tr');
+                    if (!row) return;
+                    const costInput = row.querySelector('input[name="cost_report[]"]');
+                    if (costInput && costInput.value.trim() === '') {
+                        missing.push(row);
+                        costInput.classList.add('is-invalid');
+                    }
+                });
+                if (missing.length > 0) {
+                    e.preventDefault();
+                    Swal.fire({ icon: 'warning', title: 'Missing cost', text: 'Please fill the Cost for every selected row before saving.' });
+                    return false;
+                }
+            });
+        })();
+
         document.addEventListener('DOMContentLoaded', function() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"][name="seleccionados[]"]');
             const form = document.querySelector('form[action="procesar_articulos.php"]');
@@ -872,36 +980,167 @@ function getStatus($estado)
                     if (!val) return;
                     console.log('[seeReport] validating upc_final:', val);
 
-                    // Send POST to validar_upc_final.php
-                    fetch('validar_upc_final.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'upc_final=' + encodeURIComponent(val)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('[seeReport] validar_upc_final response:', data);
-                        if (data && data.exists) {
-                            if (typeof Swal === 'undefined') {
-                                console.warn('SweetAlert2 not found; expected Swal to be available. Reverting value.');
-                                input.value = originalValue;
-                                input.focus();
-                                return;
-                            }
+                    // Use verificar_upc.php from items to retrieve matching items and show the additems modal/table
+                    $.ajax({
+                        url: '../items/verificar_upc.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: { upc_item: val },
+                        success: function(data) {
+                            console.log('[seeReport] verificar_upc response:', data);
+                            if (data && data.status === 'existe' && Array.isArray(data.items) && data.items.length > 0) {
+                                var tableHtml = '<div style="overflow:auto;max-width:100%;"><table class="table table-bordered"><thead><tr><th>Select</th><th>Brand</th><th>Item</th><th>SKU</th><th>REF</th><th>COST</th><th>Batch</th><th>Quantity</th></tr></thead><tbody>';
+                                data.items.forEach(function(item, idx) {
+                                    var qty = item.quantity_inventory || 0;
+                                    var costDisplay = (typeof item.cost_item !== 'undefined' && item.cost_item !== null && item.cost_item !== '') ? '$' + parseFloat(item.cost_item).toFixed(2) : '';
+                                    var refDisplay = item.ref_item || '';
+                                    var batchDisplay = (typeof item.batch_item !== 'undefined' && item.batch_item !== null && item.batch_item !== '') ? item.batch_item : '';
+                                    tableHtml += '<tr>' +
+                                        '<td><input type="radio" name="selected_item_temp" value="' + idx + '" ' + (idx === 0 ? 'checked' : '') + '></td>' +
+                                        '<td>' + (item.brand_item || '') + '</td>' +
+                                        '<td>' + (item.item_item || '') + '</td>' +
+                                        '<td>' + (item.sku_item || '') + '</td>' +
+                                        '<td>' + refDisplay + '</td>' +
+                                        '<td>' + costDisplay + '</td>' +
+                                        '<td>' + batchDisplay + '</td>' +
+                                        '<td>' + qty + '</td>' +
+                                        '</tr>';
+                                });
+                                tableHtml += '</tbody></table></div>';
 
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Warning',
-                                text: 'This Final UPC already exists in the items table!'
-                            }).then(function() {
-                                // restore previous value
-                                input.value = originalValue;
-                                input.focus();
-                            });
+                                // Input para agregar cantidad (similar a additems.php)
+                                var addQtyHtml = '<div class="form-group text-left">' +
+                                    '<label for="add-qty-input">Add Quantity (will redirect to edit location):</label>' +
+                                    '<input type="number" min="1" id="add-qty-input" class="form-control" style="width:120px;display:inline-block;" />' +
+                                    '</div>';
+
+                                Swal.fire({
+                                    title: 'UPC already exists!',
+                                    html: '<div style="text-align:left">' + tableHtml + addQtyHtml + '</div>',
+                                    icon: 'warning',
+                                    width: '90%',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Add Quantity & Edit Location',
+                                    cancelButtonText: 'Use selected item',
+                                    confirmButtonColor: '#632b8b',
+                                    showDenyButton: true,
+                                    denyButtonText: 'Cancel',
+                                    denyButtonColor: '#6c757d',
+                                    preConfirm: () => {
+                                        const addQty = parseInt(document.getElementById('add-qty-input').value);
+                                        if (isNaN(addQty) || addQty <= 0) {
+                                            Swal.showValidationMessage('Please enter a valid quantity to add.');
+                                            return false;
+                                        }
+                                        const selectedRadio = document.querySelector('input[name="selected_item_temp"]:checked');
+                                        if (!selectedRadio) {
+                                            Swal.showValidationMessage('Please select an item to update.');
+                                            return false;
+                                        }
+                                        return {
+                                            addQty: addQty,
+                                            selectedIdx: parseInt(selectedRadio.value)
+                                        };
+                                    }
+                                }).then((result) => {
+                                    if (result.isConfirmed && result.value) {
+                                        // Add quantity flow - create report and redirect to editLocationFolder
+                                        var addQty = result.value.addQty;
+                                        var selectedIdx = result.value.selectedIdx;
+                                        var selectedItem = data.items[selectedIdx];
+                                        var currentQty = parseInt(selectedItem.quantity_inventory) || 0;
+                                        var newQty = currentQty + addQty;
+                                        
+                                        // Create a daily_report entry and redirect to editLocationFolder
+                                        $.ajax({
+                                            url: '../items/create_report_simple.php',
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            data: {
+                                                upc_item: val.toUpperCase(),
+                                                sku_item: (selectedItem.sku_item || '').toUpperCase(),
+                                                brand_item: selectedItem.brand_item,
+                                                item_item: selectedItem.item_item,
+                                                ref_item: selectedItem.ref_item || '',
+                                                color_item: selectedItem.color_item || '',
+                                                size_item: selectedItem.size_item || '',
+                                                category_item: selectedItem.category_item || '',
+                                                weight_item: selectedItem.weight_item || '',
+                                                cost_item: selectedItem.cost_item || '',
+                                                batch_item: selectedItem.batch_item || '',
+                                                current_quantity: currentQty,
+                                                new_quantity: newQty,
+                                                added_quantity: addQty
+                                            },
+                                            success: function(resp) {
+                                                console.log('Create report response:', resp);
+                                                if (resp.status === 'success') {
+                                                    Swal.fire({
+                                                        title: 'Success!',
+                                                        text: 'Item quantity updated. You will now be redirected to edit the location.',
+                                                        icon: 'success',
+                                                        confirmButtonColor: '#632b8b',
+                                                        confirmButtonText: 'Go to Edit Location'
+                                                    }).then((result) => {
+                                                        if (result.isConfirmed) {
+                                                            // Redirect to editLocationFolder.php
+                                                            window.location.href = 'editLocationFolder.php';
+                                                        }
+                                                    });
+                                                } else {
+                                                    Swal.fire({
+                                                        title: 'Error',
+                                                        text: resp.message || 'Failed to create report entry.',
+                                                        icon: 'error',
+                                                        confirmButtonColor: '#632b8b'
+                                                    });
+                                                }
+                                            },
+                                            error: function(xhr, status, error) {
+                                                console.log('AJAX Error:', xhr.responseText);
+                                                Swal.fire({
+                                                    title: 'Error',
+                                                    text: 'Could not connect to server: ' + error,
+                                                    icon: 'error',
+                                                    confirmButtonColor: '#632b8b'
+                                                });
+                                            }
+                                        });
+                                    } else if (result.isDismissed && result.dismiss === 'cancel') {
+                                        // Use selected item flow (original functionality)
+                                        const selectedRadio = document.querySelector('input[name="selected_item_temp"]:checked');
+                                        if (selectedRadio) {
+                                            var selIdx = parseInt(selectedRadio.value);
+                                            var selectedItem = data.items[selIdx];
+                                            var row = input.closest('tr');
+                                            if (row) {
+                                                input.value = val.toUpperCase();
+                                                var skuInput = row.querySelector('input[name="sku_report[]"]');
+                                                if (skuInput) skuInput.value = (selectedItem.sku_item || '').toUpperCase();
+                                                var costInput = row.querySelector('input[name="cost_report[]"]');
+                                                if (costInput) {
+                                                    if (typeof selectedItem.cost_item !== 'undefined' && selectedItem.cost_item !== null && selectedItem.cost_item !== '') {
+                                                        costInput.value = parseFloat(selectedItem.cost_item).toFixed(2);
+                                                    } else {
+                                                        costInput.value = '';
+                                                    }
+                                                }
+                                                var batchInput = row.querySelector('input[name="batch_report[]"]');
+                                                if (batchInput) batchInput.value = selectedItem.batch_item || '';
+                                                var locInput = row.querySelector('input[name="loc_report[]"]');
+                                                if (locInput) locInput.value = selectedItem.batch_item || '';
+                                            }
+                                        }
+                                    } else {
+                                        // Cancel - restore original value
+                                        input.value = originalValue;
+                                    }
+                                });
+                            }
+                        },
+                        error: function(xhr, status, err) {
+                            console.error('[seeReport] verificar_upc error', err);
                         }
-                    })
-                    .catch(err => {
-                        console.error('[seeReport] error validating upc_final:', err);
                     });
                 }, 350);
 
