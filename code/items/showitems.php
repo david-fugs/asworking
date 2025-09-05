@@ -19,12 +19,24 @@ function deleteMember($id_item)
     $stmt = $mysqli->prepare($query);
     $stmt->bind_param("s", $id_item);
 
+    // Construir la URL de redirección con los filtros
+    $redirect_url = "showitems.php";
+    $filters = [];
+    if (!empty($_GET['upc_item'])) $filters[] = "upc_item=" . urlencode($_GET['upc_item']);
+    if (!empty($_GET['brand'])) $filters[] = "brand=" . urlencode($_GET['brand']);
+    if (!empty($_GET['size'])) $filters[] = "size=" . urlencode($_GET['size']);
+    if (!empty($_GET['ref'])) $filters[] = "ref=" . urlencode($_GET['ref']);
+    
+    if (!empty($filters)) {
+        $redirect_url .= "?" . implode("&", $filters);
+    }
+
     if ($stmt->execute()) {
         echo "<script>alert('Item deleted correctly');
-        window.location = 'showitems.php';</script>";
+        window.location = '$redirect_url';</script>";
     } else {
         echo "<script>alert('Error deleting the item');
-        window.location = 'showitems.php';</script>";
+        window.location = '$redirect_url';</script>";
     }
 
     $stmt->close();
@@ -814,6 +826,11 @@ $size_filter = isset($_GET['size']) ? trim($_GET['size']) : '';
                 <div class="modal-body">
                     <form action="editItems.php" method="POST">
                         <input type="hidden" id="edit-id" name="id">
+                        <!-- Campos ocultos para mantener los filtros -->
+                        <input type="hidden" name="filter_upc_item" value="<?= htmlspecialchars($upc_item) ?>">
+                        <input type="hidden" name="filter_brand" value="<?= htmlspecialchars($brand_filter) ?>">
+                        <input type="hidden" name="filter_size" value="<?= htmlspecialchars($size_filter) ?>">
+                        <input type="hidden" name="filter_ref" value="<?= htmlspecialchars($reference) ?>">
 
                         <!-- Primera Sección: Datos Generales -->
                         <h5 class="mb-3"> General</h5>
