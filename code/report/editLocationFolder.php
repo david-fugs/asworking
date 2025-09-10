@@ -555,12 +555,12 @@ error_log("editLocationFolder.php - Found " . count($reports) . " reports with e
                                                     <span class="badge bg-secondary"><?= htmlspecialchars($report['brand_report']) ?></span>
                                                 </td>
 
-                                                <!-- Vendor/Style (solo lectura) -->
+                                                <!-- Vendor/Style (solo lectura): preferir style_report de daily_report si existe -->
                                                 <td>
                                                     <input style="width: 120px;" type="text"
                                                         name="new_vendor[<?= $report['id_report'] ?>]"
                                                         class="form-control form-control-sm"
-                                                        value="<?= htmlspecialchars($report['vendor_report'] ?? '') ?>"
+                                                        value="<?= htmlspecialchars(!empty($report['style_report']) ? $report['style_report'] : ($report['vendor_report'] ?? '')) ?>"
                                                         placeholder="Style" readonly>
                                                 </td>
 
@@ -598,6 +598,12 @@ error_log("editLocationFolder.php - Found " . count($reports) . " reports with e
                                                         data-report-id="<?= $report['id_report'] ?>"
                                                         value="<?= htmlspecialchars($new_loc_value) ?>"
                                                         placeholder="New location">
+                                                </td>
+                                                <!-- Delete button -->
+                                                <td>
+                                                    <button type="button" class="btn btn-danger btn-sm delete-report-btn" data-id="<?= $report['id_report'] ?>">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -901,6 +907,60 @@ error_log("editLocationFolder.php - Found " . count($reports) . " reports with e
                     }
                 });
             });
+
+            // Delete report button handler
+            document.querySelectorAll('.delete-report-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const row = this.closest('tr');
+                    if (!id) return;
+
+                    if (typeof Swal !== 'undefined' && Swal.fire) {
+                        Swal.fire({
+                            title: 'Delete report?',
+                            text: 'This will remove the report from daily_report permanently.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Delete',
+                            confirmButtonColor: '#d33'
+                        }).then((res) => {
+                            if (res.isConfirmed) doDelete(id, row);
+                        });
+                    } else {
+                        if (confirm('Delete this report?')) doDelete(id, row);
+                    }
+                });
+            });
+
+            function doDelete(id, row) {
+                fetch('delete_report.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'id_report=' + encodeURIComponent(id)
+                }).then(r => r.json()).then(data => {
+                    if (data && data.status === 'success') {
+                        // remove row from DOM
+                        if (row) row.remove();
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({ title: 'Deleted', icon: 'success', timer: 1200, showConfirmButton: false });
+                        }
+                    } else {
+                        const msg = data && data.message ? data.message : 'Delete failed';
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({ title: 'Error', text: msg, icon: 'error' });
+                        } else {
+                            alert(msg);
+                        }
+                    }
+                }).catch(err => {
+                    console.error('Delete error', err);
+                    if (typeof Swal !== 'undefined' && Swal.fire) {
+                        Swal.fire({ title: 'Error', text: 'Network error', icon: 'error' });
+                    } else {
+                        alert('Network error');
+                    }
+                });
+            }
         });
     </script>
 </body>

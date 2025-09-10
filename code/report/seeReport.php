@@ -836,7 +836,7 @@ function getStatus($estado)
                                             <td class="d-none"><input type="hidden" name="upc_asignado_report[]" value="<?= htmlspecialchars($upc_asignado) ?>"></td>
                                             <td><input style="width: 84px;" type="text" name="upc_final_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($upc_final) ?>"></td>
                                             <td><input style="width: 155px;"  type="text" name="cons_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($cons) ?>"></td>
-                                            <td><input style="width: 135px;"  type="text" name="folder_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($folder) ?>"></td>
+                                            <td><input style="width: 145px;"  type="text" name="folder_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($folder) ?>"></td>
                                             <td><input type="text" style="width: 90px;" name="loc_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($loc) ?>"></td>
                                             <td><input style="width: 42px;" type="text" name="quantity_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($quantity) ?>"></td>
                                             <td><input style="width: 112px;" type="text" name="sku_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($sku) ?>"></td>
@@ -856,6 +856,11 @@ function getStatus($estado)
                                                 <input type="hidden" name="stores_report[]" value="<?= htmlspecialchars($stores_json) ?>">
                                             </td>
                                             <td><input style="width: 180px;" type="text" name="observacion_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($observacion) ?>"></td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm delete-report-btn" data-id="<?= $report['id_report'] ?>">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -1233,6 +1238,59 @@ function getStatus($estado)
                 }
                 setTimeout(syncTopWidth, 300);
             })();
+
+            // Delete report buttons handler (preserve filters, remove row on success)
+            document.querySelectorAll('.delete-report-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const row = this.closest('tr');
+                    if (!id) return;
+
+                    if (typeof Swal !== 'undefined' && Swal.fire) {
+                        Swal.fire({
+                            title: 'Delete report?',
+                            text: 'This will remove the report permanently from daily_report.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Delete',
+                            confirmButtonColor: '#d33'
+                        }).then((res) => {
+                            if (res.isConfirmed) doDelete(id, row);
+                        });
+                    } else {
+                        if (confirm('Delete this report?')) doDelete(id, row);
+                    }
+                });
+            });
+
+            function doDelete(id, row) {
+                fetch('delete_report.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'id_report=' + encodeURIComponent(id)
+                }).then(r => r.json()).then(data => {
+                    if (data && data.status === 'success') {
+                        if (row) row.remove();
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({ title: 'Deleted', icon: 'success', timer: 1200, showConfirmButton: false });
+                        }
+                    } else {
+                        const msg = data && data.message ? data.message : 'Delete failed';
+                        if (typeof Swal !== 'undefined' && Swal.fire) {
+                            Swal.fire({ title: 'Error', text: msg, icon: 'error' });
+                        } else {
+                            alert(msg);
+                        }
+                    }
+                }).catch(err => {
+                    console.error('Delete error', err);
+                    if (typeof Swal !== 'undefined' && Swal.fire) {
+                        Swal.fire({ title: 'Error', text: 'Network error', icon: 'error' });
+                    } else {
+                        alert('Network error');
+                    }
+                });
+            }
         });
     </script>
 </body>

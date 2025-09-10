@@ -174,9 +174,9 @@ if ($stmt->execute()) {
             upc_asignado_report, upc_final_report, cons_report, folder_report, 
             loc_report, quantity_report, sku_report, brand_report, item_report, 
             vendor_report, color_report, size_report, category_report, 
-            weight_report, inventory_report, observacion_report, stores_report, estado_reporte, fecha_alta_reporte
+            weight_report, inventory_report, observacion_report, stores_report, estado_reporte, fecha_alta_reporte,style_report
         ) VALUES (
-            '{$upc_item_esc}', '{$upc_item_esc}', '$cons_report', '$folder_report', '$loc_report', $quantity_inventory, '{$sku_item_esc}', '{$brand_item_esc}', '{$item_item_esc}', '$vendor_report', '{$color_item_esc}', '{$size_item_esc}', '{$category_item_esc}', '{$weight_item_esc}', '{$inventory_item_esc}', '$observacion_report', '{$stores_json_escaped}', $estado_reporte, '$fecha_alta_reporte'
+            '{$upc_item_esc}', '{$upc_item_esc}', '$cons_report', '$folder_report', '$loc_report', $quantity_inventory, '{$sku_item_esc}', '{$brand_item_esc}', '{$item_item_esc}', '$vendor_report', '{$color_item_esc}', '{$size_item_esc}', '{$category_item_esc}', '{$weight_item_esc}', '{$inventory_item_esc}', '$observacion_report', '{$stores_json_escaped}', $estado_reporte, '$fecha_alta_reporte','{$ref_item_esc}'
         )";
         if ($mysqli->query($sql_report)) {
             // Todo OK, mostrar SweetAlert y redirigir

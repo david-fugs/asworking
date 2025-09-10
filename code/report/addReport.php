@@ -508,7 +508,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
 
                             } else {
                                 limpiarCampos();
-                                alert("❌ UPC not found.");
+                                 console.log("❌ UPC not found.");
                             }
                         },
                         error: function() {

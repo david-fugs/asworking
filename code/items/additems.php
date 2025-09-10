@@ -328,7 +328,8 @@ header("Content-Type: text/html;charset=utf-8");
                                 <input type='text' name='item_item' class='form-control' style="text-transform:capitalize;" id="item_item" required />
                             </div>
                             <div class="col-12 col-sm-3">
-                                <label for="ref_item" class="form-label required-field">REF</label>
+                                <!-- POR CLIENTE SE CAMBIA NOMBRE REF A STYLE -->
+                                <label for="ref_item" class="form-label required-field">STYLE</label>
                                 <input type='text' name='ref_item' class='form-control' style="text-transform:uppercase;" id="ref_item" required />
                             </div>
                             <!-- <div class="col-12 col-sm-3">
