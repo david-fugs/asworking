@@ -20,6 +20,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stock = (int) $_POST["stock"];
     $observation = isset($_POST["observation"]) ? $mysqli->real_escape_string($_POST["observation"]) : '';
 
+    // Capturar los filtros para mantenerlos en el redirect
+    $filter_upc_item = isset($_POST["filter_upc_item"]) ? $_POST["filter_upc_item"] : '';
+    $filter_brand = isset($_POST["filter_brand"]) ? $_POST["filter_brand"] : '';
+    $filter_size = isset($_POST["filter_size"]) ? $_POST["filter_size"] : '';
+    $filter_ref = isset($_POST["filter_ref"]) ? $_POST["filter_ref"] : '';
+    
+    // Construir la URL de redirección con los filtros
+    $redirect_url = "showitems.php";
+    $filters = [];
+    if (!empty($filter_upc_item)) $filters[] = "upc_item=" . urlencode($filter_upc_item);
+    if (!empty($filter_brand)) $filters[] = "brand=" . urlencode($filter_brand);
+    if (!empty($filter_size)) $filters[] = "size=" . urlencode($filter_size);
+    if (!empty($filter_ref)) $filters[] = "ref=" . urlencode($filter_ref);
+    
+    if (!empty($filters)) {
+        $redirect_url .= "?" . implode("&", $filters);
+    }
+
     // Procesar las tiendas seleccionadas
     $stores_selected = [];
     if (isset($_POST['stores']) && is_array($_POST['stores'])) {
@@ -44,7 +62,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $row = $result_upc->fetch_assoc();
         $old_upc = $row["upc_item"]; // Guardamos el UPC actual
     } else {
-        echo json_encode(["success" => false, "error" => "ID no encontrado"]);
+        echo "<script>
+            alert('❌ ID no encontrado');
+            window.location.href = '$redirect_url';
+        </script>";
         exit;
     }
     // Actualizar la tabla items (sin cambiar quantity_inventory)
@@ -78,13 +99,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         
         echo "<script>
             alert('✅ Item updated successfully!\\n📍 Stores: $stores_list');
-            window.location.href = 'showitems.php';
+            window.location.href = '$redirect_url';
         </script>";
         exit;
     } else {
         echo "<script>
             alert('❌ Error updating item: " . addslashes($mysqli->error) . "');
-            window.location.href = 'showitems.php';
+            window.location.href = '$redirect_url';
         </script>";
     }
     // Cerrar conexión
