@@ -832,20 +832,20 @@ function getStatus($estado)
                                             <td>
                                                 <input type="checkbox" name="seleccionados[]" value="<?= $index ?>">
                                             </td>
-                                            <td><input style="width: 120px;" type="text" name="fecha_alta_reporte[]" class="form-control form-control-sm" value="<?= htmlspecialchars($fecha) ?>"></td>
+                                            <td><input style="width: 155px;"  type="text" name="fecha_alta_reporte[]" class="form-control form-control-sm" value="<?= htmlspecialchars($fecha) ?>"></td>
                                             <td class="d-none"><input type="hidden" name="upc_asignado_report[]" value="<?= htmlspecialchars($upc_asignado) ?>"></td>
-                                            <td><input style="width: 140px;" type="text" name="upc_final_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($upc_final) ?>"></td>
-                                            <td><input style="width: 80px;" type="text" name="cons_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($cons) ?>"></td>
-                                            <td><input style="width: 90px;" type="text" name="folder_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($folder) ?>"></td>
+                                            <td><input style="width: 84px;" type="text" name="upc_final_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($upc_final) ?>"></td>
+                                            <td><input style="width: 155px;"  type="text" name="cons_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($cons) ?>"></td>
+                                            <td><input style="width: 135px;"  type="text" name="folder_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($folder) ?>"></td>
                                             <td><input type="text" style="width: 90px;" name="loc_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($loc) ?>"></td>
-                                            <td><input style="width: 60px;" type="text" name="quantity_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($quantity) ?>"></td>
-                                            <td><input style="width: 160px;" type="text" name="sku_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($sku) ?>"></td>
+                                            <td><input style="width: 42px;" type="text" name="quantity_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($quantity) ?>"></td>
+                                            <td><input style="width: 112px;" type="text" name="sku_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($sku) ?>"></td>
                                             <td><input style="width: 160px;" type="text" name="brand_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($brand) ?>"></td>
                                             <td><input type="text" style="width: 240px;" name="item_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($item) ?>"></td>
                                             <td><input style="width: 80px;" type="text" name="vendor_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($vendor) ?>"></td>
                                             <td><input type="text" style="width: 110px;" name="color_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($color) ?>"></td>
                                             <td><input style="width: 110px;" type="text" name="size_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($size) ?>"></td>
-                                            <td><input style="width: 110px;" type="text" name="cost_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($cost) ?>"></td>
+                                            <td><input style="width: 55px;" type="text" name="cost_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($cost) ?>"></td>
                                             <td><input type="text" style="width: 100px;" name="category_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($category) ?>"></td>
                                             <td><input type="text" style="width: 140px;" name="weight_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($weight) ?>"></td>
                                             <td><input style="width: 140px;" type="text" name="batch_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($batch) ?>"></td>

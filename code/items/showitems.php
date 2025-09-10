@@ -426,26 +426,42 @@ $size_filter = isset($_GET['size']) ? trim($_GET['size']) : '';
             border-radius: 8px;
             transition: all 0.18s ease;
             border: none;
-            background: rgba(0,0,0,0.04);
+            background: rgba(0, 0, 0, 0.04);
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         }
 
         .btn-edit {
             color: #ffffff;
             background: linear-gradient(90deg, #28a745, #20c997);
-            border: 1px solid rgba(40,167,69,0.15);
+            border: 1px solid rgba(40, 167, 69, 0.15);
         }
-        .btn-edit svg { width: 18px; height: 18px; }
-        .btn-edit:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(40,167,69,0.18); }
+
+        .btn-edit svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(40, 167, 69, 0.18);
+        }
 
         .btn-delete {
             color: #ffffff;
             background: linear-gradient(90deg, #dc3545, #e55353);
-            border: 1px solid rgba(220,53,69,0.15);
+            border: 1px solid rgba(220, 53, 69, 0.15);
         }
-        .btn-delete svg { width: 18px; height: 18px; }
-        .btn-delete:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(220,53,69,0.18); }
+
+        .btn-delete svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(220, 53, 69, 0.18);
+        }
 
         /* Back button */
         .back-btn {
@@ -584,7 +600,11 @@ $size_filter = isset($_GET['size']) ? trim($_GET['size']) : '';
                 </div>
             </form>
         </div>
-
+        <div class="text-center mb-4">
+            <a href="../../access.php" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
         <?php
         date_default_timezone_set("America/Bogota");
         require_once("../../zebra.php");
