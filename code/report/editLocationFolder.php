@@ -596,7 +596,7 @@ error_log("editLocationFolder.php - Found " . count($reports) . " reports with e
                                                         name="new_location[<?= $report['id_report'] ?>]"
                                                         class="form-control form-control-sm new-location-input"
                                                         data-report-id="<?= $report['id_report'] ?>"
-                                                        value="<?= htmlspecialchars($new_loc_value) ?>"
+                                                        value=""
                                                         placeholder="New location">
                                                 </td>
                                                 <!-- Delete button -->

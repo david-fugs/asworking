@@ -94,6 +94,24 @@ function getStatus($estado)
         .table-responsive {
             overflow-x: auto;
             max-height: 600px;
+            cursor: grab;
+            position: relative;
+        }
+
+        .table-responsive:active {
+            cursor: grabbing;
+        }
+
+        /* Improve dragging experience */
+        .table-responsive.dragging,
+        .top-scroll-container.dragging {
+            cursor: grabbing !important;
+            user-select: none;
+        }
+
+        .table-responsive.dragging *,
+        .top-scroll-container.dragging * {
+            pointer-events: none;
         }
 
         /* Top scroll bar styles (mirror) */
@@ -106,6 +124,12 @@ function getStatus($estado)
             border-radius: 6px;
             margin-bottom: 12px;
             box-shadow: none;
+            cursor: grab;
+            position: relative;
+        }
+
+        .top-scroll-container:active {
+            cursor: grabbing;
         }
 
         .top-scroll-content {
@@ -113,6 +137,7 @@ function getStatus($estado)
             width: 1000px; /* will be adjusted by JS */
             background: transparent;
             display: block;
+            pointer-events: none; /* Allow clicks to go through to container */
         }
 
         /* Custom scrollbar for the top scroll container (WebKit) */
@@ -272,15 +297,24 @@ function getStatus($estado)
         /* Estilos generales para la tabla */
         .table-container {
             border-radius: 100px;
-            overflow-x: auto;
-            overflow-y: hidden;
+            overflow: hidden; /* Prevent any overflow from this container */
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
             background: white;
             padding: 2px;
+            max-width: 100vw; /* Ensure it never exceeds viewport width */
+            width: 100%;
         }
 
         .table-content {
-            min-width: 2000px;
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Ensure table takes full width and scrolls properly */
+        .table-responsive table {
+            min-width: 2500px; /* Fixed minimum width to ensure all columns fit */
+            width: max-content;
+            table-layout: auto;
         }
 
         table {
@@ -601,6 +635,29 @@ function getStatus($estado)
             background: linear-gradient(to right, transparent, #632b8b, transparent);
             border-radius: 3px;
         }
+
+        /* Prevent browser horizontal scrollbar */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        .container-fluid {
+            overflow-x: hidden;
+            max-width: 100vw;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .col-md-12 {
+            padding-left: 0;
+            padding-right: 0;
+        }
     </style>
 </head>
 
@@ -647,9 +704,9 @@ function getStatus($estado)
 
 
     ?>
-    <div class="container-fluid mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-12">
+    <div class="container-fluid mt-5" style="overflow-x: hidden; max-width: 100vw;">
+        <div class="row justify-content-center" style="margin: 0;">
+            <div class="col-md-12" style="padding: 0; max-width: 100%;"">
                 <form action="procesar_articulos.php" method="POST">
                     <div class="table-container">
                         <div class="table-content">
@@ -700,6 +757,7 @@ function getStatus($estado)
                                         <th colspan="1">Batch </th>
                                         <th colspan="1">Stores</th>
                                         <th>Observation</th>
+                                        <th>Actions</th>
                                     </tr>
                                         <tr>
                                         <th class=""></th>
@@ -722,6 +780,7 @@ function getStatus($estado)
                                         <th>Batch</th>
                                         <th>Stores</th>
                                         <th>Observation</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1213,7 +1272,7 @@ function getStatus($estado)
                 }
             });
 
-            // --- Top scrollbar synchronization (mirror horizontal scroll) ---
+            // --- Enhanced horizontal scroll synchronization and mouse drag functionality ---
             (function() {
                 const topScroll = document.querySelector('.top-scroll-container');
                 const mainTable = document.querySelector('.table-container .table-responsive');
@@ -1222,21 +1281,228 @@ function getStatus($estado)
                 const topScrollContent = topScroll.querySelector('.top-scroll-content');
                 const table = mainTable.querySelector('table');
 
+                // Enhanced synchronization function
                 function syncTopWidth() {
                     if (!table || !topScrollContent) return;
-                    topScrollContent.style.width = table.scrollWidth + 'px';
+                    
+                    // Force table to recalculate its dimensions
+                    table.style.minWidth = '2500px';
+                    
+                    // Wait a moment for layout to settle
+                    setTimeout(() => {
+                        // Get the actual scroll width of the table
+                        const scrollWidth = table.scrollWidth;
+                        const clientWidth = mainTable.clientWidth;
+                        
+                        // Add a much larger buffer to ensure we can reach the delete button column completely
+                        // Adding approximately 350px to reach the Actions column and have extra space
+                        const adjustedScrollWidth = scrollWidth + 350;
+                        
+                        // Set the same scroll width for perfect synchronization
+                        topScrollContent.style.width = adjustedScrollWidth + 'px';
+                        
+                        // Ensure containers have same dimensions for perfect sync
+                        topScroll.style.width = clientWidth + 'px';
+                        
+                        // Ensure the table container stays within bounds
+                        mainTable.style.maxWidth = '100%';
+                        mainTable.style.width = '100%';
+                        
+                        console.log('Sync - ScrollWidth:', scrollWidth, 'AdjustedWidth:', adjustedScrollWidth, 'ClientWidth:', clientWidth);
+                    }, 10);
                 }
 
-                topScroll.addEventListener('scroll', function() { mainTable.scrollLeft = topScroll.scrollLeft; });
-                mainTable.addEventListener('scroll', function() { topScroll.scrollLeft = mainTable.scrollLeft; });
+                // Improved scroll synchronization with better precision
+                let isTopScrolling = false;
+                let isMainScrolling = false;
 
+                topScroll.addEventListener('scroll', function() {
+                    if (isMainScrolling) return;
+                    isTopScrolling = true;
+                    
+                    // Direct synchronization - use the same scroll position
+                    mainTable.scrollLeft = topScroll.scrollLeft;
+                    
+                    // Debug info to verify scroll range
+                    console.log('Top scroll at:', topScroll.scrollLeft, 'Max:', topScroll.scrollWidth - topScroll.clientWidth);
+                    
+                    setTimeout(() => { isTopScrolling = false; }, 5);
+                });
+
+                mainTable.addEventListener('scroll', function() {
+                    if (isTopScrolling) return;
+                    isMainScrolling = true;
+                    
+                    // Direct synchronization - use the same scroll position
+                    topScroll.scrollLeft = mainTable.scrollLeft;
+                    
+                    setTimeout(() => { isMainScrolling = false; }, 5);
+                });
+
+                // Mouse drag functionality for horizontal scrolling
+                let isDragging = false;
+                let startX = 0;
+                let scrollStartLeft = 0;
+                let dragTarget = null;
+
+                // Add drag functionality to both scroll containers
+                function addDragFunctionality(element, isTopScroll = false) {
+                    element.style.cursor = 'grab';
+                    
+                    element.addEventListener('mousedown', function(e) {
+                        // Only start drag on left mouse button and not on input elements
+                        if (e.button !== 0 || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                        
+                        isDragging = true;
+                        startX = e.pageX;
+                        scrollStartLeft = isTopScroll ? topScroll.scrollLeft : mainTable.scrollLeft;
+                        dragTarget = isTopScroll ? 'top' : 'main';
+                        element.style.cursor = 'grabbing';
+                        
+                        // Prevent text selection while dragging
+                        e.preventDefault();
+                        document.body.style.userSelect = 'none';
+                    });
+                }
+
+                // Global mouse events for drag functionality
+                document.addEventListener('mousemove', function(e) {
+                    if (!isDragging) return;
+                    
+                    e.preventDefault();
+                    const deltaX = startX - e.pageX;
+                    const newScrollLeft = Math.max(0, scrollStartLeft + deltaX);
+                    
+                    // Add dragging class for visual feedback
+                    if (dragTarget === 'top') {
+                        topScroll.classList.add('dragging');
+                        mainTable.classList.add('dragging');
+                        topScroll.scrollLeft = newScrollLeft;
+                        // This will trigger the scroll event and sync with main table
+                    } else {
+                        mainTable.classList.add('dragging');
+                        topScroll.classList.add('dragging');
+                        mainTable.scrollLeft = newScrollLeft;
+                        // This will trigger the scroll event and sync with top scroll
+                    }
+                });
+
+                document.addEventListener('mouseup', function() {
+                    if (isDragging) {
+                        isDragging = false;
+                        dragTarget = null;
+                        
+                        // Remove dragging classes and reset cursors
+                        topScroll.classList.remove('dragging');
+                        mainTable.classList.remove('dragging');
+                        topScroll.style.cursor = 'grab';
+                        mainTable.style.cursor = 'grab';
+                        document.body.style.userSelect = '';
+                    }
+                });
+
+                // Prevent context menu during drag
+                topScroll.addEventListener('contextmenu', function(e) {
+                    if (isDragging) e.preventDefault();
+                });
+                
+                mainTable.addEventListener('contextmenu', function(e) {
+                    if (isDragging) e.preventDefault();
+                });
+
+                // Enhanced mouse wheel support for horizontal scrolling
+                function addWheelSupport(element, isTopScroll = false) {
+                    element.addEventListener('wheel', function(e) {
+                        // If scrolling horizontally with trackpad/mouse wheel
+                        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                            e.preventDefault();
+                            const scrollAmount = e.deltaX;
+                            
+                            if (isTopScroll) {
+                                topScroll.scrollLeft += scrollAmount;
+                            } else {
+                                mainTable.scrollLeft += scrollAmount;
+                            }
+                        }
+                        // If scrolling vertically but at the edges horizontally, allow horizontal scroll
+                        else if (e.shiftKey || (Math.abs(e.deltaY) > 0 && (
+                            (e.deltaY > 0 && (isTopScroll ? topScroll.scrollLeft < topScroll.scrollWidth - topScroll.clientWidth : mainTable.scrollLeft < mainTable.scrollWidth - mainTable.clientWidth)) ||
+                            (e.deltaY < 0 && (isTopScroll ? topScroll.scrollLeft > 0 : mainTable.scrollLeft > 0))
+                        ))) {
+                            e.preventDefault();
+                            const scrollAmount = e.deltaY;
+                            
+                            if (isTopScroll) {
+                                topScroll.scrollLeft += scrollAmount;
+                            } else {
+                                mainTable.scrollLeft += scrollAmount;
+                            }
+                        }
+                    }, { passive: false });
+                }
+
+                addWheelSupport(topScroll, true);
+                addWheelSupport(mainTable, false);
+
+                // Apply drag functionality
+                addDragFunctionality(topScroll, true);
+                addDragFunctionality(mainTable, false);
+
+                // Enhanced sync setup with more frequent updates
                 syncTopWidth();
-                window.addEventListener('resize', function(){ setTimeout(syncTopWidth, 120); });
+                
+                // More frequent resize handling
+                window.addEventListener('resize', function(){ 
+                    syncTopWidth();
+                    setTimeout(syncTopWidth, 50); 
+                    setTimeout(syncTopWidth, 150); 
+                });
+                
+                // Enhanced ResizeObserver
                 if (window.ResizeObserver && table) {
-                    const ro = new ResizeObserver(function(){ setTimeout(syncTopWidth, 80); });
+                    const ro = new ResizeObserver(function(entries){ 
+                        syncTopWidth();
+                        setTimeout(syncTopWidth, 30); 
+                    });
                     ro.observe(table);
+                    ro.observe(mainTable);
+                    ro.observe(topScroll);
                 }
+                
+                // More sync attempts to ensure proper initialization
+                setTimeout(syncTopWidth, 50);
+                setTimeout(syncTopWidth, 150);
                 setTimeout(syncTopWidth, 300);
+                setTimeout(syncTopWidth, 600);
+                setTimeout(syncTopWidth, 1000);
+                
+                // Sync on any layout changes
+                document.addEventListener('DOMContentLoaded', syncTopWidth);
+                window.addEventListener('load', function() {
+                    setTimeout(syncTopWidth, 100);
+                });
+                
+                // Sync when table content changes (like when inputs are filled)
+                const observer = new MutationObserver(function(mutations) {
+                    let shouldSync = false;
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                            shouldSync = true;
+                        }
+                    });
+                    if (shouldSync) {
+                        setTimeout(syncTopWidth, 100);
+                    }
+                });
+                
+                if (table) {
+                    observer.observe(table, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['style', 'class']
+                    });
+                }
             })();
 
             // Delete report buttons handler (preserve filters, remove row on success)

@@ -862,3 +862,128 @@ Computed values before INSERT: cons=[FOLDER cons 1] sku=[I6RBU3KTML] folder=[FOL
 [2025-09-04T22:14:19+02:00] cons_report column type detected: varchar(255)
 [2025-09-04T22:14:19+02:00] sku_report column type detected: varchar(255)
 [2025-09-04T22:14:19+02:00] create_item_query: INSERT INTO items (upc_item, sku_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, batch_item, stores_item, id_usu) VALUES ('98989898', 'I6RBU3KTML', 'BRAND', 'Item', 'STYLE', 'COLOR', 'SIZE', 'CATEGORY', '0', 'WEIGHT', 'BATCH', '', '[\"EB002\"]', 2)
+[2025-09-28T18:38:57+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 12344
+    [upc_final_report] => 12344
+    [cons_report] => FOLDEERE cons 1
+    [folder_report] => FOLDEERE
+    [loc_report] => LOCATAION
+    [quantity_report] => 12
+    [sku_report] => 
+    [brand_report] => BRAND
+    [item_report] => Item ite
+    [vendor_report] => STYL
+    [color_report] => COLOR
+    [size_report] => SIZE
+    [category_report] => CATEGORY
+    [weight_report] => WEIGHT
+    [inventory_report] => BATCH
+    [stores] => Array
+        (
+            [0] => EB002
+            [1] => AM002
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[FOLDEERE cons 1] sku=[5JP89RTS0F] folder=[FOLDEERE]
+
+[2025-09-28T18:38:57+02:00] cons_report column type detected: varchar(255)
+[2025-09-28T18:38:57+02:00] sku_report column type detected: varchar(255)
+[2025-09-28T18:38:57+02:00] create_item_query: INSERT INTO items (upc_item, sku_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, batch_item, stores_item, id_usu) VALUES ('12344', '5JP89RTS0F', 'BRAND', 'Item ite', 'STYL', 'COLOR', 'SIZE', 'CATEGORY', '0', 'WEIGHT', 'BATCH', '', '[\"EB002\",\"AM002\"]', 2)
+[2025-09-28T18:42:07+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 5555
+    [upc_final_report] => 5555
+    [cons_report] => FOLDER cons 4
+    [folder_report] => FOLDER
+    [loc_report] => LOCATAION
+    [quantity_report] => 2324
+    [sku_report] => 
+    [brand_report] => BRAND
+    [item_report] => Item
+    [vendor_report] => STYLE
+    [color_report] => COLOR
+    [size_report] => SIZ
+    [category_report] => CATEGORY
+    [weight_report] => WEIGHT
+    [inventory_report] => BATCH
+    [stores] => Array
+        (
+            [0] => WM001
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[FOLDER cons 4] sku=[0N59L68WL5] folder=[FOLDER]
+
+[2025-09-28T18:42:07+02:00] cons_report column type detected: varchar(255)
+[2025-09-28T18:42:07+02:00] sku_report column type detected: varchar(255)
+[2025-09-28T18:42:07+02:00] create_item_query: INSERT INTO items (upc_item, sku_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, batch_item, stores_item, id_usu) VALUES ('5555', '0N59L68WL5', 'BRAND', 'Item', 'STYLE', 'COLOR', 'SIZ', 'CATEGORY', '0', 'WEIGHT', 'BATCH', '', '[\"WM001\"]', 2)
+[2025-09-28T18:47:21+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 6666
+    [upc_final_report] => 6666
+    [cons_report] => FOLDR cons 1
+    [folder_report] => FOLDR
+    [loc_report] => LOCATION
+    [quantity_report] => 123
+    [sku_report] => 
+    [brand_report] => BRAND
+    [item_report] => Item item
+    [vendor_report] => STYL
+    [color_report] => COLOR
+    [size_report] => SIZE
+    [category_report] => CATEGORY
+    [weight_report] => WEIGHT
+    [inventory_report] => BATACH
+    [stores] => Array
+        (
+            [0] => EB002
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[FOLDR cons 1] sku=[QHHKAEW7E5] folder=[FOLDR]
+
+[2025-09-28T18:47:21+02:00] cons_report column type detected: varchar(255)
+[2025-09-28T18:47:21+02:00] sku_report column type detected: varchar(255)
+[2025-09-28T18:47:21+02:00] create_item_query: INSERT INTO items (upc_item, sku_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, batch_item, stores_item, id_usu) VALUES ('6666', 'QHHKAEW7E5', 'BRAND', 'Item item', 'STYL', 'COLOR', 'SIZE', 'CATEGORY', '0', 'WEIGHT', 'BATACH', '', '[\"EB002\"]', 2)
+[2025-09-28T18:52:56+02:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 88800
+    [upc_final_report] => 88800
+    [cons_report] => FOLDEER cons 1
+    [folder_report] => FOLDEER
+    [loc_report] => LOCATION
+    [quantity_report] => 123
+    [sku_report] => 
+    [brand_report] => BRAND
+    [item_report] => Iteem
+    [vendor_report] => STYLE
+    [color_report] => COLOR
+    [size_report] => SIZE
+    [category_report] => CATEGEORY
+    [weight_report] => WEIGHT
+    [inventory_report] => BATCH
+    [stores] => Array
+        (
+            [0] => WM001
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[FOLDEER cons 1] sku=[AG0EC8ZBAO] folder=[FOLDEER]
+
+[2025-09-28T18:52:56+02:00] cons_report column type detected: varchar(255)
+[2025-09-28T18:52:56+02:00] sku_report column type detected: varchar(255)
+[2025-09-28T18:52:56+02:00] create_item_query: INSERT INTO items (upc_item, sku_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, batch_item, stores_item, id_usu) VALUES ('88800', 'AG0EC8ZBAO', 'BRAND', 'Iteem', 'STYLE', 'COLOR', 'SIZE', 'CATEGEORY', '0', 'WEIGHT', 'BATCH', '', '[\"WM001\"]', 2)

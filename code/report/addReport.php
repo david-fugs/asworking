@@ -181,11 +181,11 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                             <div class="row g-3">
                                 <div class="col-md-6 form-group">
                                     <label for="upc_asignado_report" class="form-label"> Assigned UPC</label>
-                                    <input type="text" class="form-control form-control-sm" id="upc_asignado_report" onblur="buscarUPC() " name="upc_asignado_report">
+                                    <input type="text" class="form-control form-control-sm" id="upc_asignado_report" name="upc_asignado_report">
                                 </div>
                                 <div class="col-md-6 form-group">
                                     <label for="upc_final_report" class="form-label"> Final UPC</label>
-                                    <input type="text" class="form-control form-control-sm" id="upc_final_report" name="upc_final_report" onblur="validarUPCFinal()">
+                                    <input type="text" class="form-control form-control-sm" id="upc_final_report" name="upc_final_report" onblur="buscarUPC()">
                                 </div>
 
                                 <div class="col-md-6 form-group">
@@ -349,7 +349,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                 });
 
                 function buscarUPC() {
-                    let upc = $('#upc_asignado_report').val();
+                    let upc = $('#upc_final_report').val();
 
                     if (upc.trim() === "") return;
 
@@ -450,7 +450,7 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                                 type: 'POST',
                                                 dataType: 'json',
                                                 data: {
-                                                    upc_item: $('#upc_asignado_report').val().toUpperCase(),
+                                                    upc_item: $('#upc_final_report').val().toUpperCase(),
                                                     sku_item: (selectedItem.sku_item || '').toUpperCase(),
                                                     brand_item: selectedItem.brand_item,
                                                     item_item: selectedItem.item_item,
@@ -508,16 +508,20 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
 
                             } else {
                                 limpiarCampos();
-                                 console.log("❌ UPC not found.");
+                                console.log("❌ UPC not found.");
+                                // If no UPC references found, still check for folder prefill
+                                validarUPCFinal();
                             }
                         },
                         error: function() {
                             alert("⚠️ Error .");
+                            // On error, still try to validate for folder prefill
+                            validarUPCFinal();
                         }
                     });
                 }
 
-                // Validar UPC Final
+                // Simple validation for Final UPC (optional - just for folder prefill)
                 function validarUPCFinal() {
                     let upcFinal = $('#upc_final_report').val().trim();
 
@@ -534,37 +538,14 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                         },
                         success: function(data) {
                             if (data.exists) {
-                                var folderMsg = '';
+                                // Just prefill folder if available, no popup warning
                                 if (data.folder_item && data.folder_item.trim() !== '') {
-                                    // Prefill folder input with the folder_item value
                                     $('#folder_report').val(data.folder_item);
-                                    folderMsg = '\n\nThis article is currently in the items table in the column folder_item: ' + data.folder_item;
-                                }
-
-                                var fullMessage = 'This Final UPC already exists in the items table!' + folderMsg;
-
-                                // Use SweetAlert2 if available, otherwise fallback to native alert
-                                if (typeof Swal !== 'undefined') {
-                                    Swal.fire({
-                                        icon: 'warning',
-                                        title: 'Warning',
-                                        text: fullMessage
-                                    }).then(function() {
-                                        $('#upc_final_report').focus();
-                                    });
-                                } else {
-                                    alert('⚠️ ' + fullMessage);
-                                    $('#upc_final_report').focus();
                                 }
                             }
                         },
                         error: function() {
                             console.log("Error validating Final UPC", arguments);
-                        },
-                        statusCode: {
-                            500: function(xhr) {
-                                console.error('Server error validating Final UPC');
-                            }
                         }
                     });
                 }
@@ -712,13 +693,13 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                             .catch(error => console.error("Error:", error));
                     });
 
-                    // Ensure validarUPCFinal runs reliably on multiple input events
+                    // Ensure buscarUPC runs reliably on Final UPC field
                     if (window.jQuery) {
-                        $(document).on('blur input change', '#upc_final_report', function() {
+                        $(document).on('blur', '#upc_final_report', function() {
                             try {
-                                validarUPCFinal();
+                                buscarUPC();
                             } catch (e) {
-                                console.error('Error calling validarUPCFinal()', e);
+                                console.error('Error calling buscarUPC()', e);
                             }
                         });
                     }

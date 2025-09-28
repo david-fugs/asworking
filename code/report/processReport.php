@@ -198,7 +198,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         '$upc_asignado', '$upc_final', '$cons', '$folder',
         '$loc', '$quantity', '$sku', '$brand', '$item',
         '$vendor', '$color', '$size', '$category',
-        '$weight', '$inventory', '$observacion', '$stores_json_escaped', 0
+        '$weight', '$inventory', '$observacion', '$stores_json_escaped', 1
     )";
 
 // Ejecutar consulta del reporte
