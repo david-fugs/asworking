@@ -55,7 +55,7 @@ try {
         $update_sql = "UPDATE daily_report 
                       SET folder_report = '$new_folder_esc', 
                           loc_report = '$new_location_esc',
-                          estado_reporte = 1,
+                          estado_reporte = -1,
                           fecha_modificacion = NOW()
                       WHERE id_report = $report_id 
                       AND estado_reporte = 0";
@@ -100,24 +100,23 @@ try {
                             continue;
                         }
                         
+                        // Execute the UPDATE
                         if ($mysqli->query($update_items_sql)) {
-                            if ($mysqli->affected_rows > 0) {
-                                $success_count++;
-                                if (isset($_GET['debug']) || isset($_POST['debug'])) {
-                                    error_log("SUCCESS - Updated inventory_item in items table for UPC: $upc_final, SKU: $sku_report");
-                                }
-                            } else {
-                                $errors[] = "Reporte ID $report_id: Actualizado en daily_report pero no se encontró en tabla items (UPC: $upc_final, SKU: $sku_report). Item count: $item_count";
-                                $error_count++;
+                            // Success - even if affected_rows is 0 (means data was already the same)
+                            // We consider this a success because the item exists and query executed without errors
+                            $success_count++;
+                            if (isset($_GET['debug']) || isset($_POST['debug'])) {
+                                $affected = $mysqli->affected_rows;
+                                error_log("SUCCESS - Updated items table for UPC: $upc_final, SKU: $sku_report (affected rows: $affected)");
                             }
                         } else {
                             $errors[] = "Reporte ID $report_id: Error actualizando inventory_item en tabla items - " . $mysqli->error;
                             $error_count++;
                         }
                         
-                                        // 4. If the user provided an edited quantity and it's different from the daily_report quantity, update inventory table
+                                        // 4. Sum the edited quantity to the existing inventory quantity
                                         $edited_qty = isset($edited_quantities[$report_id]) ? trim($edited_quantities[$report_id]) : '';
-                                        if ($edited_qty !== '') {
+                                        if ($edited_qty !== '' && intval($edited_qty) > 0) {
                                             // Need to obtain sku for the UPC/report to correctly identify inventory row
                                             $get_sku_sql = "SELECT sku_report, quantity_report FROM daily_report WHERE id_report = ?";
                                             $get_sku_stmt = $mysqli->prepare($get_sku_sql);
@@ -127,39 +126,54 @@ try {
                                                     $res = $get_sku_stmt->get_result();
                                                     if ($row = $res->fetch_assoc()) {
                                                         $sku_report = $row['sku_report'];
-                                                        $orig_qty = isset($row['quantity_report']) ? $row['quantity_report'] : '';
-                                                        if ((string)$edited_qty !== (string)$orig_qty) {
-                                                            $upc_inv_esc = $mysqli->real_escape_string($upc_final);
-                                                            // Determine SKU to use for inventory update: prefer sku_report, else try to lookup sku_item in items table
-                                                            $sku_to_use = trim((string)$sku_report);
-                                                            if ($sku_to_use === '') {
-                                                                $lookup_stmt = $mysqli->prepare("SELECT sku_item FROM items WHERE upc_item = ? LIMIT 1");
-                                                                if ($lookup_stmt) {
-                                                                    $lookup_stmt->bind_param('s', $upc_final);
-                                                                    if ($lookup_stmt->execute()) {
-                                                                        $lookup_res = $lookup_stmt->get_result();
-                                                                        if ($lookup_row = $lookup_res->fetch_assoc()) {
-                                                                            $sku_to_use = isset($lookup_row['sku_item']) ? $lookup_row['sku_item'] : '';
-                                                                        }
+                                                        
+                                                        $upc_inv_esc = $mysqli->real_escape_string($upc_final);
+                                                        // Determine SKU to use for inventory update: prefer sku_report, else try to lookup sku_item in items table
+                                                        $sku_to_use = trim((string)$sku_report);
+                                                        if ($sku_to_use === '') {
+                                                            $lookup_stmt = $mysqli->prepare("SELECT sku_item FROM items WHERE upc_item = ? LIMIT 1");
+                                                            if ($lookup_stmt) {
+                                                                $lookup_stmt->bind_param('s', $upc_final);
+                                                                if ($lookup_stmt->execute()) {
+                                                                    $lookup_res = $lookup_stmt->get_result();
+                                                                    if ($lookup_row = $lookup_res->fetch_assoc()) {
+                                                                        $sku_to_use = isset($lookup_row['sku_item']) ? $lookup_row['sku_item'] : '';
                                                                     }
-                                                                    $lookup_stmt->close();
                                                                 }
+                                                                $lookup_stmt->close();
                                                             }
-                                                            $sku_inv_esc = $mysqli->real_escape_string($sku_to_use);
-                                                            $edited_qty_esc = $mysqli->real_escape_string($edited_qty);
-                                                            $update_inventory_sql = "UPDATE inventory SET quantity_inventory = '$edited_qty_esc' WHERE upc_inventory = '$upc_inv_esc' AND sku_inventory = '$sku_inv_esc'";
+                                                        }
+                                                        $sku_inv_esc = $mysqli->real_escape_string($sku_to_use);
+                                                        $edited_qty_int = intval($edited_qty);
+                                                        
+                                                        // Check if inventory record exists
+                                                        $check_inv_sql = "SELECT quantity_inventory FROM inventory WHERE upc_inventory = '$upc_inv_esc' AND sku_inventory = '$sku_inv_esc'";
+                                                        $check_inv_result = $mysqli->query($check_inv_sql);
+                                                        
+                                                        if ($check_inv_result && $check_inv_result->num_rows > 0) {
+                                                            // Inventory exists - ADD the quantity
+                                                            $inv_row = $check_inv_result->fetch_assoc();
+                                                            $current_qty = intval($inv_row['quantity_inventory']);
+                                                            $new_qty = $current_qty + $edited_qty_int;
+                                                            
+                                                            $update_inventory_sql = "UPDATE inventory SET quantity_inventory = $new_qty WHERE upc_inventory = '$upc_inv_esc' AND sku_inventory = '$sku_inv_esc'";
                                                             if ($mysqli->query($update_inventory_sql)) {
-                                                                if ($mysqli->affected_rows > 0) {
-                                                                    if (isset($_GET['debug']) || isset($_POST['debug'])) {
-                                                                        error_log("SUCCESS - Updated inventory quantity for UPC: $upc_final, SKU: $sku_report to $edited_qty");
-                                                                    }
-                                                                } else {
-                                                                    // inventory row not found - note as warning but don't fail whole transaction
-                                                                    $errors[] = "Reporte ID $report_id: Inventory row not found for UPC: $upc_final, SKU: $sku_report.";
-                                                                    $error_count++;
+                                                                if (isset($_GET['debug']) || isset($_POST['debug'])) {
+                                                                    error_log("SUCCESS - Added $edited_qty_int to inventory (was $current_qty, now $new_qty) for UPC: $upc_final, SKU: $sku_report");
                                                                 }
                                                             } else {
                                                                 $errors[] = "Reporte ID $report_id: Error updating inventory - " . $mysqli->error;
+                                                                $error_count++;
+                                                            }
+                                                        } else {
+                                                            // Inventory doesn't exist - CREATE it with the edited quantity
+                                                            $insert_inventory_sql = "INSERT INTO inventory (upc_inventory, sku_inventory, quantity_inventory) VALUES ('$upc_inv_esc', '$sku_inv_esc', $edited_qty_int)";
+                                                            if ($mysqli->query($insert_inventory_sql)) {
+                                                                if (isset($_GET['debug']) || isset($_POST['debug'])) {
+                                                                    error_log("SUCCESS - Created new inventory record with quantity $edited_qty_int for UPC: $upc_final, SKU: $sku_report");
+                                                                }
+                                                            } else {
+                                                                $errors[] = "Reporte ID $report_id: Error creating inventory record - " . $mysqli->error;
                                                                 $error_count++;
                                                             }
                                                         }

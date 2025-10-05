@@ -68,11 +68,11 @@ try {
     
     if ($check_result->num_rows > 0) {
         // Update existing record
-        $update_sql = "UPDATE inventory SET quantity_inventory = ? WHERE upc_inventory = ? AND sku_inventory = ?";
-        $update_stmt = $mysqli->prepare($update_sql);
-        $update_stmt->bind_param("iss", $new_quantity, $upc_item, $sku_item);
-        $update_stmt->execute();
-        $update_stmt->close();
+        // $update_sql = "UPDATE inventory SET quantity_inventory = ? WHERE upc_inventory = ? AND sku_inventory = ?";
+        // $update_stmt = $mysqli->prepare($update_sql);
+        // $update_stmt->bind_param("iss", $new_quantity, $upc_item, $sku_item);
+        // $update_stmt->execute();
+        // $update_stmt->close();
     } else {
         // Insert new record
         $insert_sql = "INSERT INTO inventory (upc_inventory, sku_inventory, quantity_inventory) VALUES (?, ?, ?)";
@@ -136,128 +136,168 @@ try {
     }
     $item_stmt->close();
     
-    // Create entry in daily_report for location editing
-    $fecha_alta = date('Y-m-d H:i:s');
-    $vendor_info = "Added: {$added_quantity} units (Total: {$new_quantity})";
+    // Check if a record exists in daily_report with same UPC, SKU and estado_reporte = 0
+    $check_report_sql = "SELECT id_report, quantity_report, observacion_report FROM daily_report 
+                         WHERE upc_final_report = ? AND sku_report = ? AND estado_reporte = 0 
+                         LIMIT 1";
+    $check_report_stmt = $mysqli->prepare($check_report_sql);
+    $check_report_stmt->bind_param("ss", $upc_item, $sku_item);
+    $check_report_stmt->execute();
+    $check_report_result = $check_report_stmt->get_result();
     
-    // Check what columns exist in daily_report table
-    $columns_sql = "SHOW COLUMNS FROM daily_report";
-    $columns_result = $mysqli->query($columns_sql);
-    $available_columns = [];
-    while ($col = $columns_result->fetch_assoc()) {
-        $available_columns[] = $col['Field'];
+    if ($check_report_result->num_rows > 0) {
+        // Record exists with estado_reporte = 0, UPDATE by adding the quantity
+        $existing_report = $check_report_result->fetch_assoc();
+        $existing_quantity = intval($existing_report['quantity_report']);
+        $existing_observacion = $existing_report['observacion_report'] ?? '';
+        $report_id = $existing_report['id_report'];
+        
+        // Add the new quantity to the existing one
+        $updated_quantity = $existing_quantity + $added_quantity;
+        
+        // Extract the current quantity from observacion_report and add the new one
+        // Format: "Added quantity: X"
+        $current_added = 0;
+        if (preg_match('/Added quantity:\s*(\d+)/', $existing_observacion, $matches)) {
+            $current_added = intval($matches[1]);
+        }
+        $new_added_total = $current_added + $added_quantity;
+        $updated_observacion = "Added quantity: " . $new_added_total;
+        
+        // Update the record with new quantity and observacion
+        $update_report_sql = "UPDATE daily_report SET quantity_report = ?, observacion_report = ?, fecha_alta_reporte = ? 
+                              WHERE id_report = ?";
+        $update_report_stmt = $mysqli->prepare($update_report_sql);
+        $fecha_alta = date('Y-m-d H:i:s');
+        $update_report_stmt->bind_param("issi", $updated_quantity, $updated_observacion, $fecha_alta, $report_id);
+        $update_report_stmt->execute();
+        $update_report_stmt->close();
+        
+    } else {
+        // No existing record found, INSERT a new one
+        $fecha_alta = date('Y-m-d H:i:s');
+        
+        // Check what columns exist in daily_report table
+        $columns_sql = "SHOW COLUMNS FROM daily_report";
+        $columns_result = $mysqli->query($columns_sql);
+        $available_columns = [];
+        while ($col = $columns_result->fetch_assoc()) {
+            $available_columns[] = $col['Field'];
+        }
+        
+        // Build dynamic INSERT based on available columns
+        $insert_columns = [];
+        $insert_values = [];
+        $bind_types = '';
+        $bind_params = [];
+        
+        // Required columns
+        if (in_array('fecha_alta_reporte', $available_columns)) {
+            $insert_columns[] = 'fecha_alta_reporte';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $fecha_alta;
+        }
+        
+        if (in_array('upc_final_report', $available_columns)) {
+            $insert_columns[] = 'upc_final_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $upc_item;
+        }
+        
+        if (in_array('quantity_report', $available_columns)) {
+            $insert_columns[] = 'quantity_report';
+            $insert_values[] = '?';
+            $bind_types .= 'i';
+            $bind_params[] = $added_quantity; // Use only the added quantity, not new_quantity
+        }
+        
+        if (in_array('sku_report', $available_columns)) {
+            $insert_columns[] = 'sku_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $sku_item;
+        }
+        
+        if (in_array('item_report', $available_columns)) {
+            $insert_columns[] = 'item_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $item_item;
+        }
+        
+        if (in_array('brand_report', $available_columns)) {
+            $insert_columns[] = 'brand_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $brand_item;
+        }
+        
+        if (in_array('vendor_report', $available_columns)) {
+            $insert_columns[] = 'vendor_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $ref_item; // Use ref_item for style/vendor
+        }
+        
+        // Store quantity information in observacion_report for display in Observation column
+        if (in_array('observacion_report', $available_columns)) {
+            $observacion_text = "Added quantity: " . $added_quantity;
+            $insert_columns[] = 'observacion_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $observacion_text;
+        }
+        
+        if (in_array('color_report', $available_columns)) {
+            $insert_columns[] = 'color_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $color_item;
+        }
+        
+        if (in_array('size_report', $available_columns)) {
+            $insert_columns[] = 'size_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $size_item;
+        }
+        
+        if (in_array('folder_report', $available_columns)) {
+            $insert_columns[] = 'folder_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $current_folder;
+        }
+        
+        if (in_array('loc_report', $available_columns)) {
+            $insert_columns[] = 'loc_report';
+            $insert_values[] = '?';
+            $bind_types .= 's';
+            $bind_params[] = $current_location;
+        }
+        
+        // Set estado_reporte = 0 for editing
+        if (in_array('estado_reporte', $available_columns)) {
+            $insert_columns[] = 'estado_reporte';
+            $insert_values[] = '?';
+            $bind_types .= 'i';
+            $bind_params[] = 0;
+        }
+        
+        // Create the INSERT statement
+        $report_sql = "INSERT INTO daily_report (" . implode(', ', $insert_columns) . ") VALUES (" . implode(', ', $insert_values) . ")";
+        $report_stmt = $mysqli->prepare($report_sql);
+        
+        if ($report_stmt && !empty($bind_params)) {
+            $report_stmt->bind_param($bind_types, ...$bind_params);
+            $report_stmt->execute();
+            $report_stmt->close();
+        }
     }
     
-    // Build dynamic INSERT based on available columns
-    $insert_columns = [];
-    $insert_values = [];
-    $bind_types = '';
-    $bind_params = [];
-    
-    // Required columns
-    if (in_array('fecha_alta_reporte', $available_columns)) {
-        $insert_columns[] = 'fecha_alta_reporte';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $fecha_alta;
-    }
-    
-    if (in_array('upc_final_report', $available_columns)) {
-        $insert_columns[] = 'upc_final_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $upc_item;
-    }
-    
-    if (in_array('quantity_report', $available_columns)) {
-        $insert_columns[] = 'quantity_report';
-        $insert_values[] = '?';
-        $bind_types .= 'i';
-        $bind_params[] = $new_quantity;
-    }
-    
-    if (in_array('sku_report', $available_columns)) {
-        $insert_columns[] = 'sku_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $sku_item;
-    }
-    
-    if (in_array('item_report', $available_columns)) {
-        $insert_columns[] = 'item_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $item_item;
-    }
-    
-    if (in_array('brand_report', $available_columns)) {
-        $insert_columns[] = 'brand_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $brand_item;
-    }
-    
-    if (in_array('vendor_report', $available_columns)) {
-        $insert_columns[] = 'vendor_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $ref_item; // Use ref_item for style/vendor
-    }
-    
-    // Store quantity information in observacion_report for display in Observation column
-    if (in_array('observacion_report', $available_columns)) {
-        $observacion_text = "Added quantity: " . $added_quantity;
-        $insert_columns[] = 'observacion_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $observacion_text;
-    }
-    
-    if (in_array('color_report', $available_columns)) {
-        $insert_columns[] = 'color_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $color_item;
-    }
-    
-    if (in_array('size_report', $available_columns)) {
-        $insert_columns[] = 'size_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $size_item;
-    }
-    
-    if (in_array('folder_report', $available_columns)) {
-        $insert_columns[] = 'folder_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $current_folder;
-    }
-    
-    if (in_array('loc_report', $available_columns)) {
-        $insert_columns[] = 'loc_report';
-        $insert_values[] = '?';
-        $bind_types .= 's';
-        $bind_params[] = $current_location;
-    }
-    
-    // Set estado_reporte = 0 for editing
-    if (in_array('estado_reporte', $available_columns)) {
-        $insert_columns[] = 'estado_reporte';
-        $insert_values[] = '?';
-        $bind_types .= 'i';
-        $bind_params[] = 0;
-    }
-    
-    // Create the INSERT statement
-    $report_sql = "INSERT INTO daily_report (" . implode(', ', $insert_columns) . ") VALUES (" . implode(', ', $insert_values) . ")";
-    $report_stmt = $mysqli->prepare($report_sql);
-    
-    if ($report_stmt && !empty($bind_params)) {
-        $report_stmt->bind_param($bind_types, ...$bind_params);
-        $report_stmt->execute();
-        $report_stmt->close();
-    }
+    $check_report_stmt->close();
 
     // For now, let's just return success without creating daily_report entry
     // We can add that later once this basic version works

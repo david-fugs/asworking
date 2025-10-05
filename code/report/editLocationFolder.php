@@ -522,6 +522,13 @@ error_log("editLocationFolder.php - Found " . count($reports) . " reports with e
                                             // Normalize display: treat '0' as empty for both current and new location
                                             $current_loc_display = ($current_loc === '0' ? '' : $current_loc);
                                             $new_loc_value = (isset($report['loc_report']) && trim($report['loc_report']) !== '0') ? $report['loc_report'] : '';
+                                            
+                                            // Extract "Added quantity" from observacion_report
+                                            $display_quantity = $report['quantity_report']; // default
+                                            $observacion = isset($report['observacion_report']) ? $report['observacion_report'] : '';
+                                            if (!empty($observacion) && preg_match('/Added quantity:\s*(\d+)/', $observacion, $matches)) {
+                                                $display_quantity = intval($matches[1]);
+                                            }
                                         ?>
                                             <tr>
                                                 <td>
@@ -530,7 +537,7 @@ error_log("editLocationFolder.php - Found " . count($reports) . " reports with e
                                                 <td><?= htmlspecialchars($report['fecha_alta_reporte']) ?></td>
                                                 <td><?= htmlspecialchars($report['upc_final_report']) ?></td>
                                                 <td style="width:120px;">
-                                                    <input type="text" name="edited_quantity[<?= $report['id_report'] ?>]" class="form-control form-control-sm edited-quantity" placeholder="<?= htmlspecialchars($report['quantity_report']) ?>" value="">
+                                                    <input type="text" name="edited_quantity[<?= $report['id_report'] ?>]" class="form-control form-control-sm edited-quantity" placeholder="<?= htmlspecialchars($display_quantity) ?>" value="<?= htmlspecialchars($display_quantity) ?>" readonly>
                                                 </td>
                                                 
                                                 <!-- Observation (para observaciones generales, no cantidad agregada) -->

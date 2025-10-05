@@ -374,19 +374,18 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                 }
 
                                 // Build table HTML
-                                var tableHtml = '<div style="overflow:auto;max-width:100%;"><table class="table table-bordered"><thead><tr><th>Select</th><th>Brand</th><th>Item</th><th>SKU</th><th>REF</th><th>COST</th><th>Batch</th><th>Quantity</th></tr></thead><tbody>';
+                                var tableHtml = '<div style="overflow:auto;max-width:100%;"><table class="table table-bordered"><thead><tr><th>Select</th><th>Brand</th><th>Item</th><th>SKU</th><th>REF</th><th>Batch</th><th>Quantity</th></tr></thead><tbody>';
                                 items.forEach(function(item, idx) {
                                     var qty = item.quantity_inventory || 0;
                                     var costDisplay = (typeof item.cost_item !== 'undefined' && item.cost_item !== null && item.cost_item !== '') ? '$' + parseFloat(item.cost_item).toFixed(2) : '';
                                     var refDisplay = item.ref_item || '';
-                                    var batchDisplay = item.inventory_item || '';
+                                    var batchDisplay = item.batch_item || '';
                                     tableHtml += '<tr>' +
                                         '<td><input type="radio" name="selected_item" value="' + idx + '" ' + (idx === 0 ? 'checked' : '') + '></td>' +
                                         '<td>' + (item.brand_item || '') + '</td>' +
                                         '<td>' + (item.item_item || '') + '</td>' +
                                         '<td>' + (item.sku_item || '') + '</td>' +
                                         '<td>' + refDisplay + '</td>' +
-                                        '<td>' + costDisplay + '</td>' +
                                         '<td>' + batchDisplay + '</td>' +
                                         '<td>' + qty + '</td>' +
                                         '</tr>';
@@ -499,6 +498,24 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                                     });
                                                 }
                                             });
+                                        } else if (result.isDismissed) {
+                                            // User clicked Cancel or closed the modal
+                                            // Get the selected item radio button
+                                            const selectedRadio = document.querySelector('input[name="selected_item"]:checked');
+                                            if (selectedRadio) {
+                                                var selectedIdx = parseInt(selectedRadio.value);
+                                                var selectedItem = items[selectedIdx];
+                                                
+                                                // Preload the values from the selected item
+                                                $('#brand_report').val(selectedItem.brand_item || '');
+                                                $('#item_report').val(selectedItem.item_item || '');
+                                                $('#vendor_report').val(selectedItem.ref_item || '');
+                                                $('#color_report').val(selectedItem.color_item || '');
+                                                $('#size_report').val(selectedItem.size_item || '');
+                                                $('#category_report').val(selectedItem.category_item || '');
+                                                $('#weight_report').val(selectedItem.weight_item || '');
+                                                $('#inventory_report').val(selectedItem.batch_item || selectedItem.inventory_item || '');
+                                            }
                                         }
                                     });
                                 } else {

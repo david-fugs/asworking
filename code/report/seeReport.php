@@ -893,7 +893,7 @@ function getStatus($estado)
                                             </td>
                                             <td><input style="width: 155px;"  type="text" name="fecha_alta_reporte[]" class="form-control form-control-sm" value="<?= htmlspecialchars($fecha) ?>"></td>
                                             <td class="d-none"><input type="hidden" name="upc_asignado_report[]" value="<?= htmlspecialchars($upc_asignado) ?>"></td>
-                                            <td><input style="width: 84px;" type="text" name="upc_final_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($upc_final) ?>"></td>
+                                            <td><input style="width: 124px;" type="text" name="upc_final_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($upc_final) ?>"></td>
                                             <td><input style="width: 155px;"  type="text" name="cons_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($cons) ?>"></td>
                                             <td><input style="width: 145px;"  type="text" name="folder_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($folder) ?>"></td>
                                             <td><input type="text" style="width: 90px;" name="loc_report[]" class="form-control form-control-sm" value="<?= htmlspecialchars($loc) ?>"></td>

@@ -23,22 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $inventory = $mysqli->real_escape_string($_POST['inventory_report']);
     $observacion = $mysqli->real_escape_string($_POST['observacion_report']);
 
-    // VALIDACIÓN 1: Verificar si UPC Final ya existe en tabla items
-    if (!empty($upc_final)) {
-        $check_upc_final = "SELECT COUNT(*) as count FROM items WHERE upc_item = '$upc_final'";
-        $result_upc_final = $mysqli->query($check_upc_final);
-        $upc_final_exists = $result_upc_final->fetch_assoc()['count'] > 0;
-        
-        if ($upc_final_exists) {
-            echo "<script>
-                alert('❌ Error: The Final UPC \"$upc_final\" already exists in the items table.');
-                window.history.back();
-              </script>";
-            exit();
-        }
-    }
-
-    // VALIDACIÓN 2: Generar SKU único alfanumérico (8 caracteres, letras y números)
+    // VALIDACIÓN 1: Generar SKU único alfanumérico (8 caracteres, letras y números)
     function generateUniqueSKU($mysqli) {
         $max_attempts = 100;
         $attempts = 0;
@@ -226,7 +211,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             } else {
                 // El UPC no existe, crear nuevo item en tabla items
                 // Note: include id_usu to satisfy FK constraint on items.id_usu and remove quantity_inventory from items
-                $create_item_query = "INSERT INTO items (upc_item, sku_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, batch_item, stores_item, id_usu) VALUES ('$upc_asignado', '$sku', '$brand', '$item', '$vendor', '$color', '$size', '$category', '0', '$weight', '$inventory', '', '$stores_json_escaped', $user_id)";
+                $create_item_query = "INSERT INTO items (upc_item, sku_item, brand_item, item_item, ref_item, color_item, size_item, category_item, cost_item, weight_item, inventory_item, batch_item, stores_item, id_usu) VALUES ('$upc_asignado', '$sku', '$brand', '$item', '$vendor', '$color', '$size', '$category', '0', '$weight', '$loc', '', '$stores_json_escaped', $user_id)";
 
                 // Log the query for debugging
                 @file_put_contents($debug_log, "[".date('c')."] create_item_query: " . $create_item_query . "\n", FILE_APPEND | LOCK_EX);
