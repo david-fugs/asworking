@@ -652,10 +652,13 @@ header("Content-Type: text/html;charset=utf-8");
                                     html: '<div style="text-align:left">' + tableHtml + addQtyHtml + '</div>',
                                     icon: 'warning',
                                     width: '90%',
+                                    showDenyButton: true,
                                     showCancelButton: true,
                                     confirmButtonText: 'Add Quantity & Edit Location',
+                                    denyButtonText: 'Add New Batch (Same UPC/SKU)',
                                     cancelButtonText: 'Cancel',
                                     confirmButtonColor: '#632b8b',
+                                    denyButtonColor: '#28a745',
                                     preConfirm: () => {
                                         const addQty = parseInt(document.getElementById('add-qty-input').value);
                                         if (isNaN(addQty) || addQty <= 0) {
@@ -766,6 +769,53 @@ header("Content-Type: text/html;charset=utf-8");
                                                 });
                                             }
                                         });
+                                    } else if (result.isDenied) {
+                                        // User clicked "Add New Batch" button
+                                        const selectedRadio = document.querySelector('input[name="selected_item"]:checked');
+                                        if (selectedRadio) {
+                                            var selectedIdx = parseInt(selectedRadio.value);
+                                            var selectedItem = data.items[selectedIdx];
+                                            
+                                            // Pre-fill form with selected item data but keep the UPC and SKU
+                                            $('#brand_item').val(selectedItem.brand_item);
+                                            $('#item_item').val(selectedItem.item_item);
+                                            $('#sku_item').val(selectedItem.sku_item);
+                                            $('#ref_item').val(selectedItem.ref_item || '');
+                                            $('#color_item').val(selectedItem.color_item || '');
+                                            $('#size_item').val(selectedItem.size_item || '');
+                                            $('#category_item').val(selectedItem.category_item || '');
+                                            $('#weight_item').val(selectedItem.weight_item || '');
+                                            
+                                            // Clear cost, batch, and quantity to force user to enter NEW values
+                                            $('#cost_item').val('');
+                                            $('#inventory_item').val('');
+                                            $('#quantity_inventory').val('');
+                                            
+                                            // Show a message explaining what to do next
+                                            Swal.fire({
+                                                title: 'Add New Batch',
+                                                html: '<div style="text-align:left;">' +
+                                                    '<p><strong>Instructions:</strong></p>' +
+                                                    '<ul>' +
+                                                    '<li>The form has been pre-filled with the item information</li>' +
+                                                    '<li>Please enter a <strong>NEW BATCH</strong> number (different from existing batches)</li>' +
+                                                    '<li>Enter the <strong>COST</strong> for this new batch</li>' +
+                                                    '<li>Enter the <strong>QUANTITY</strong> for this new batch</li>' +
+                                                    '<li>Add an <strong>OBSERVATION</strong> if needed</li>' +
+                                                    '<li>Select the stores to publish</li>' +
+                                                    '<li>Click "ADD ITEM" to create the new batch record</li>' +
+                                                    '</ul>' +
+                                                    '<p style="color: #632b8b; font-weight: bold;">Note: This will create a new separate record with the same UPC and SKU but different batch.</p>' +
+                                                    '</div>',
+                                                icon: 'info',
+                                                confirmButtonText: 'Got it!',
+                                                confirmButtonColor: '#632b8b',
+                                                width: '600px'
+                                            }).then(() => {
+                                                // Focus on the batch field
+                                                $('#inventory_item').focus();
+                                            });
+                                        }
                                     } else {
                                         // Usuario canceló el modal: no queremos conservar un SKU existente.
                                         // Generamos un SKU nuevo (función ya definida) para evitar que quede el SKU
@@ -774,9 +824,11 @@ header("Content-Type: text/html;charset=utf-8");
                                     }
                                 });
 
+                                // Show a non-blocking informational message instead of an error
                                 $('#mensaje-upc').show();
-                                $('#mensaje-upc').text('This UPC already exists in the database.').css('color', 'red');
-                                $('#mensaje-upc').addClass('alert alert-danger');
+                                $('#mensaje-upc').removeClass('alert alert-danger alert-success');
+                                $('#mensaje-upc').addClass('alert alert-info');
+                                $('#mensaje-upc').text('UPC found — you may add this item or create a new batch.').css('color', '#055160');
                             } else if (data.status === 'no_existe') {
                                 console.log('UPC no existe - mostrando mensaje disponible');
                                 $('#mensaje-upc').removeClass('alert alert-danger');

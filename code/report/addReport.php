@@ -403,10 +403,13 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                         html: '<div style="text-align:left">' + tableHtml + addQtyHtml + '</div>',
                                         icon: 'info',
                                         width: '90%',
+                                        showDenyButton: true,
                                         showCancelButton: true,
                                         confirmButtonText: 'Add Quantity & Edit Location',
+                                        denyButtonText: 'Add New Batch (Same UPC/SKU)',
                                         cancelButtonText: 'Cancel',
                                         confirmButtonColor: '#632b8b',
+                                        denyButtonColor: '#28a745',
                                         preConfirm: () => {
                                             const addQty = parseInt(document.getElementById('add-qty-input').value);
                                             if (isNaN(addQty) || addQty <= 0) {
@@ -498,6 +501,51 @@ $code_sucursal = isset($_GET['code_sucursal']) ? trim($_GET['code_sucursal']) : 
                                                     });
                                                 }
                                             });
+                                        } else if (result.isDenied) {
+                                            // User clicked "Add New Batch" button
+                                            const selectedRadio = document.querySelector('input[name="selected_item"]:checked');
+                                            if (selectedRadio) {
+                                                var selectedIdx = parseInt(selectedRadio.value);
+                                                var selectedItem = items[selectedIdx];
+                                                
+                                                // Pre-fill form with selected item data but keep the UPC and SKU
+                                                $('#brand_report').val(selectedItem.brand_item || '');
+                                                $('#item_report').val(selectedItem.item_item || '');
+                                                $('#sku_report').val(selectedItem.sku_item || '');
+                                                $('#vendor_report').val(selectedItem.ref_item || '');
+                                                $('#color_report').val(selectedItem.color_item || '');
+                                                $('#size_report').val(selectedItem.size_item || '');
+                                                $('#category_report').val(selectedItem.category_item || '');
+                                                $('#weight_report').val(selectedItem.weight_item || '');
+                                                
+                                                // Clear inventory (batch) and quantity to force user to enter NEW values
+                                                $('#inventory_report').val('');
+                                                $('#quantity_report').val('');
+                                                
+                                                // Show a message explaining what to do next
+                                                Swal.fire({
+                                                    title: 'Add New Batch',
+                                                    html: '<div style="text-align:left;">' +
+                                                        '<p><strong>Instructions:</strong></p>' +
+                                                        '<ul>' +
+                                                        '<li>The form has been pre-filled with the item information</li>' +
+                                                        '<li>Please enter a <strong>NEW BATCH/LOCATION</strong> number (different from existing batches)</li>' +
+                                                        '<li>Enter the <strong>QUANTITY</strong> for this new batch</li>' +
+                                                        '<li>Add an <strong>OBSERVATION</strong> if needed</li>' +
+                                                        '<li>Select the stores to publish</li>' +
+                                                        '<li>Click "SAVE" to create the new batch record</li>' +
+                                                        '</ul>' +
+                                                        '<p style="color: #632b8b; font-weight: bold;">Note: This will create a new separate record with the same UPC and SKU but different batch.</p>' +
+                                                        '</div>',
+                                                    icon: 'info',
+                                                    confirmButtonText: 'Got it!',
+                                                    confirmButtonColor: '#632b8b',
+                                                    width: '600px'
+                                                }).then(() => {
+                                                    // Focus on the inventory field
+                                                    $('#inventory_report').focus();
+                                                });
+                                            }
                                         } else if (result.isDismissed) {
                                             // User clicked Cancel or closed the modal
                                             // Get the selected item radio button

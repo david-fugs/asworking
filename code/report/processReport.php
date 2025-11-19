@@ -53,25 +53,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Respect client-provided SKU if present; otherwise generate one server-side.
         $sku_post = isset($_POST['sku_report']) ? trim($_POST['sku_report']) : '';
         if (!empty($sku_post)) {
-            // Verify the provided SKU is unique in items and inventory
-            $sku_post_esc = $mysqli->real_escape_string($sku_post);
-            $check_items = "SELECT COUNT(*) as count FROM items WHERE sku_item = '$sku_post_esc'";
-            $result_items = $mysqli->query($check_items);
-            $exists_items = $result_items ? $result_items->fetch_assoc()['count'] > 0 : false;
-
-            $check_inventory = "SELECT COUNT(*) as count FROM inventory WHERE sku_inventory = '$sku_post_esc'";
-            $result_inventory = $mysqli->query($check_inventory);
-            $exists_inventory = $result_inventory ? $result_inventory->fetch_assoc()['count'] > 0 : false;
-
-            if ($exists_items || $exists_inventory) {
-                echo "<script>
-                    alert('❌ Error: The provided SKU (" . htmlspecialchars($sku_post_esc) . ") already exists. Please choose another.');
-                    window.history.back();
-                  </script>";
-                exit();
-            }
-
-            $sku = $sku_post_esc;
+                // Accept the client-provided SKU (no longer enforce uniqueness here).
+                // Note: uniqueness at the database level for sku has been relaxed to allow same SKU across batches.
+                $sku = $mysqli->real_escape_string($sku_post);
         } else {
             $sku_generated = generateUniqueSKU($mysqli);
             if (!$sku_generated) {

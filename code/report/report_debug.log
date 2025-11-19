@@ -1138,3 +1138,34 @@ Computed values before INSERT: cons=[FOLDER2 cons 1] sku=[3VTCKKZPM5] folder=[FO
 
 [2025-10-05T02:07:38+02:00] cons_report column type detected: varchar(255)
 [2025-10-05T02:07:38+02:00] sku_report column type detected: varchar(255)
+[2025-11-19T17:17:38+01:00] processReport POST snapshot:
+Array
+(
+    [upc_asignado_report] => 733004811005
+    [upc_final_report] => 733004811005
+    [cons_report] => 
+    [folder_report] => FOLDER
+    [loc_report] => LOCATION
+    [quantity_report] => 4
+    [sku_report] => 
+    [brand_report] => VA BIEN
+    [item_report] => Bustier
+    [vendor_report] => 1509
+    [color_report] => NUDE
+    [size_report] => 36E
+    [category_report] => SHAPEWEAR
+    [weight_report] => 9.0 OZ
+    [inventory_report] => BATCH NEW
+    [stores] => Array
+        (
+            [0] => EB001
+            [1] => EB002
+        )
+
+    [observacion_report] => 
+)
+
+Computed values before INSERT: cons=[] sku=[GNS4H3NMT8] folder=[FOLDER]
+
+[2025-11-19T17:17:38+01:00] cons_report column type detected: varchar(255)
+[2025-11-19T17:17:38+01:00] sku_report column type detected: varchar(255)
